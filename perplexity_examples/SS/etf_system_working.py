@@ -7,8 +7,8 @@ import pandas as pd
 
 # Verify your ETF data loaded correctly
 print("=== Verifying ETF Data ===")
-ivv_data = pd.read_csv("data/futures/multiple_prices_csv/IVV.csv", index_col=0, parse_dates=True)
-hyd_data = pd.read_csv("data/futures/multiple_prices_csv/HYD.csv", index_col=0, parse_dates=True)
+ivv_data = pd.read_csv("../data/futures/multiple_prices_csv/IVV.csv", index_col=0, parse_dates=True)
+hyd_data = pd.read_csv("../data/futures/multiple_prices_csv/HYD.csv", index_col=0, parse_dates=True)
 
 print(f"IVV data: {len(ivv_data)} days, latest: ${ivv_data['PRICE'].iloc[-1]:.2f}")
 print(f"HYD data: {len(hyd_data)} days, latest: ${hyd_data['PRICE'].iloc[-1]:.2f}")
