@@ -585,3 +585,35 @@ YENEUR,YENEUR currency,125000,JPY,FX,329.4,0,0,US
 YENEUR-ICE,EUR.JPY,125000,JPY,FX,0,0,0,US
 ZAR,South African Rand,500000,USD,FX,2.47,0,0,US
 ZINC_LME,Zinc - LME,25,USD,Metals,0,0,0,EMEA
+IVV,Core S&P 500 ETF,1,USD,Equity,0,0,0,US
+FLCA,Franklin FTSE Canada ETF,1,USD,Equity,0,0,0,US
+VGK,Vanguard FTSE Europe ETF,1,USD,Equity,0,0,0,EMEA
+FLJP,Franklin FTSE Japan ETF,1,USD,Equity,0,0,0,ASIA
+BBAX,JPM BetaBuilders Dev Asia ex-JP ETF,1,USD,Equity,0,0,0,ASIA
+ILF,iShares MSCI Latin America ETF,1,USD,Equity,0,0,0,LATAM
+EZA,iShares MSCI South Africa ETF,1,USD,Equity,0,0,0,EMEA
+EPOL,iShares MSCI Poland ETF,1,USD,Equity,0,0,0,EMEA
+KSA,iShares MSCI Saudi Arabia ETF,1,USD,Equity,0,0,0,EMEA
+IEMG,iShares Core MSCI EM ETF,1,USD,Equity,0,0,0,EM
+HYD,VanEck High-Yield Muni ETF,1,USD,Bond,0,0,0,US
+VMBS,Vanguard MBS ETF,1,USD,Bond,0,0,0,US
+CMBS,Commercial MBS ETF,1,USD,Bond,0,0,0,US
+ICVT,iShares Convertible Bond ETF,1,USD,Bond,0,0,0,US
+SPHY,SPDR Short-Term HY Bond ETF,1,USD,Bond,0,0,0,US
+HYLB,Xtrackers USD HY Corp Bond ETF,1,USD,Bond,0,0,0,US
+SCHO,Schwab Short-Term Treasury ETF,1,USD,Bond,0,0,0,US
+SPSB,SPDR Short-Term Corporate Bond ETF,1,USD,Bond,0,0,0,US
+SCHR,Schwab Intermediate Treasury ETF,1,USD,Bond,0,0,0,US
+VCIT,Vanguard Intermediate Corp Bond ETF,1,USD,Bond,0,0,0,US
+SPTL,SPDR Long-Term Treasury ETF,1,USD,Bond,0,0,0,US
+VCLT,Vanguard Long-Term Corp Bond ETF,1,USD,Bond,0,0,0,US
+SCHP,Schwab US TIPS ETF,1,USD,Bond,0,0,0,US
+BWX,SPDR International Govt Bond ETF,1,USD,Bond,0,0,0,GLOBAL
+PICB,Invesco International Corp Bond ETF,1,USD,Bond,0,0,0,GLOBAL
+IHY,iShares International HY Bond ETF,1,USD,Bond,0,0,0,GLOBAL
+WIP,SPDR International TIPS ETF,1,USD,Bond,0,0,0,GLOBAL
+VWOB,Vanguard EM Govt Bond ETF,1,USD,Bond,0,0,0,EM
+EMLC,VanEck EM Local Currency Bond ETF,1,USD,Bond,0,0,0,EM
+EMHY,iShares EM HY Bond ETF,1,USD,Bond,0,0,0,EM
+EMB,iShares EM USD Bond ETF,1,USD,Bond,0,0,0,EM
+IAU,iShares Gold Trust,1,USD,Metals,0,0,0,GLOBAL
