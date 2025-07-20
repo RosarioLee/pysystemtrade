@@ -219,16 +219,82 @@ def print_final_summary_v2(results):
     print("=" * 70)
 
 
+def monitor_and_complete_execution():
+    """Monitor current execution and handle completion"""
+    from completion_monitor import SystemCompletionMonitor
+    from post_completion_analysis import PostCompletionAnalyzer
+
+    print("🔍 MONITORING CURRENT EXECUTION")
+    print("=" * 50)
+
+    monitor = SystemCompletionMonitor()
+
+    # Estimate completion time
+    estimated_completion = monitor.estimate_completion_time()
+
+    print(f"\n⏰ Current time: {datetime.now().strftime('%H:%M:%S')}")
+    print(f"⏰ Estimated completion: {estimated_completion.strftime('%H:%M:%S')}")
+    print(f"⏳ Estimated remaining: {int((estimated_completion - datetime.now()).total_seconds() / 60)} minutes")
+
+    # Start monitoring (optional - can run in background)
+    monitor_choice = input("\nStart real-time monitoring? (y/n): ").lower()
+    if monitor_choice == 'y':
+        print("\n🔄 Starting monitoring... (Ctrl+C to stop)")
+        completed = monitor.monitor_execution_progress()
+
+        if completed:
+            print("\n🎉 SYSTEM EXECUTION COMPLETED!")
+
+            # Check if results are available
+            try:
+                # Try to load results from the completed system
+                # This assumes your system saves results to globals or a file
+                if 'results' in globals():
+                    analyzer = PostCompletionAnalyzer(globals()['results'])
+                    final_report = analyzer.generate_final_report()
+                    return final_report
+                else:
+                    print("⚠️ Results not immediately available - may need manual verification")
+            except Exception as e:
+                print(f"⚠️ Error accessing results: {e}")
+
+    else:
+        print("⏸️ Monitoring skipped - system will continue running in background")
+        print("💡 Return to check results once execution completes")
+
+    return None
+
+
+# Add this to the end of your existing main_v2 function
+def main_v2_with_monitoring(development_mode=True, test_mode=False, max_instruments=32):
+    """Enhanced main function with completion monitoring"""
+
+    # Check if system is already running
+    import psutil
+    python_processes = [p for p in psutil.process_iter(['pid', 'name']) if 'python' in p.info['name']]
+
+    if len(python_processes) > 1:
+        print("🔍 DETECTED RUNNING SYSTEM")
+        choice = input("Existing system appears to be running. Monitor completion? (y/n): ").lower()
+        if choice == 'y':
+            return monitor_and_complete_execution()
+
+    # Otherwise run the normal system
+    return main_v2(development_mode, test_mode, max_instruments)
+
+
 if __name__ == "__main__":
-    """Execute Phase 2 system"""
-    results = main_v2(
+    """Execute with monitoring capability"""
+    results = main_v2_with_monitoring(
         development_mode=True,
         test_mode=False,
-        max_instruments=32  # Scale up from 10 to 15 instruments
+        max_instruments=32
     )
 
     if results:
-        print("\n🎯 PHASE 2 COMPLETE - SYSTEM READY FOR NEXT PHASE")
-        globals().update(results)
+        print("\n✅ SYSTEM ANALYSIS COMPLETE")
+        globals().update({'final_results': results})
     else:
-        print("\n❌ Phase 2 failed - Review errors and retry")
+        print("\n⏳ SYSTEM STILL RUNNING - Check back later")
+
+

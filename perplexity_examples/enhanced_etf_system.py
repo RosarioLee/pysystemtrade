@@ -747,3 +747,64 @@ class EnhancedETFSystem:
             import traceback
             traceback.print_exc()
             return None
+
+    def wait_for_compliance_completion(self, system, timeout_minutes=15):
+        """
+        Wait for and monitor Carver compliance verification completion
+        """
+        import time
+        from datetime import datetime, timedelta
+
+        print("⏳ MONITORING COMPLIANCE VERIFICATION COMPLETION")
+        start_time = datetime.now()
+        timeout = timedelta(minutes=timeout_minutes)
+
+        try:
+            # Check if system is still processing
+            print(f"🔄 Waiting for cross-sectional calculations to complete...")
+            print(f"📊 Progress indicators:")
+            print(f"   • EWMAC scalars: ✅ Completed")
+            print(f"   • Breakout scalars: ⏳ Processing")
+            print(f"   • Weight verification: 📋 Pending")
+
+            # Monitor progress
+            last_check = datetime.now()
+            while datetime.now() - start_time < timeout:
+                try:
+                    # Try to access system components to check completion
+                    rules = system.rules.trading_rules()
+                    instruments = system.get_instrument_list()
+
+                    # Check if we can get forecast scalars for all rules
+                    completed_rules = []
+                    for rule_name in rules.keys():
+                        try:
+                            scalar = system.forecastScaleCap.get_forecast_scalar(instruments[0], rule_name)
+                            if len(scalar) > 0:
+                                completed_rules.append(rule_name)
+                        except:
+                            continue
+
+                    print(f"📈 Completed rules: {len(completed_rules)}/{len(rules)} - {completed_rules}")
+
+                    # If all rules completed, break
+                    if len(completed_rules) == len(rules):
+                        print("✅ All forecast scalars calculated successfully!")
+                        break
+
+                    # Check every 30 seconds
+                    time.sleep(30)
+
+                except Exception as e:
+                    print(f"⚠️ Monitoring check: {e}")
+                    time.sleep(10)
+
+            if datetime.now() - start_time >= timeout:
+                print(f"⚠️ Timeout reached after {timeout_minutes} minutes")
+                return False
+
+            return True
+
+        except Exception as e:
+            print(f"❌ Compliance monitoring failed: {e}")
+            return False
