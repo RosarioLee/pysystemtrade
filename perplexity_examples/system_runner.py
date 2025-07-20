@@ -11,68 +11,64 @@ warnings.filterwarnings('ignore')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from enhanced_etf_system import EnhancedETFSystem
-from system_monitoring import SystemMonitor
 
 
-def main():
-    """Main execution function"""
-    print("🚀 Enhanced ETF Systematic Trading System v1.1")
+def main(development_mode=True, test_mode=False, max_instruments=10):
+    """
+    Progressive implementation - start with 10 instruments
+    """
+    print("🚀 Enhanced ETF System v1.1 – PROGRESSIVE DEPLOYMENT")
     print("=" * 60)
-    print("Following Robert Carver's systematic trading methodology")
-    print("Enhanced with breakout rules and comprehensive monitoring")
-    print("=" * 60)
+
+    # Progressive scaling approach
+    if not test_mode and max_instruments > 15:
+        print("⚠️ RECOMMENDATION: Start with 10-15 instruments for stability")
+        max_instruments = 15
 
     try:
-        # Step 1: Initialize system
-        print("\n1️⃣ INITIALIZING ENHANCED ETF SYSTEM")
         config_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "private", "etf_system", "config_v1.1.yaml")
-        etf_system = EnhancedETFSystem(config_path=config_path)
+            os.path.dirname(os.path.dirname(__file__)),
+            "private", "etf_system", "config_v1.1.yaml"
+        )
 
-        # Step 2: Download and prepare data
-        print("\n2️⃣ DOWNLOADING ETF DATA")
-        download_count = etf_system.download_etf_data()
-        if download_count == 0:
-            print("❌ No data downloaded. Exiting.")
+        etf_system = EnhancedETFSystem(
+            config_path=config_path,
+            test_mode=False,  # Use full historical data
+            max_instruments=max_instruments  # But limit instruments
+        )
+
+        # Rest of your existing code...
+        if etf_system.download_etf_data() == 0:
             return None
 
-        # Step 3: Create enhanced system
-        print("\n3️⃣ CREATING ENHANCED SYSTEM")
-        system = etf_system.create_enhanced_system()
+        system = etf_system.create_carver_compliant_system()
         if system is None:
-            print("❌ System creation failed. Exiting.")
             return None
 
-        # Step 4: Calculate performance metrics
-        print("\n4️⃣ CALCULATING PERFORMANCE METRICS")
-        performance_metrics = etf_system.calculate_performance_metrics(system)
+        # CRITICAL: Add compliance verification
+        print("\n4️⃣ VERIFYING CARVER COMPLIANCE")
+        compliance_report = etf_system.verify_carver_compliance(system)
 
-        # Step 5: Get system summary
-        print("\n5️⃣ GENERATING SYSTEM SUMMARY")
-        system_summary = etf_system.get_system_summary(system)
+        if compliance_report['scalar_compliance'] and compliance_report['weight_compliance']:
+            print("🎉 FULL CARVER COMPLIANCE ACHIEVED")
+        else:
+            print("⚠️ COMPLIANCE ISSUES - Review before production")
+            for issue in compliance_report['issues']:
+                print(f"   • {issue}")
 
-        # Step 6: Initialize monitoring
-        print("\n6️⃣ INITIALIZING SYSTEM MONITORING")
-        monitoring_config = etf_system.monitoring_config
-        system_monitor = SystemMonitor(system, monitoring_config)
+        # FIXED: Use standard performance calculation for smaller systems
+        print(f"\n5️⃣ CALCULATING PERFORMANCE METRICS")
+        if len(system.get_instrument_list()) <= 15:
+            # Use standard calculation for manageable size
+            perf = etf_system.calculate_performance_metrics(system)
+        else:
+            # Only use sampling for very large systems
+            perf = etf_system.calculate_performance_metrics_optimized(system)
 
-        # Step 7: Run comprehensive monitoring
-        print("\n7️⃣ RUNNING COMPREHENSIVE MONITORING")
-        monitoring_report = system_monitor.run_full_monitoring()
-
-        # Step 8: Final results summary
-        print("\n8️⃣ FINAL RESULTS SUMMARY")
-        print_final_summary(system_summary, performance_metrics, monitoring_report)
-
-        # Return complete results
         return {
-            'system': system,
-            'etf_system': etf_system,
-            'performance_metrics': performance_metrics,
-            'system_summary': system_summary,
-            'monitoring_report': monitoring_report,
-            'system_monitor': system_monitor
+            "system": system,
+            "compliance_report": compliance_report,
+            "performance_metrics": perf
         }
 
     except Exception as e:
@@ -82,51 +78,60 @@ def main():
         return None
 
 
-def print_final_summary(system_summary, performance_metrics, monitoring_report):
-    """Print comprehensive final summary"""
-    print("=" * 60)
-    print("🎉 ENHANCED ETF SYSTEM ANALYSIS COMPLETE")
-    print("=" * 60)
+def monitor_system_health(system):
+    """Real-time system health monitoring"""
+    print("=== SYSTEM HEALTH MONITORING ===")
 
-    # System configuration summary
-    if system_summary:
-        print(f"📊 SYSTEM CONFIGURATION:")
-        print(f"   • Total Instruments: {system_summary['total_instruments']}")
-        print(f"   • Total Trading Rules: {system_summary['total_rules']}")
-        print(f"   • EWMAC Rules: {system_summary['ewmac_rules']}")
-        print(f"   • Breakout Rules: {system_summary['breakout_rules']}")
-        print(f"   • Volatility Target: {system_summary['vol_target']}%")
+    health_report = {
+        'instruments': len(system.get_instrument_list()),
+        'rules': len(system.rules.trading_rules()),
+        'data_quality': {},
+        'rule_activity': {},
+        'alerts': []
+    }
 
-    # Performance metrics summary
-    if performance_metrics:
-        print(f"\n📈 PERFORMANCE METRICS:")
-        print(f"   • Sharpe Ratio: {performance_metrics['sharpe_ratio']:.4f}")
-        print(f"   • Annual Return: {performance_metrics['annual_return']:.2%}")
-        print(f"   • Annual Volatility: {performance_metrics['annual_volatility']:.2%}")
-        print(f"   • Maximum Drawdown: {performance_metrics['max_drawdown']:.2%}")
+    # Check data quality
+    for instrument in system.get_instrument_list()[:5]:  # Sample check
+        try:
+            prices = system.rawdata.get_daily_prices(instrument)
+            health_report['data_quality'][instrument] = {
+                'length': len(prices),
+                'last_date': prices.index[-1],
+                'null_count': prices.isnull().sum()
+            }
+        except Exception as e:
+            health_report['alerts'].append(f"Data issue for {instrument}: {e}")
 
-    # Monitoring summary
-    if monitoring_report:
-        print(f"\n🔍 MONITORING SUMMARY:")
-        print(f"   • Total Alerts: {monitoring_report['total_alerts']}")
-        print(f"   • Scalar Alerts: {len(monitoring_report['scalar_analysis']['alerts'])}")
-        print(f"   • Weight Alerts: {len(monitoring_report['weight_analysis']['alerts'])}")
-        print(f"   • Monitoring Timestamp: {monitoring_report['monitoring_timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+    # Check rule activity
+    for rule_name in list(system.rules.trading_rules().keys())[:3]:  # Sample check
+        try:
+            forecast = system.forecastScaleCap.get_scaled_forecast('IVV', rule_name)
+            health_report['rule_activity'][rule_name] = {
+                'mean_forecast': forecast.tail(252).mean(),
+                'forecast_std': forecast.tail(252).std(),
+                'last_forecast': forecast.iloc[-1]
+            }
+        except Exception as e:
+            health_report['alerts'].append(f"Rule issue for {rule_name}: {e}")
 
-    print(f"\n✅ SYSTEM STATUS:")
-    print(f"   • Enhanced multi-strategy system: OPERATIONAL")
-    print(f"   • Dynamic forecast scaling: ACTIVE")
-    print(f"   • Cost-aware optimization: ENABLED")
-    print(f"   • Comprehensive monitoring: ACTIVE")
-    print(f"   • Robert Carver methodology: FULLY IMPLEMENTED")
+    # Display health summary
+    print(f"📊 Instruments: {health_report['instruments']}")
+    print(f"🎯 Trading Rules: {health_report['rules']}")
+    print(f"🚨 Alerts: {len(health_report['alerts'])}")
 
-    print(f"\n🚀 SYSTEM READY FOR PRODUCTION DEPLOYMENT")
-    print("=" * 60)
+    if health_report['alerts']:
+        for alert in health_report['alerts']:
+            print(f"   ⚠️ {alert}")
+    else:
+        print("✅ All systems healthy")
+
+    return health_report
 
 
 if __name__ == "__main__":
     """Execute main function when run directly"""
-    results = main()
+    # Run with 10 carefully selected instruments
+    results = main(development_mode=True, test_mode=False, max_instruments=10)
 
     if results:
         print("\n💡 NEXT STEPS:")
@@ -139,18 +144,5 @@ if __name__ == "__main__":
 
         # Make results available for interactive analysis
         globals().update(results)
-
-        # Optional: Save results to file
-        save_results = input("\nSave detailed results to file? (y/n): ").lower() == 'y'
-        if save_results:
-            try:
-                import pickle
-
-                results_file = f"enhanced_etf_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl"
-                with open(results_file, 'wb') as f:
-                    pickle.dump(results, f)
-                print(f"✅ Results saved to: {results_file}")
-            except Exception as e:
-                print(f"⚠️ Could not save results: {e}")
     else:
         print("\n❌ Analysis failed. Please check configuration and try again.")
