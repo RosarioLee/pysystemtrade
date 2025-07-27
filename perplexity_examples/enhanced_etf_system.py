@@ -29,7 +29,7 @@ class EnhancedETFSystem:
     - Cost-aware optimization
     """
 
-    def __init__(self, config_path=None, test_mode=False, max_instruments=5):
+    def __init__(self, config_path=None, test_mode=False, max_instruments=5, warm_up_days=365):
         """Initialize the enhanced ETF system"""
         # Load configuration
         if config_path is None:
@@ -46,6 +46,7 @@ class EnhancedETFSystem:
             raise
 
         # Extract configuration
+        self.warm_up_days = warm_up_days
         self.instruments = self.config_data['instruments']
         self.instrument_weights = self.config_data['instrument_weights']
         self.vol_target = self.config_data['percentage_vol_target']
@@ -336,8 +337,8 @@ class EnhancedETFSystem:
             return None
 
     def calculate_performance_metrics(self, system, timeout_seconds=300):
-        """Fixed performance calculation with proper portfolio curve handling"""
-        print("=== Calculating Performance Metrics ===")
+        """Fixed performance calculation with warm-up buffer applied"""
+        print("=== Calculating Performance Metrics (with Warm-Up Buffer) ===")
         t0 = time.time()
 
         try:
@@ -347,23 +348,34 @@ class EnhancedETFSystem:
                 print("⚠️ Portfolio curve unavailable")
                 return None
 
-            # Extract and normalize equity curve
+            # Extract equity curve
             equity_curve = curve_group.curve()
             print(f"📈 Raw portfolio curve: {len(equity_curve)} points")
 
-            # CRITICAL FIX: Normalize portfolio curve to start at 1.0
-            if len(equity_curve) > 0 and equity_curve.iloc[0] == 0:
-                print("🔧 Normalizing portfolio curve (converting from P&L to returns)")
-                # Convert P&L to cumulative returns starting from 1.0
-                equity_curve = (equity_curve / abs(equity_curve).max()) + 1.0
-                equity_curve = equity_curve / equity_curve.iloc[0]  # Ensure starts at 1.0
+            # CRITICAL: Apply warm-up buffer to remove cold-start distortions
+            if self.warm_up_days and len(equity_curve) > self.warm_up_days:
+                equity_curve = equity_curve.iloc[self.warm_up_days:]
+                print(f"🔧 Applied {self.warm_up_days}-day warm-up buffer")
+                print(f"📊 Analysis period: {equity_curve.index[0]} to {equity_curve.index[-1]}")
+            else:
+                print(f"⚠️ Insufficient data for {self.warm_up_days}-day buffer, using all data")
 
-            print(f"✅ Normalized curve: {equity_curve.iloc[0]:.4f} to {equity_curve.iloc[-1]:.4f}")
+            # Normalize portfolio curve if needed
+            if len(equity_curve) > 0:
+                if equity_curve.iloc[0] <= 0:
+                    print("🔧 Normalizing portfolio curve to start at 1.0")
+                    equity_curve = equity_curve - equity_curve.iloc[0] + 1.0
 
-            # Calculate returns on normalized curve
+            print(f"✅ Final analysis curve: {equity_curve.iloc[0]:.4f} to {equity_curve.iloc[-1]:.4f}")
+
+            # Calculate returns
             daily_ret = equity_curve.pct_change().dropna()
 
-            # Enhanced metric calculations
+            if len(daily_ret) < 50:
+                print("❌ Insufficient return data after warm-up buffer")
+                return None
+
+            # Performance calculations
             sharpe = (daily_ret.mean() / daily_ret.std()) * np.sqrt(252) if daily_ret.std() > 0 else 0
             total_return = equity_curve.iloc[-1] / equity_curve.iloc[0] - 1
             years = len(daily_ret) / 252.0
@@ -381,10 +393,14 @@ class EnhancedETFSystem:
                 "annual_volatility": float(ann_vol),
                 "max_drawdown": float(max_dd),
                 "total_return": float(total_return),
+                "warm_up_days_applied": self.warm_up_days,
+                "analysis_days": len(daily_ret),
                 "run_seconds": round(time.time() - t0, 1)
             }
 
-            print(f"📊 CORRECTED Performance Metrics:")
+            print(f"📊 WARM-UP CORRECTED Performance Metrics:")
+            print(f"   • Warm-up buffer: {self.warm_up_days} days")
+            print(f"   • Analysis period: {len(daily_ret)} days ({years:.1f} years)")
             print(f"   • Sharpe Ratio: {sharpe:.3f}")
             print(f"   • Annual Return: {ann_ret:.1%}")
             print(f"   • Annual Volatility: {ann_vol:.1%}")
@@ -395,6 +411,96 @@ class EnhancedETFSystem:
 
         except Exception as err:
             print(f"❌ Performance calculation failed: {err}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def calculate_performance_metrics_robust(self, system, timeout_seconds=300):
+        """Robust performance calculation with warm-up buffer"""
+        print("=== Calculating Performance Metrics (Robust with Warm-Up) ===")
+        t0 = time.time()
+
+        try:
+            # Get portfolio curve
+            portfolio_curve = system.accounts.portfolio()
+            if portfolio_curve is None:
+                print("⚠️ Portfolio curve unavailable")
+                return None
+
+            # Extract equity curve
+            equity_curve = portfolio_curve.curve()
+
+            # Apply warm-up buffer
+            if self.warm_up_days and len(equity_curve) > self.warm_up_days:
+                equity_curve = equity_curve.iloc[self.warm_up_days:]
+                print(f"🔧 Applied {self.warm_up_days}-day warm-up buffer")
+
+            # Validation
+            if len(equity_curve) < 50:
+                print(f"❌ Insufficient data points after buffer: {len(equity_curve)}")
+                return None
+
+            # Ensure numeric data
+            equity_curve = pd.to_numeric(equity_curve, errors='coerce').dropna()
+
+            if equity_curve.empty:
+                print("❌ No valid numeric data in equity curve")
+                return None
+
+            print(f"✅ Valid equity curve: {len(equity_curve)} points")
+            print(f"   Range: {equity_curve.iloc[0]:.2f} to {equity_curve.iloc[-1]:.2f}")
+
+            # Calculate returns
+            daily_returns = equity_curve.pct_change().dropna()
+
+            if len(daily_returns) < 10:
+                print("❌ Insufficient return data")
+                return None
+
+            # Performance calculations with validation
+            if daily_returns.std() > 0:
+                sharpe = (daily_returns.mean() / daily_returns.std()) * np.sqrt(252)
+            else:
+                sharpe = 0.0
+
+            total_return = (equity_curve.iloc[-1] / equity_curve.iloc[0]) - 1
+            years = len(daily_returns) / 252.0
+
+            if years > 0:
+                annual_return = (1 + total_return) ** (1 / years) - 1
+            else:
+                annual_return = 0.0
+
+            annual_vol = daily_returns.std() * np.sqrt(252)
+
+            # Drawdown calculation
+            rolling_max = equity_curve.expanding().max()
+            drawdown = (equity_curve - rolling_max) / rolling_max
+            max_drawdown = drawdown.min()
+
+            metrics = {
+                "sharpe_ratio": float(sharpe) if np.isfinite(sharpe) else 0.0,
+                "annual_return": float(annual_return) if np.isfinite(annual_return) else 0.0,
+                "annual_volatility": float(annual_vol) if np.isfinite(annual_vol) else 0.0,
+                "max_drawdown": float(max_drawdown) if np.isfinite(max_drawdown) else 0.0,
+                "total_return": float(total_return) if np.isfinite(total_return) else 0.0,
+                "warm_up_days_applied": self.warm_up_days,
+                "data_points": len(daily_returns),
+                "run_seconds": round(time.time() - t0, 1)
+            }
+
+            print(f"📊 Performance Metrics (Warm-Up Corrected):")
+            print(f"   • Sharpe Ratio: {metrics['sharpe_ratio']:.3f}")
+            print(f"   • Annual Return: {metrics['annual_return']:.1%}")
+            print(f"   • Annual Volatility: {metrics['annual_volatility']:.1%}")
+            print(f"   • Maximum Drawdown: {metrics['max_drawdown']:.1%}")
+
+            return metrics
+
+        except Exception as e:
+            print(f"❌ Performance calculation failed: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def calculate_performance_metrics_optimized(self, system, timeout_seconds=600):
@@ -665,88 +771,7 @@ class EnhancedETFSystem:
 
         return compliance_report
 
-    def calculate_performance_metrics_robust(self, system, timeout_seconds=300):
-        """Robust performance calculation with proper error handling"""
-        print("=== Calculating Performance Metrics (Robust) ===")
-        t0 = time.time()
 
-        try:
-            # Get portfolio curve with multiple fallback approaches
-            portfolio_curve = system.accounts.portfolio()
-
-            if portfolio_curve is None:
-                print("⚠️ Portfolio curve unavailable")
-                return None
-
-            # Extract equity curve with validation
-            equity_curve = portfolio_curve.curve()
-
-            # Critical validation
-            if len(equity_curve) < 50:
-                print(f"❌ Insufficient data points: {len(equity_curve)}")
-                return None
-
-            # Ensure we have numeric data
-            equity_curve = pd.to_numeric(equity_curve, errors='coerce').dropna()
-
-            if equity_curve.empty:
-                print("❌ No valid numeric data in equity curve")
-                return None
-
-            print(f"✅ Valid equity curve: {len(equity_curve)} points")
-            print(f"   Range: {equity_curve.iloc[0]:.2f} to {equity_curve.iloc[-1]:.2f}")
-
-            # Calculate returns
-            daily_returns = equity_curve.pct_change().dropna()
-
-            if len(daily_returns) < 10:
-                print("❌ Insufficient return data")
-                return None
-
-            # Performance calculations with validation
-            if daily_returns.std() > 0:
-                sharpe = (daily_returns.mean() / daily_returns.std()) * np.sqrt(252)
-            else:
-                sharpe = 0.0
-
-            total_return = (equity_curve.iloc[-1] / equity_curve.iloc[0]) - 1
-            years = len(daily_returns) / 252.0
-
-            if years > 0:
-                annual_return = (1 + total_return) ** (1 / years) - 1
-            else:
-                annual_return = 0.0
-
-            annual_vol = daily_returns.std() * np.sqrt(252)
-
-            # Drawdown calculation
-            rolling_max = equity_curve.expanding().max()
-            drawdown = (equity_curve - rolling_max) / rolling_max
-            max_drawdown = drawdown.min()
-
-            metrics = {
-                "sharpe_ratio": float(sharpe) if np.isfinite(sharpe) else 0.0,
-                "annual_return": float(annual_return) if np.isfinite(annual_return) else 0.0,
-                "annual_volatility": float(annual_vol) if np.isfinite(annual_vol) else 0.0,
-                "max_drawdown": float(max_drawdown) if np.isfinite(max_drawdown) else 0.0,
-                "total_return": float(total_return) if np.isfinite(total_return) else 0.0,
-                "data_points": len(daily_returns),
-                "run_seconds": round(time.time() - t0, 1)
-            }
-
-            print(f"📊 Performance Metrics:")
-            print(f"   • Sharpe Ratio: {metrics['sharpe_ratio']:.3f}")
-            print(f"   • Annual Return: {metrics['annual_return']:.1%}")
-            print(f"   • Annual Volatility: {metrics['annual_volatility']:.1%}")
-            print(f"   • Maximum Drawdown: {metrics['max_drawdown']:.1%}")
-
-            return metrics
-
-        except Exception as e:
-            print(f"❌ Performance calculation failed: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
 
     def wait_for_compliance_completion(self, system, timeout_minutes=15):
         """

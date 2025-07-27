@@ -302,78 +302,325 @@ class ProductionMonitor:
         print("=" * 60)
 
     def create_monitoring_dashboard(self):
-        """Create visual monitoring dashboard"""
+        """Create visual monitoring dashboard with proper warm-up buffer"""
         fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 
+        # Get warm-up buffer setting from the ETF system
+        warm_up_days = 365  # Match your system's warm_up_days setting
+
         try:
-            # Plot 1: Portfolio Performance
+            # Plot 1: Portfolio Performance (with warm-up buffer applied)
             ax1 = axes[0, 0]
-            portfolio = self.system.accounts.portfolio()
-            if portfolio is not None:
-                curve = portfolio.curve()
-                curve.plot(ax=ax1, title="Portfolio Performance", color='blue')
-                ax1.set_ylabel("P&L")
-                ax1.grid(True, alpha=0.3)
+            try:
+                portfolio = self.system.accounts.portfolio()
+                if portfolio is not None:
+                    curve = portfolio.curve()
 
-            # Plot 2: Rolling Volatility
+                    # CRITICAL: Apply warm-up buffer to remove early spikes
+                    if len(curve) > warm_up_days:
+                        curve_filtered = curve.iloc[warm_up_days:]
+                        curve_filtered.plot(ax=ax1, title=f"Portfolio Performance (After {warm_up_days}-Day Warm-Up)",
+                                            color='blue')
+                        ax1.set_ylabel("P&L")
+                        ax1.grid(True, alpha=0.3)
+
+                        # Add buffer indicator
+                        ax1.text(0.02, 0.98, f'✅ {warm_up_days}-day buffer applied',
+                                 transform=ax1.transAxes, verticalalignment='top',
+                                 bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
+                                 fontsize=9)
+                    else:
+                        curve.plot(ax=ax1, title="Portfolio Performance (Insufficient Data for Buffer)", color='orange')
+                        ax1.set_ylabel("P&L")
+                        ax1.grid(True, alpha=0.3)
+                else:
+                    ax1.text(0.5, 0.5, 'Portfolio data\nnot available',
+                             ha='center', va='center', transform=ax1.transAxes)
+                    ax1.set_title("Portfolio Performance (No Data)")
+            except Exception as e:
+                ax1.text(0.5, 0.5, f'Portfolio error:\n{str(e)[:40]}',
+                         ha='center', va='center', transform=ax1.transAxes, color='red')
+                ax1.set_title("Portfolio Performance (Error)")
+
+            # Plot 2: Rolling Volatility (with warm-up buffer applied)
             ax2 = axes[0, 1]
-            returns = portfolio.curve().pct_change().dropna()
-            rolling_vol = returns.rolling(60).std() * np.sqrt(252)
-            rolling_vol.plot(ax=ax2, title="Rolling 60-Day Volatility", color='orange')
-            ax2.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
-            ax2.set_ylabel("Annualized Volatility")
-            ax2.legend()
-            ax2.grid(True, alpha=0.3)
+            try:
+                portfolio = self.system.accounts.portfolio()
+                if portfolio is not None:
+                    curve = portfolio.curve()
 
-            # Plot 3: Drawdown
+                    # CRITICAL: Apply warm-up buffer to remove early volatility spikes
+                    if len(curve) > warm_up_days:
+                        curve_filtered = curve.iloc[warm_up_days:]
+                        if len(curve_filtered) > 60:
+                            returns = curve_filtered.pct_change().dropna()
+                            rolling_vol = returns.rolling(60).std() * np.sqrt(252)
+                            rolling_vol.plot(ax=ax2,
+                                             title=f"Rolling 60-Day Volatility (After {warm_up_days}-Day Warm-Up)",
+                                             color='orange')
+                            ax2.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
+                            ax2.set_ylabel("Annualized Volatility")
+                            ax2.legend()
+                            ax2.grid(True, alpha=0.3)
+
+                            # Add buffer indicator
+                            ax2.text(0.02, 0.98, f'✅ {warm_up_days}-day buffer applied',
+                                     transform=ax2.transAxes, verticalalignment='top',
+                                     bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
+                                     fontsize=9)
+                        else:
+                            ax2.text(0.5, 0.5, 'Insufficient data\nfor volatility after buffer',
+                                     ha='center', va='center', transform=ax2.transAxes)
+                            ax2.set_title("Rolling Volatility (Insufficient Data)")
+                    else:
+                        returns = curve.pct_change().dropna()
+                        if len(returns) > 60:
+                            rolling_vol = returns.rolling(60).std() * np.sqrt(252)
+                            rolling_vol.plot(ax=ax2, title="Rolling 60-Day Volatility (No Buffer)", color='red')
+                            ax2.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
+                            ax2.set_ylabel("Annualized Volatility")
+                            ax2.legend()
+                            ax2.grid(True, alpha=0.3)
+                else:
+                    ax2.text(0.5, 0.5, 'Volatility data\nnot available',
+                             ha='center', va='center', transform=ax2.transAxes)
+                    ax2.set_title("Rolling Volatility (No Data)")
+            except Exception as e:
+                ax2.text(0.5, 0.5, f'Volatility error:\n{str(e)[:40]}',
+                         ha='center', va='center', transform=ax2.transAxes, color='red')
+                ax2.set_title("Rolling Volatility (Error)")
+
+            # Plot 3: Drawdown (FIXED with guaranteed display)
             ax3 = axes[1, 0]
-            rolling_max = portfolio.curve().expanding().max()
-            drawdown = (portfolio.curve() - rolling_max) / rolling_max
-            drawdown.plot(ax=ax3, title="Drawdown", color='red', area=True, alpha=0.3)
-            ax3.set_ylabel("Drawdown")
-            ax3.grid(True, alpha=0.3)
+            try:
+                portfolio = self.system.accounts.portfolio()
+                if portfolio is not None:
+                    curve = portfolio.curve()
 
-            # Plot 4: System Summary
+                    # Apply warm-up buffer
+                    if len(curve) > warm_up_days:
+                        curve_filtered = curve.iloc[warm_up_days:]
+                        title_suffix = f" (After {warm_up_days}-Day Warm-Up)"
+                    else:
+                        curve_filtered = curve
+                        title_suffix = " (No Buffer)"
+
+                    if len(curve_filtered) > 50:
+                        # Normalize curve to start from 1.0
+                        if curve_filtered.iloc[0] <= 0:
+                            curve_filtered = curve_filtered - curve_filtered.iloc[0] + 1.0
+
+                        # Calculate drawdown
+                        rolling_max = curve_filtered.expanding().max()
+                        drawdown = ((curve_filtered - rolling_max) / rolling_max) * 100
+
+                        # Plot drawdown
+                        drawdown.plot(ax=ax3, color='red', linewidth=2)
+                        ax3.fill_between(drawdown.index, drawdown.values, 0,
+                                         where=(drawdown <= 0), color='red', alpha=0.2)
+
+                        ax3.set_title(f"Portfolio Drawdown{title_suffix}")
+                        ax3.set_ylabel("Drawdown (%)")
+                        ax3.grid(True, alpha=0.3)
+
+                        # Add statistics
+                        max_dd = drawdown.min()
+                        current_dd = drawdown.iloc[-1]
+                        ax3.text(0.02, 0.98, f'Max DD: {max_dd:.1f}%\nCurrent: {current_dd:.1f}%',
+                                 transform=ax3.transAxes, verticalalignment='top',
+                                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+                        ax3.set_ylim(min(drawdown.min() * 1.1, -1), 1)
+                        ax3.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+                    else:
+                        # Create a simple bar chart as placeholder
+                        ax3.bar([1], [-5], color='red', alpha=0.3, width=0.5)
+                        ax3.text(0.5, 0.5, f'Drawdown Analysis\n\nNeed more data\n({len(curve_filtered)} points)',
+                                 ha='center', va='center', transform=ax3.transAxes,
+                                 bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+                        ax3.set_title("Drawdown (Insufficient Data)")
+                        ax3.set_ylim(-10, 0)
+                else:
+                    # Portfolio not available - create placeholder
+                    ax3.bar([1], [-10], color='gray', alpha=0.3, width=0.5)
+                    ax3.text(0.5, 0.5, 'Drawdown Analysis\n\n⏳ Portfolio calculation\nin progress...',
+                             ha='center', va='center', transform=ax3.transAxes,
+                             bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+                    ax3.set_title("Drawdown (Pending)")
+                    ax3.set_ylim(-10, 0)
+            except Exception as e:
+                ax3.text(0.5, 0.5, f'Drawdown Error:\n{str(e)[:30]}',
+                         ha='center', va='center', transform=ax3.transAxes, color='red')
+                ax3.set_title("Drawdown (Error)")
+
+            # Plot 4: System Summary (FIXED with guaranteed content)
             ax4 = axes[1, 1]
+            ax4.clear()
             ax4.axis('off')
 
-            summary_text = f"""
-SYSTEM HEALTH SUMMARY
+            try:
+                # Get system information
+                instruments = self.system.get_instrument_list()
+                rules = self.system.rules.trading_rules()
+                current_time = datetime.now().strftime('%H:%M:%S')
 
-📊 CONFIGURATION:
-• Instruments: {len(self.instruments)}
-• Trading Rules: {len(self.rules)}
-• Volatility Target: 12%
-• Cost Multiplier: 2.5x
+                # Get performance summary if available
+                try:
+                    portfolio = self.system.accounts.portfolio()
+                    if portfolio is not None:
+                        curve = portfolio.curve()
+                        if len(curve) > warm_up_days:
+                            curve_filtered = curve.iloc[warm_up_days:]
+                            returns = curve_filtered.pct_change().dropna()
+                            if len(returns) > 0 and returns.std() > 0:
+                                sharpe = (returns.mean() / returns.std()) * np.sqrt(252)
+                                vol = returns.std() * np.sqrt(252)
+                                perf_text = f"Sharpe: {sharpe:.2f}\nVol: {vol:.1%}"
+                            else:
+                                perf_text = "Calculating..."
+                        else:
+                            perf_text = "Warming up..."
+                    else:
+                        perf_text = "Pending..."
+                except:
+                    perf_text = "Error"
 
-📈 STATUS:
-• Data Quality: Monitoring
-• Rule Performance: Active
-• Risk Controls: Enabled
-• Alert System: Active
+                # Create summary text
+                summary_text = f"""SYSTEM HEALTH MONITOR
 
-⚙️ CARVER METHODOLOGY:
-• Pooled Scalars: ✅
-• Uniform Weights: ✅
-• Cost Awareness: ✅
-• Dynamic Optimization: ✅
+    ⏰ Time: {current_time}
+    🎯 Status: ACTIVE
 
-🔔 MONITORING:
-• Real-time tracking
-• Performance alerts
-• Risk limit monitoring
-• Regular health checks
-"""
+    📊 CONFIGURATION:
+    • ETFs: {len(instruments)}
+    • Rules: {len(rules)}
+    • Warm-up: {warm_up_days} days
+    • Vol Target: 12%
 
-            ax4.text(0.05, 0.95, summary_text, transform=ax4.transAxes,
-                     fontsize=10, verticalalignment='top', fontfamily='monospace',
-                     bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+    📈 PERFORMANCE:
+    {perf_text}
+
+    ⚙️ CARVER METHOD:
+    • Pooled Scalars: ✅
+    • Uniform Weights: ✅  
+    • Cost Awareness: ✅
+    • Buffer Applied: ✅
+
+    🔔 MONITORING:
+    • Dashboard: Live
+    • Health: Active
+    • Alerts: Enabled
+    • Status: Ready
+
+    💡 NOTES:
+    • Full 32-ETF universe
+    • Production v1.2
+    • Enhanced monitoring
+    • Real-time updates"""
+
+                ax4.text(0.02, 0.98, summary_text, transform=ax4.transAxes,
+                         fontsize=8, verticalalignment='top', fontfamily='monospace',
+                         bbox=dict(boxstyle='round,pad=0.3', facecolor='lightcyan', alpha=0.9))
+
+            except Exception as e:
+                # Emergency fallback
+                ax4.text(0.5, 0.5,
+                         f'System Summary\n\nStatus: Active\nTime: {datetime.now().strftime("%H:%M:%S")}\nETFs: Processing\n\nError: {str(e)[:20]}',
+                         ha='center', va='center', transform=ax4.transAxes,
+                         bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.7))
 
         except Exception as e:
             print(f"⚠️ Dashboard creation error: {e}")
 
-        plt.suptitle('Production Monitoring Dashboard', fontsize=14, fontweight='bold')
-        plt.tight_layout()
-        plt.show()
+        # Enhanced layout
+        try:
+            fig.suptitle(f'Enhanced ETF System v1.2 - Production Dashboard',
+                         fontsize=14, fontweight='bold', y=0.96)
+
+            plt.subplots_adjust(left=0.06, right=0.94, top=0.90, bottom=0.06,
+                                hspace=0.40, wspace=0.20)
+
+            fig.set_size_inches(16, 12)
+            fig.set_dpi(100)
+
+            print("📊 Dashboard created with warm-up buffer corrections")
+            plt.show(block=True)
+
+        except Exception as layout_error:
+            print(f"⚠️ Layout error: {layout_error}")
+            plt.tight_layout()
+            plt.show(block=True)
 
         return fig
+
+    def create_persistent_dashboard(self):
+        """Create dashboard with multiple viewing and saving options"""
+
+        print("🎨 CREATING ENHANCED MONITORING DASHBOARD")
+        print("=" * 50)
+
+        # Create the dashboard
+        fig = self.create_monitoring_dashboard()
+
+        # Enhanced viewing options
+        print("\n📊 DASHBOARD READY!")
+        print("Options:")
+        print("  1. View interactive plot (recommended)")
+        print("  2. Save to PNG file only")
+        print("  3. Save to PDF file only")
+        print("  4. Save to both PNG and PDF")
+        print("  5. View AND save (PNG)")
+
+        while True:
+            try:
+                choice = input("\nEnter choice (1-5): ").strip()
+
+                if choice == "1":
+                    print("📊 Opening interactive dashboard...")
+                    plt.show(block=True)
+                    break
+
+                elif choice == "2":
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f'etf_dashboard_{timestamp}.png'
+                    plt.savefig(filename, dpi=300, bbox_inches='tight')
+                    print(f"💾 Saved as: {filename}")
+                    break
+
+                elif choice == "3":
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f'etf_dashboard_{timestamp}.pdf'
+                    plt.savefig(filename, bbox_inches='tight')
+                    print(f"💾 Saved as: {filename}")
+                    break
+
+                elif choice == "4":
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    png_file = f'etf_dashboard_{timestamp}.png'
+                    pdf_file = f'etf_dashboard_{timestamp}.pdf'
+                    plt.savefig(png_file, dpi=300, bbox_inches='tight')
+                    plt.savefig(pdf_file, bbox_inches='tight')
+                    print(f"💾 Saved as: {png_file} and {pdf_file}")
+                    break
+
+                elif choice == "5":
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f'etf_dashboard_{timestamp}.png'
+                    plt.savefig(filename, dpi=300, bbox_inches='tight')
+                    print(f"💾 Saved as: {filename}")
+                    print("📊 Opening interactive dashboard...")
+                    plt.show(block=True)
+                    break
+
+                else:
+                    print("❌ Invalid choice. Please enter 1-5.")
+
+            except KeyboardInterrupt:
+                print("\n⏸️ Dashboard creation cancelled")
+                break
+            except:
+                print("❌ Invalid input. Please try again.")
+
+        return fig
+
+
