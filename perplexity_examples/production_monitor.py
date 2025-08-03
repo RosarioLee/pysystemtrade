@@ -26,8 +26,12 @@ class ProductionMonitor:
         self.drawdown_threshold = self.config.get('max_drawdown', 0.15)
         self.vol_tolerance = self.config.get('vol_tolerance', 0.02)  # 2% tolerance
 
+        # Dashboard settings
+        self.warm_up_days = 365  # Match your system's warm_up_days setting
+
         print(f"✅ Production Monitor initialized for {len(self.instruments)} instruments")
 
+    # [Keep all existing health check methods unchanged]
     def run_full_health_check(self):
         """
         Comprehensive system health check for production readiness
@@ -71,7 +75,6 @@ class ProductionMonitor:
     def _check_data_quality(self):
         """Check data quality across all instruments"""
         print("\n1️⃣ DATA QUALITY CHECK")
-
         data_issues = []
         data_metrics = {}
 
@@ -109,8 +112,8 @@ class ProductionMonitor:
             except Exception as e:
                 data_issues.append(f"{instrument}: Data access error - {e}")
 
-        print(f"   ✅ Analyzed {len(self.instruments)} instruments")
-        print(f"   ⚠️ Found {len(data_issues)} data issues")
+        print(f" ✅ Analyzed {len(self.instruments)} instruments")
+        print(f" ⚠️ Found {len(data_issues)} data issues")
 
         return {
             'status': 'PASS' if len(data_issues) < 3 else 'WARN',
@@ -121,7 +124,6 @@ class ProductionMonitor:
     def _check_rule_performance(self):
         """Check individual rule performance"""
         print("\n2️⃣ RULE PERFORMANCE CHECK")
-
         rule_metrics = {}
         rule_issues = []
 
@@ -141,7 +143,6 @@ class ProductionMonitor:
                 if rule_sharpes:
                     avg_sharpe = np.mean(rule_sharpes)
                     std_sharpe = np.std(rule_sharpes)
-
                     rule_metrics[rule_name] = {
                         'avg_sharpe': avg_sharpe,
                         'std_sharpe': std_sharpe,
@@ -157,8 +158,8 @@ class ProductionMonitor:
             except Exception as e:
                 rule_issues.append(f"{rule_name}: Performance check failed - {e}")
 
-        print(f"   ✅ Analyzed {len(rule_metrics)} rules")
-        print(f"   ⚠️ Found {len(rule_issues)} rule issues")
+        print(f" ✅ Analyzed {len(rule_metrics)} rules")
+        print(f" ⚠️ Found {len(rule_issues)} rule issues")
 
         return {
             'status': 'PASS' if len(rule_issues) == 0 else 'WARN',
@@ -169,7 +170,6 @@ class ProductionMonitor:
     def _check_risk_metrics(self):
         """Check system-wide risk metrics"""
         print("\n3️⃣ RISK METRICS CHECK")
-
         risk_issues = []
         risk_metrics = {}
 
@@ -197,8 +197,8 @@ class ProductionMonitor:
         except Exception as e:
             risk_issues.append(f"Risk metrics calculation failed: {e}")
 
-        print(f"   ✅ Risk analysis complete")
-        print(f"   ⚠️ Found {len(risk_issues)} risk issues")
+        print(f" ✅ Risk analysis complete")
+        print(f" ⚠️ Found {len(risk_issues)} risk issues")
 
         return {
             'status': 'PASS' if len(risk_issues) == 0 else 'WARN',
@@ -209,7 +209,6 @@ class ProductionMonitor:
     def _check_system_performance(self):
         """Check overall system performance"""
         print("\n4️⃣ SYSTEM PERFORMANCE CHECK")
-
         perf_issues = []
         perf_metrics = {}
 
@@ -224,18 +223,16 @@ class ProductionMonitor:
                 # Check performance thresholds
                 if metrics['sharpe_ratio'] < self.sharpe_threshold:
                     perf_issues.append(f"Low Sharpe ratio: {metrics['sharpe_ratio']:.2f}")
-
                 if metrics['max_drawdown'] < -self.drawdown_threshold:
                     perf_issues.append(f"High drawdown: {metrics['max_drawdown']:.1%}")
-
                 if metrics['annual_volatility'] > 0.20:  # 20% max vol
                     perf_issues.append(f"High volatility: {metrics['annual_volatility']:.1%}")
 
         except Exception as e:
             perf_issues.append(f"Performance calculation failed: {e}")
 
-        print(f"   ✅ Performance analysis complete")
-        print(f"   ⚠️ Found {len(perf_issues)} performance issues")
+        print(f" ✅ Performance analysis complete")
+        print(f" ⚠️ Found {len(perf_issues)} performance issues")
 
         return {
             'status': 'PASS' if len(perf_issues) == 0 else 'WARN',
@@ -245,7 +242,6 @@ class ProductionMonitor:
 
     def _generate_alerts(self, health_report):
         """Generate alerts and recommendations based on health check"""
-
         # Critical alerts
         for section in ['data_quality', 'rule_performance', 'risk_metrics', 'system_performance']:
             if health_report[section]['status'] == 'WARN':
@@ -282,280 +278,287 @@ class ProductionMonitor:
         if health_report['alerts']:
             print(f"\n🚨 ALERTS ({len(health_report['alerts'])}):")
             for alert in health_report['alerts'][:10]:  # Show max 10
-                print(f"   • {alert}")
+                print(f" • {alert}")
 
         # Key metrics
         if 'system_performance' in health_report and health_report['system_performance']['metrics']:
             metrics = health_report['system_performance']['metrics']
             print(f"\n📊 KEY METRICS:")
-            print(f"   • Sharpe Ratio: {metrics.get('sharpe_ratio', 'N/A'):.3f}")
-            print(f"   • Annual Return: {metrics.get('annual_return', 'N/A'):.1%}")
-            print(f"   • Max Drawdown: {metrics.get('max_drawdown', 'N/A'):.1%}")
-            print(f"   • Win Rate: {metrics.get('win_rate', 'N/A'):.1%}")
+            print(f" • Sharpe Ratio: {metrics.get('sharpe_ratio', 'N/A'):.3f}")
+            print(f" • Annual Return: {metrics.get('annual_return', 'N/A'):.1%}")
+            print(f" • Max Drawdown: {metrics.get('max_drawdown', 'N/A'):.1%}")
+            print(f" • Win Rate: {metrics.get('win_rate', 'N/A'):.1%}")
 
         # Recommendations
         if health_report['recommendations']:
             print(f"\n💡 RECOMMENDATIONS:")
             for rec in health_report['recommendations']:
-                print(f"   • {rec}")
+                print(f" • {rec}")
 
         print("=" * 60)
 
+    # ================================
+    # REFACTORED DASHBOARD METHODS
+    # ================================
+
     def create_monitoring_dashboard(self):
-        """Create visual monitoring dashboard with proper warm-up buffer"""
+        """Create visual monitoring dashboard with modular components"""
         fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 
-        # Get warm-up buffer setting from the ETF system
-        warm_up_days = 365  # Match your system's warm_up_days setting
-
         try:
-            # Plot 1: Portfolio Performance (with warm-up buffer applied)
-            ax1 = axes[0, 0]
-            try:
-                portfolio = self.system.accounts.portfolio()
-                if portfolio is not None:
-                    curve = portfolio.curve()
+            # Create each plot using dedicated methods
+            self._create_portfolio_plot(axes[0, 0])
+            self._create_volatility_plot(axes[0, 1])
+            self._create_drawdown_plot(axes[1, 0])
+            self._create_summary_panel(axes[1, 1])
 
-                    # CRITICAL: Apply warm-up buffer to remove early spikes
-                    if len(curve) > warm_up_days:
-                        curve_filtered = curve.iloc[warm_up_days:]
-                        curve_filtered.plot(ax=ax1, title=f"Portfolio Performance (After {warm_up_days}-Day Warm-Up)",
-                                            color='blue')
-                        ax1.set_ylabel("P&L")
-                        ax1.grid(True, alpha=0.3)
-
-                        # Add buffer indicator
-                        ax1.text(0.02, 0.98, f'✅ {warm_up_days}-day buffer applied',
-                                 transform=ax1.transAxes, verticalalignment='top',
-                                 bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
-                                 fontsize=9)
-                    else:
-                        curve.plot(ax=ax1, title="Portfolio Performance (Insufficient Data for Buffer)", color='orange')
-                        ax1.set_ylabel("P&L")
-                        ax1.grid(True, alpha=0.3)
-                else:
-                    ax1.text(0.5, 0.5, 'Portfolio data\nnot available',
-                             ha='center', va='center', transform=ax1.transAxes)
-                    ax1.set_title("Portfolio Performance (No Data)")
-            except Exception as e:
-                ax1.text(0.5, 0.5, f'Portfolio error:\n{str(e)[:40]}',
-                         ha='center', va='center', transform=ax1.transAxes, color='red')
-                ax1.set_title("Portfolio Performance (Error)")
-
-            # Plot 2: Rolling Volatility (with warm-up buffer applied)
-            ax2 = axes[0, 1]
-            try:
-                portfolio = self.system.accounts.portfolio()
-                if portfolio is not None:
-                    curve = portfolio.curve()
-
-                    # CRITICAL: Apply warm-up buffer to remove early volatility spikes
-                    if len(curve) > warm_up_days:
-                        curve_filtered = curve.iloc[warm_up_days:]
-                        if len(curve_filtered) > 60:
-                            returns = curve_filtered.pct_change().dropna()
-                            rolling_vol = returns.rolling(60).std() * np.sqrt(252)
-                            rolling_vol.plot(ax=ax2,
-                                             title=f"Rolling 60-Day Volatility (After {warm_up_days}-Day Warm-Up)",
-                                             color='orange')
-                            ax2.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
-                            ax2.set_ylabel("Annualized Volatility")
-                            ax2.legend()
-                            ax2.grid(True, alpha=0.3)
-
-                            # Add buffer indicator
-                            ax2.text(0.02, 0.98, f'✅ {warm_up_days}-day buffer applied',
-                                     transform=ax2.transAxes, verticalalignment='top',
-                                     bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
-                                     fontsize=9)
-                        else:
-                            ax2.text(0.5, 0.5, 'Insufficient data\nfor volatility after buffer',
-                                     ha='center', va='center', transform=ax2.transAxes)
-                            ax2.set_title("Rolling Volatility (Insufficient Data)")
-                    else:
-                        returns = curve.pct_change().dropna()
-                        if len(returns) > 60:
-                            rolling_vol = returns.rolling(60).std() * np.sqrt(252)
-                            rolling_vol.plot(ax=ax2, title="Rolling 60-Day Volatility (No Buffer)", color='red')
-                            ax2.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
-                            ax2.set_ylabel("Annualized Volatility")
-                            ax2.legend()
-                            ax2.grid(True, alpha=0.3)
-                else:
-                    ax2.text(0.5, 0.5, 'Volatility data\nnot available',
-                             ha='center', va='center', transform=ax2.transAxes)
-                    ax2.set_title("Rolling Volatility (No Data)")
-            except Exception as e:
-                ax2.text(0.5, 0.5, f'Volatility error:\n{str(e)[:40]}',
-                         ha='center', va='center', transform=ax2.transAxes, color='red')
-                ax2.set_title("Rolling Volatility (Error)")
-
-            # Plot 3: Drawdown (FIXED with guaranteed display)
-            ax3 = axes[1, 0]
-            try:
-                portfolio = self.system.accounts.portfolio()
-                if portfolio is not None:
-                    curve = portfolio.curve()
-
-                    # Apply warm-up buffer
-                    if len(curve) > warm_up_days:
-                        curve_filtered = curve.iloc[warm_up_days:]
-                        title_suffix = f" (After {warm_up_days}-Day Warm-Up)"
-                    else:
-                        curve_filtered = curve
-                        title_suffix = " (No Buffer)"
-
-                    if len(curve_filtered) > 50:
-                        # Normalize curve to start from 1.0
-                        if curve_filtered.iloc[0] <= 0:
-                            curve_filtered = curve_filtered - curve_filtered.iloc[0] + 1.0
-
-                        # Calculate drawdown
-                        rolling_max = curve_filtered.expanding().max()
-                        drawdown = ((curve_filtered - rolling_max) / rolling_max) * 100
-
-                        # Plot drawdown
-                        drawdown.plot(ax=ax3, color='red', linewidth=2)
-                        ax3.fill_between(drawdown.index, drawdown.values, 0,
-                                         where=(drawdown <= 0), color='red', alpha=0.2)
-
-                        ax3.set_title(f"Portfolio Drawdown{title_suffix}")
-                        ax3.set_ylabel("Drawdown (%)")
-                        ax3.grid(True, alpha=0.3)
-
-                        # Add statistics
-                        max_dd = drawdown.min()
-                        current_dd = drawdown.iloc[-1]
-                        ax3.text(0.02, 0.98, f'Max DD: {max_dd:.1f}%\nCurrent: {current_dd:.1f}%',
-                                 transform=ax3.transAxes, verticalalignment='top',
-                                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-
-                        ax3.set_ylim(min(drawdown.min() * 1.1, -1), 1)
-                        ax3.axhline(y=0, color='black', linestyle='-', alpha=0.5)
-                    else:
-                        # Create a simple bar chart as placeholder
-                        ax3.bar([1], [-5], color='red', alpha=0.3, width=0.5)
-                        ax3.text(0.5, 0.5, f'Drawdown Analysis\n\nNeed more data\n({len(curve_filtered)} points)',
-                                 ha='center', va='center', transform=ax3.transAxes,
-                                 bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
-                        ax3.set_title("Drawdown (Insufficient Data)")
-                        ax3.set_ylim(-10, 0)
-                else:
-                    # Portfolio not available - create placeholder
-                    ax3.bar([1], [-10], color='gray', alpha=0.3, width=0.5)
-                    ax3.text(0.5, 0.5, 'Drawdown Analysis\n\n⏳ Portfolio calculation\nin progress...',
-                             ha='center', va='center', transform=ax3.transAxes,
-                             bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
-                    ax3.set_title("Drawdown (Pending)")
-                    ax3.set_ylim(-10, 0)
-            except Exception as e:
-                ax3.text(0.5, 0.5, f'Drawdown Error:\n{str(e)[:30]}',
-                         ha='center', va='center', transform=ax3.transAxes, color='red')
-                ax3.set_title("Drawdown (Error)")
-
-            # Plot 4: System Summary (FIXED with guaranteed content)
-            ax4 = axes[1, 1]
-            ax4.clear()
-            ax4.axis('off')
-
-            try:
-                # Get system information
-                instruments = self.system.get_instrument_list()
-                rules = self.system.rules.trading_rules()
-                current_time = datetime.now().strftime('%H:%M:%S')
-
-                # Get performance summary if available
-                try:
-                    portfolio = self.system.accounts.portfolio()
-                    if portfolio is not None:
-                        curve = portfolio.curve()
-                        if len(curve) > warm_up_days:
-                            curve_filtered = curve.iloc[warm_up_days:]
-                            returns = curve_filtered.pct_change().dropna()
-                            if len(returns) > 0 and returns.std() > 0:
-                                sharpe = (returns.mean() / returns.std()) * np.sqrt(252)
-                                vol = returns.std() * np.sqrt(252)
-                                perf_text = f"Sharpe: {sharpe:.2f}\nVol: {vol:.1%}"
-                            else:
-                                perf_text = "Calculating..."
-                        else:
-                            perf_text = "Warming up..."
-                    else:
-                        perf_text = "Pending..."
-                except:
-                    perf_text = "Error"
-
-                # Create summary text
-                summary_text = f"""SYSTEM HEALTH MONITOR
-
-    ⏰ Time: {current_time}
-    🎯 Status: ACTIVE
-
-    📊 CONFIGURATION:
-    • ETFs: {len(instruments)}
-    • Rules: {len(rules)}
-    • Warm-up: {warm_up_days} days
-    • Vol Target: 12%
-
-    📈 PERFORMANCE:
-    {perf_text}
-
-    ⚙️ CARVER METHOD:
-    • Pooled Scalars: ✅
-    • Uniform Weights: ✅  
-    • Cost Awareness: ✅
-    • Buffer Applied: ✅
-
-    🔔 MONITORING:
-    • Dashboard: Live
-    • Health: Active
-    • Alerts: Enabled
-    • Status: Ready
-
-    💡 NOTES:
-    • Full 32-ETF universe
-    • Production v1.2
-    • Enhanced monitoring
-    • Real-time updates"""
-
-                ax4.text(0.02, 0.98, summary_text, transform=ax4.transAxes,
-                         fontsize=8, verticalalignment='top', fontfamily='monospace',
-                         bbox=dict(boxstyle='round,pad=0.3', facecolor='lightcyan', alpha=0.9))
-
-            except Exception as e:
-                # Emergency fallback
-                ax4.text(0.5, 0.5,
-                         f'System Summary\n\nStatus: Active\nTime: {datetime.now().strftime("%H:%M:%S")}\nETFs: Processing\n\nError: {str(e)[:20]}',
-                         ha='center', va='center', transform=ax4.transAxes,
-                         bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.7))
-
-        except Exception as e:
-            print(f"⚠️ Dashboard creation error: {e}")
-
-        # Enhanced layout
-        try:
+            # Enhanced layout
             fig.suptitle(f'Enhanced ETF System v1.2 - Production Dashboard',
                          fontsize=14, fontweight='bold', y=0.96)
-
             plt.subplots_adjust(left=0.06, right=0.94, top=0.90, bottom=0.06,
                                 hspace=0.40, wspace=0.20)
-
             fig.set_size_inches(16, 12)
             fig.set_dpi(100)
 
             print("📊 Dashboard created with warm-up buffer corrections")
             plt.show(block=True)
 
-        except Exception as layout_error:
-            print(f"⚠️ Layout error: {layout_error}")
+        except Exception as e:
+            print(f"⚠️ Dashboard creation error: {e}")
             plt.tight_layout()
             plt.show(block=True)
 
         return fig
 
+    def _create_portfolio_plot(self, ax):
+        """Create portfolio performance plot with warm-up buffer"""
+        try:
+            portfolio = self.system.accounts.portfolio()
+            if portfolio is not None:
+                curve = portfolio.curve()
+
+                # Apply warm-up buffer to remove early spikes
+                if len(curve) > self.warm_up_days:
+                    curve_filtered = curve.iloc[self.warm_up_days:]
+                    curve_filtered.plot(ax=ax,
+                                        title=f"Portfolio Performance (After {self.warm_up_days}-Day Warm-Up)",
+                                        color='blue')
+                    ax.set_ylabel("P&L")
+                    ax.grid(True, alpha=0.3)
+
+                    # Add buffer indicator
+                    ax.text(0.02, 0.98, f'✅ {self.warm_up_days}-day buffer applied',
+                            transform=ax.transAxes, verticalalignment='top',
+                            bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
+                            fontsize=9)
+                else:
+                    curve.plot(ax=ax, title="Portfolio Performance (Insufficient Data for Buffer)",
+                               color='orange')
+                    ax.set_ylabel("P&L")
+                    ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Portfolio data\nnot available',
+                        ha='center', va='center', transform=ax.transAxes)
+                ax.set_title("Portfolio Performance (No Data)")
+
+        except Exception as e:
+            ax.text(0.5, 0.5, f'Portfolio error:\n{str(e)[:40]}',
+                    ha='center', va='center', transform=ax.transAxes, color='red')
+            ax.set_title("Portfolio Performance (Error)")
+
+    def _create_volatility_plot(self, ax):
+        """Create rolling volatility plot with warm-up buffer"""
+        try:
+            portfolio = self.system.accounts.portfolio()
+            if portfolio is not None:
+                curve = portfolio.curve()
+
+                # Apply warm-up buffer to remove early volatility spikes
+                if len(curve) > self.warm_up_days:
+                    curve_filtered = curve.iloc[self.warm_up_days:]
+                    if len(curve_filtered) > 60:
+                        returns = curve_filtered.pct_change().dropna()
+                        rolling_vol = returns.rolling(60).std() * np.sqrt(252)
+                        rolling_vol.plot(ax=ax,
+                                         title=f"Rolling 60-Day Volatility (After {self.warm_up_days}-Day Warm-Up)",
+                                         color='orange')
+                        ax.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
+                        ax.set_ylabel("Annualized Volatility")
+                        ax.legend()
+                        ax.grid(True, alpha=0.3)
+
+                        # Add buffer indicator
+                        ax.text(0.02, 0.98, f'✅ {self.warm_up_days}-day buffer applied',
+                                transform=ax.transAxes, verticalalignment='top',
+                                bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
+                                fontsize=9)
+                    else:
+                        ax.text(0.5, 0.5, 'Insufficient data\nfor volatility after buffer',
+                                ha='center', va='center', transform=ax.transAxes)
+                        ax.set_title("Rolling Volatility (Insufficient Data)")
+                else:
+                    returns = curve.pct_change().dropna()
+                    if len(returns) > 60:
+                        rolling_vol = returns.rolling(60).std() * np.sqrt(252)
+                        rolling_vol.plot(ax=ax, title="Rolling 60-Day Volatility (No Buffer)", color='red')
+                        ax.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
+                        ax.set_ylabel("Annualized Volatility")
+                        ax.legend()
+                        ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Volatility data\nnot available',
+                        ha='center', va='center', transform=ax.transAxes)
+                ax.set_title("Rolling Volatility (No Data)")
+
+        except Exception as e:
+            ax.text(0.5, 0.5, f'Volatility error:\n{str(e)[:40]}',
+                    ha='center', va='center', transform=ax.transAxes, color='red')
+            ax.set_title("Rolling Volatility (Error)")
+
+    def _create_drawdown_plot(self, ax):
+        """Create drawdown plot with proper handling"""
+        try:
+            portfolio = self.system.accounts.portfolio()
+            if portfolio is not None:
+                curve = portfolio.curve()
+
+                # Apply warm-up buffer
+                if len(curve) > self.warm_up_days:
+                    curve_filtered = curve.iloc[self.warm_up_days:]
+                    title_suffix = f" (After {self.warm_up_days}-Day Warm-Up)"
+                else:
+                    curve_filtered = curve
+                    title_suffix = " (No Buffer)"
+
+                if len(curve_filtered) > 50:
+                    # Normalize curve to start from 1.0
+                    if curve_filtered.iloc[0] <= 0:
+                        curve_filtered = curve_filtered - curve_filtered.iloc[0] + 1.0
+
+                    # Calculate drawdown
+                    rolling_max = curve_filtered.expanding().max()
+                    drawdown = ((curve_filtered - rolling_max) / rolling_max) * 100
+
+                    # Plot drawdown
+                    drawdown.plot(ax=ax, color='red', linewidth=2)
+                    ax.fill_between(drawdown.index, drawdown.values, 0,
+                                    where=(drawdown <= 0), color='red', alpha=0.2)
+                    ax.set_title(f"Portfolio Drawdown{title_suffix}")
+                    ax.set_ylabel("Drawdown (%)")
+                    ax.grid(True, alpha=0.3)
+
+                    # Add statistics
+                    max_dd = drawdown.min()
+                    current_dd = drawdown.iloc[-1]
+                    ax.text(0.02, 0.98, f'Max DD: {max_dd:.1f}%\nCurrent: {current_dd:.1f}%',
+                            transform=ax.transAxes, verticalalignment='top',
+                            bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                    ax.set_ylim(min(drawdown.min() * 1.1, -1), 1)
+                    ax.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+                else:
+                    # Create a simple bar chart as placeholder
+                    ax.bar([1], [-5], color='red', alpha=0.3, width=0.5)
+                    ax.text(0.5, 0.5, f'Drawdown Analysis\n\nNeed more data\n({len(curve_filtered)} points)',
+                            ha='center', va='center', transform=ax.transAxes,
+                            bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+                    ax.set_title("Drawdown (Insufficient Data)")
+                    ax.set_ylim(-10, 0)
+            else:
+                # Portfolio not available - create placeholder
+                ax.bar([1], [-10], color='gray', alpha=0.3, width=0.5)
+                ax.text(0.5, 0.5, 'Drawdown Analysis\n\n⏳ Portfolio calculation\nin progress...',
+                        ha='center', va='center', transform=ax.transAxes,
+                        bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+                ax.set_title("Drawdown (Pending)")
+                ax.set_ylim(-10, 0)
+
+        except Exception as e:
+            ax.text(0.5, 0.5, f'Drawdown Error:\n{str(e)[:30]}',
+                    ha='center', va='center', transform=ax.transAxes, color='red')
+            ax.set_title("Drawdown (Error)")
+
+    def _create_summary_panel(self, ax):
+        """Create system summary information panel"""
+        ax.clear()
+        ax.axis('off')
+
+        try:
+            # Get system information
+            instruments = self.system.get_instrument_list()
+            rules = self.system.rules.trading_rules()
+            current_time = datetime.now().strftime('%H:%M:%S')
+
+            # Get performance summary if available
+            perf_text = self._get_performance_summary()
+
+            # Create summary text
+            summary_text = f"""SYSTEM HEALTH MONITOR
+
+⏰ Time: {current_time}
+🎯 Status: ACTIVE
+
+📊 CONFIGURATION:
+• ETFs: {len(instruments)}
+• Rules: {len(rules)}
+• Warm-up: {self.warm_up_days} days
+• Vol Target: 12%
+
+📈 PERFORMANCE:
+{perf_text}
+
+⚙️ CARVER METHOD:
+• Pooled Scalars: ✅
+• Uniform Weights: ✅
+• Cost Awareness: ✅
+• Buffer Applied: ✅
+
+🔔 MONITORING:
+• Dashboard: Live
+• Health: Active
+• Alerts: Enabled
+• Status: Ready
+
+💡 NOTES:
+• Full 32-ETF universe
+• Production v1.2
+• Enhanced monitoring
+• Real-time updates"""
+
+            ax.text(0.02, 0.98, summary_text, transform=ax.transAxes,
+                    fontsize=8, verticalalignment='top', fontfamily='monospace',
+                    bbox=dict(boxstyle='round,pad=0.3', facecolor='lightcyan', alpha=0.9))
+
+        except Exception as e:
+            # Emergency fallback
+            ax.text(0.5, 0.5,
+                    f'System Summary\n\nStatus: Active\nTime: {datetime.now().strftime("%H:%M:%S")}\nETFs: Processing\n\nError: {str(e)[:20]}',
+                    ha='center', va='center', transform=ax.transAxes,
+                    bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.7))
+
+    def _get_performance_summary(self):
+        """Get performance summary text"""
+        try:
+            portfolio = self.system.accounts.portfolio()
+            if portfolio is not None:
+                curve = portfolio.curve()
+                if len(curve) > self.warm_up_days:
+                    curve_filtered = curve.iloc[self.warm_up_days:]
+                    returns = curve_filtered.pct_change().dropna()
+                    if len(returns) > 0 and returns.std() > 0:
+                        sharpe = (returns.mean() / returns.std()) * np.sqrt(252)
+                        vol = returns.std() * np.sqrt(252)
+                        return f"Sharpe: {sharpe:.2f}\nVol: {vol:.1%}"
+                    else:
+                        return "Calculating..."
+                else:
+                    return "Warming up..."
+            else:
+                return "Pending..."
+        except:
+            return "Error"
+
     def create_persistent_dashboard(self):
         """Create dashboard with multiple viewing and saving options"""
-
         print("🎨 CREATING ENHANCED MONITORING DASHBOARD")
         print("=" * 50)
 
@@ -565,11 +568,11 @@ class ProductionMonitor:
         # Enhanced viewing options
         print("\n📊 DASHBOARD READY!")
         print("Options:")
-        print("  1. View interactive plot (recommended)")
-        print("  2. Save to PNG file only")
-        print("  3. Save to PDF file only")
-        print("  4. Save to both PNG and PDF")
-        print("  5. View AND save (PNG)")
+        print(" 1. View interactive plot (recommended)")
+        print(" 2. Save to PNG file only")
+        print(" 3. Save to PDF file only")
+        print(" 4. Save to both PNG and PDF")
+        print(" 5. View AND save (PNG)")
 
         while True:
             try:
@@ -579,21 +582,18 @@ class ProductionMonitor:
                     print("📊 Opening interactive dashboard...")
                     plt.show(block=True)
                     break
-
                 elif choice == "2":
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                     filename = f'etf_dashboard_{timestamp}.png'
                     plt.savefig(filename, dpi=300, bbox_inches='tight')
                     print(f"💾 Saved as: {filename}")
                     break
-
                 elif choice == "3":
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                     filename = f'etf_dashboard_{timestamp}.pdf'
                     plt.savefig(filename, bbox_inches='tight')
                     print(f"💾 Saved as: {filename}")
                     break
-
                 elif choice == "4":
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                     png_file = f'etf_dashboard_{timestamp}.png'
@@ -602,7 +602,6 @@ class ProductionMonitor:
                     plt.savefig(pdf_file, bbox_inches='tight')
                     print(f"💾 Saved as: {png_file} and {pdf_file}")
                     break
-
                 elif choice == "5":
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                     filename = f'etf_dashboard_{timestamp}.png'
@@ -611,7 +610,6 @@ class ProductionMonitor:
                     print("📊 Opening interactive dashboard...")
                     plt.show(block=True)
                     break
-
                 else:
                     print("❌ Invalid choice. Please enter 1-5.")
 
@@ -622,5 +620,3 @@ class ProductionMonitor:
                 print("❌ Invalid input. Please try again.")
 
         return fig
-
-

@@ -15,8 +15,9 @@ class EnhancedPerformanceCalculator:
     and proper volatility scaling following Carver methodology
     """
 
-    def __init__(self, target_vol=0.12):
+    def __init__(self, target_vol=0.12, warm_up_days=None):
         self.target_vol = target_vol
+        self.warm_up_days = warm_up_days
         self.trading_days_per_year = 252
 
     def calculate_portfolio_performance(self, system, timeout_seconds=300):
@@ -36,6 +37,11 @@ class EnhancedPerformanceCalculator:
             # Extract P&L curve
             raw_curve = portfolio_curve.curve()
             print(f"📈 Raw portfolio data: {len(raw_curve)} points")
+
+            # Apply warm-up buffer if specified
+            if hasattr(self, 'warm_up_days') and self.warm_up_days and len(raw_curve) > self.warm_up_days:
+                raw_curve = raw_curve.iloc[self.warm_up_days:]
+                print(f"🔧 Applied {self.warm_up_days}-day warm-up buffer")
 
             # Convert P&L to percentage returns
             if raw_curve.iloc[0] == 0:
@@ -101,8 +107,30 @@ class EnhancedPerformanceCalculator:
         profit_factor = abs(avg_win * len(positive_returns)) / abs(
             avg_loss * len(negative_returns)) if avg_loss != 0 else np.inf
 
+        # Calmar Ratio (Annual Return / Max Drawdown)
+        calmar_ratio = abs(annual_return / max_drawdown) if max_drawdown != 0 else np.inf
+
+        # Volatility-Adjusted Return (Return per unit of volatility)
+        vol_adjusted_return = annual_return / vol if vol > 0 else 0
+
+        # Average Daily Return scaled for comparison
+        avg_daily_return = returns.mean()
+
+        # Downside Deviation (volatility of negative returns only)
+        downside_returns = returns[returns < 0]
+        downside_deviation = downside_returns.std() * np.sqrt(self.trading_days_per_year) if len(
+            downside_returns) > 0 else 0
+
+        # Sortino Ratio (return vs downside risk)
+        sortino_ratio = annual_return / downside_deviation if downside_deviation > 0 else np.inf
+
         return {
             'sharpe_ratio': float(sharpe),
+            'calmar_ratio': float(calmar_ratio),
+            'vol_adjusted_return': float(vol_adjusted_return),
+            'sortino_ratio': float(sortino_ratio),
+            'downside_deviation': float(downside_deviation),
+            'avg_daily_return': float(avg_daily_return),
             'annual_return': float(annual_return),
             'annual_volatility': float(vol),
             'max_drawdown': float(max_drawdown),
@@ -117,6 +145,10 @@ class EnhancedPerformanceCalculator:
         """Display metrics in formatted output"""
         print(f"\n📊 CORRECTED Performance Metrics:")
         print(f"   • Sharpe Ratio: {metrics['sharpe_ratio']:.3f}")
+        print(f" • Calmar Ratio: {metrics['calmar_ratio']:.2f}")
+        print(f" • Sortino Ratio: {metrics['sortino_ratio']:.2f}")
+        print(f" • Vol-Adjusted Return: {metrics['vol_adjusted_return']:.2f}")
+        print(f" • Downside Deviation: {metrics['downside_deviation']:.1%}")
         print(f"   • Annual Return: {metrics['annual_return']:.1%}")
         print(f"   • Annual Volatility: {metrics['annual_volatility']:.1%}")
         print(f"   • Maximum Drawdown: {metrics['max_drawdown']:.1%}")
