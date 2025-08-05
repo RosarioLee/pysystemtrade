@@ -1,4 +1,4 @@
-# system_runner_v2.py - Enhanced ETF System Runner v1.2
+# system_runner_v2.py - Enhanced ETF System Runner v1.3 - FIXED
 
 import os
 import sys
@@ -16,9 +16,8 @@ from production_monitor import ProductionMonitor
 
 
 def main_v2(development_mode=True, test_mode=False, max_instruments=32):
-    """Enhanced ETF System v1.2 - Production Ready"""
-
-    print("🚀 Enhanced ETF System v1.2")
+    """Enhanced ETF System v1.3 - Production Ready - FIXED"""
+    print("ðŸš€ Enhanced ETF System v1.3 - FIXED")
     print("=" * 40)
 
     try:
@@ -39,55 +38,92 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
         print("Acquiring data and creating system...")
         download_count = etf_system.download_etf_data()
         if download_count == 0:
-            print("❌ No data downloaded - aborting")
+            print("âŒ No data downloaded - aborting")
             return None
 
         system = etf_system.create_carver_compliant_system()
         if system is None:
-            print("❌ System creation failed")
+            print("âŒ System creation failed")
             return None
 
-        # Step 3: Analysis
-        print("Running analysis...")
+        # Step 3: Enhanced Analysis (FIXED ERROR HANDLING)
+        print("Running enhanced analysis...")
         compliance_report = etf_system.verify_carver_compliance(system)
 
-        calculator = EnhancedPerformanceCalculator(target_vol=0.12)
-        performance_metrics = calculator.calculate_portfolio_performance(system)
+        # Use the NEW comprehensive performance calculator with FIXED error handling
+        try:
+            calculator = EnhancedPerformanceCalculator(target_vol=0.12)
+            comprehensive_performance = calculator.calculate_comprehensive_performance(system)
+
+            if comprehensive_performance is None:
+                print("âš ï¸ Using fallback performance calculation")
+                # Fallback to basic performance calculation
+                basic_performance = calculator.calculate_portfolio_performance(system)
+                if basic_performance:
+                    # Convert basic performance to comprehensive format
+                    comprehensive_performance = {
+                        'portfolio_metrics': basic_performance,
+                        'rule_performance': {},
+                        'instrument_performance': {},
+                        'cost_analysis': {},
+                        'etf_statistics': {}
+                    }
+                else:
+                    comprehensive_performance = None
+
+        except Exception as e:
+            print(f"âŒ Performance calculation error: {e}")
+            comprehensive_performance = None
 
         monitor = ProductionMonitor(system, etf_system.monitoring_config)
         health_report = monitor.run_full_health_check()
 
-        # Step 4: Dashboard
-        print("Creating dashboard...")
-        dashboard = monitor.create_monitoring_dashboard()
+        # NEW: Run enhanced performance analysis with FIXED error handling
+        enhanced_analysis = None
+        try:
+            if comprehensive_performance is not None:
+                enhanced_analysis = monitor.run_enhanced_performance_analysis_separated(comprehensive_performance)
+            else:
+                print("âš ï¸ Skipping enhanced analysis due to performance calculation failure")
+        except Exception as e:
+            print(f"âš ï¸ Enhanced analysis failed, continuing with basic analysis: {e}")
 
-        # Step 5: Generate final report
-        deployment_status = generate_deployment_report(
-            system, compliance_report, performance_metrics, health_report
+        # Step 4: FIXED Dashboard (avoid duplication)
+        print("Creating dashboard...")
+        if enhanced_analysis is not None:
+            print("ðŸ“Š Using enhanced dashboard")
+            # Don't create basic dashboard if enhanced succeeded
+        else:
+            print("ðŸ“Š Using basic dashboard")
+            dashboard = monitor.create_monitoring_dashboard()
+
+        # Step 5: Generate final report with FIXED key access
+        deployment_status = generate_deployment_report_fixed(
+            system, compliance_report, comprehensive_performance, health_report
         )
 
         results = {
             'system': system,
             'compliance_report': compliance_report,
-            'performance_metrics': performance_metrics,
+            'performance_metrics': comprehensive_performance,  # This is the comprehensive report
             'health_report': health_report,
             'deployment_status': deployment_status,
             'monitor': monitor,
             'calculator': calculator
         }
 
-        print_summary(results)
+        print_summary_fixed(results)
         return results
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"âŒ Error: {e}")
         import traceback
         traceback.print_exc()
         return None
 
 
-def generate_deployment_report(system, compliance, performance, health):
-    """Generate production deployment readiness report"""
+def generate_deployment_report_fixed(system, compliance, performance, health):
+    """Generate production deployment readiness report - FIXED VERSION"""
     deployment_score = 0
     max_score = 100
     issues = []
@@ -98,11 +134,13 @@ def generate_deployment_report(system, compliance, performance, health):
     else:
         issues.append("Carver methodology compliance issues")
 
-    # Performance metrics (25 points)
-    if performance and performance['sharpe_ratio'] > 0.3:
-        deployment_score += 15
-    if performance and performance['max_drawdown'] > -0.2:
-        deployment_score += 10
+    # Performance metrics (25 points) - FIXED ACCESS
+    if performance and performance.get('portfolio_metrics'):
+        pm = performance['portfolio_metrics']  # Access nested metrics
+        if pm.get('sharpe_ratio', 0) > 0.3:
+            deployment_score += 15
+        if pm.get('max_drawdown', 0) > -0.2:
+            deployment_score += 10
     else:
         issues.append("Performance metrics below threshold")
 
@@ -138,20 +176,22 @@ def generate_deployment_report(system, compliance, performance, health):
     }
 
 
-def print_summary(results):
-    """Print concise summary"""
-    print(f"\n✅ Analysis Complete - {len(results['system'].get_instrument_list())} instruments")
+def print_summary_fixed(results):
+    """Print concise summary - FIXED VERSION"""
+    print(f"\nâœ… Analysis Complete - {len(results['system'].get_instrument_list())} instruments")
 
-    if results['performance_metrics']:
-        perf = results['performance_metrics']
+    if results['performance_metrics'] and results['performance_metrics'].get('portfolio_metrics'):
+        pm = results['performance_metrics']['portfolio_metrics']  # Access nested metrics
         print(
-            f"📈 Sharpe: {perf['sharpe_ratio']:.3f} | Return: {perf['annual_return']:.1%} | DD: {perf['max_drawdown']:.1%}")
+            f"ðŸ“ˆ Sharpe: {pm.get('sharpe_ratio', 0):.3f} | Return: {pm.get('annual_return', 0):.1%} | DD: {pm.get('max_drawdown', 0):.1%}")
+    else:
+        print("ðŸ“ˆ Performance metrics not available")
 
     deployment = results['deployment_status']
-    print(f"🚀 Status: {deployment['status']} ({deployment['score']}/100)")
+    print(f"ðŸš€ Status: {deployment['status']} ({deployment['score']}/100)")
 
     if deployment['issues']:
-        print("⚠️ Issues:", ", ".join(deployment['issues']))
+        print("âš ï¸ Issues:", ", ".join(deployment['issues']))
 
 
 if __name__ == "__main__":
