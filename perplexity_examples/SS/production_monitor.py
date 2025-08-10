@@ -1,10 +1,8 @@
 # production_monitor.py - Production Monitoring System v2.1 with Fixed Separated Dashboards
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from datetime import datetime, timedelta
+from datetime import datetime
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -653,7 +651,7 @@ class ProductionMonitor:
         perf_metrics = {}
 
         try:
-            from performance_calculator import EnhancedPerformanceCalculator
+            from perplexity_examples.SS.performance_calculator import EnhancedPerformanceCalculator
             calculator = EnhancedPerformanceCalculator()
             comprehensive_metrics = calculator.calculate_comprehensive_performance(self.system)
 

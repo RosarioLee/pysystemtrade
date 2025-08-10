@@ -1,15 +1,15 @@
 # system_runner_v3.py
 import os
 import sys
-from datetime import datetime
 import warnings
+from dashboard_v1 import SimpleETFDashboard
 
 warnings.filterwarnings('ignore')
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from enhanced_etf_system import EnhancedETFSystem
+from perplexity_examples.enhanced_etf_system import EnhancedETFSystem
 from performance_calculator_v3 import SimplePerformanceCalculator
 from production_monitor_v3 import SimpleProductionMonitor
 
@@ -150,6 +150,32 @@ def main():
         # Step 7: Store results globally for inspection
         globals()['system_results'] = results
         globals()['trading_system'] = system
+
+        # Step 8: Generate Excel Reports instead of plots
+        print("Exporting performance analysis to Excel...")
+        dashboard = SimpleETFDashboard(system)
+
+        # Export comprehensive instrument analysis to Excel
+        instrument_file = dashboard.export_instrument_performance_excel("etf_instrument_analysis.xlsx")
+
+        # Export portfolio summary to Excel
+        portfolio_file = dashboard.export_portfolio_summary_excel("portfolio_summary.xlsx")
+
+        # Still create equity curve plot (this one is readable with any number of instruments)
+        print("Creating equity curve plot...")
+        dashboard.create_equity_curve_dashboard()
+
+        if instrument_file:
+            print(f"📊 Instrument analysis saved to: {instrument_file}")
+        if portfolio_file:
+            print(f"📈 Portfolio summary saved to: {portfolio_file}")
+
+        # Step 9: Generate Turnover Analysis
+        print("Exporting turnover analysis...")
+        turnover_file = dashboard.export_instrument_turnover_analysis_excel("etf_turnover_analysis.xlsx")
+
+        if turnover_file:
+            print(f"📊 Turnover analysis saved to: {turnover_file}")
 
         return results
 

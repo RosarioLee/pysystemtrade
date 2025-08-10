@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import required modules
 try:
-    from enhanced_etf_system import EnhancedETFSystem
+    from perplexity_examples.enhanced_etf_system import EnhancedETFSystem
 except ImportError:
     # Fallback to your existing ETF system
     print("Warning: Using fallback ETF system")

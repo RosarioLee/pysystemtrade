@@ -16,7 +16,8 @@ warnings.filterwarnings('ignore')
 from systems.provided.futures_chapter15.basesystem import futures_system
 from sysdata.config.configdata import Config
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
-from performance_calculator import EnhancedPerformanceCalculator
+from performance_calculator_v3 import SimplePerformanceCalculator
+
 
 
 class EnhancedETFSystem:
@@ -339,17 +340,16 @@ class EnhancedETFSystem:
 
     def calculate_performance_metrics(self, system, timeout_seconds=300):
         """
-        Calculate performance metrics using the enhanced performance calculator
-        with warm-up buffer support
+        Calculate performance metrics using the simplified performance calculator v3
+        with proper P&L to capital conversion
         """
-        print("=== Calculating Performance Metrics (Enhanced Calculator) ===")
-
+        print("=== Calculating Performance Metrics (Simplified Calculator v3) ===")
         try:
-            # Initialize the enhanced performance calculator
-            calculator = EnhancedPerformanceCalculator(target_vol=self.vol_target / 100)
+            # Initialize the simplified performance calculator
+            calculator = SimplePerformanceCalculator(target_vol=self.vol_target / 100)
 
-            # Calculate performance using the dedicated calculator
-            performance_metrics = calculator.calculate_portfolio_performance(system)
+            # Calculate performance using the working calculator
+            performance_metrics = calculator.calculate_performance(system)
 
             if performance_metrics is None:
                 print("❌ Performance calculation failed")

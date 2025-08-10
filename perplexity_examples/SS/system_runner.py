@@ -2,7 +2,6 @@
 
 import os
 import sys
-from datetime import datetime
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -10,7 +9,7 @@ warnings.filterwarnings('ignore')
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from enhanced_etf_system import EnhancedETFSystem
+from perplexity_examples.enhanced_etf_system import EnhancedETFSystem
 
 
 def main(development_mode=True, test_mode=False, max_instruments=10):
