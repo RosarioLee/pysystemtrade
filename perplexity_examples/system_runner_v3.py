@@ -177,6 +177,13 @@ def main():
         if turnover_file:
             print(f"📊 Turnover analysis saved to: {turnover_file}")
 
+        # Step 10: Generate Trading Rule Analysis
+        print("Exporting trading rule analysis...")
+        rule_file = dashboard.export_trading_rule_analysis_excel("etf_trading_rule_analysis.xlsx")
+
+        if rule_file:
+            print(f"📊 Trading rule analysis saved to: {rule_file}")
+
         return results
 
     except Exception as e:

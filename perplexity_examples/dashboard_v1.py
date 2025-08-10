@@ -840,3 +840,576 @@ Win Rate: {performance['win_rate']:.1%}
                 worksheet.set_column('A:A', 12)  # Instrument names
                 worksheet.set_column('B:Z', 15)  # Data columns
 
+    def export_trading_rule_analysis_excel(self, filename="trading_rule_analysis.xlsx"):
+        """Export comprehensive trading rule analysis following Robert Carver's methodology"""
+
+        print(f"Exporting trading rule analysis to {filename}...")
+
+        # Get system data with proper error handling
+        instruments = self.system.get_instrument_list()
+
+        # Get rules
+        try:
+            rules_dict = self.system.rules.trading_rules()
+            rules = list(rules_dict.keys())
+            print(f"Found rules: {rules}")
+        except Exception as e:
+            print(f"Error getting trading rules: {e}")
+            return None
+
+        if not rules:
+            print("No trading rules found in system")
+            return None
+
+        print(f"Analyzing {len(rules)} trading rules across {len(instruments)} instruments...")
+
+        # Ensure system is fully processed
+        self._ensure_system_processed()
+
+        # Collect rule performance data
+        rule_data = {}
+        rule_returns_data = {}
+
+        # NEW: Collect rule turnover data
+        rule_turnover_data = {}
+
+        for rule_name in rules:
+            try:
+                print(f"Processing rule: {rule_name}")
+
+                # Get rule performance
+                rule_returns = self._get_rule_aggregate_returns(rule_name, instruments)
+
+                if rule_returns is None or len(rule_returns) < 50:
+                    print(f"Insufficient data for rule {rule_name}")
+                    continue
+
+                # Calculate rule performance metrics
+                annual_return = rule_returns.mean() * 252
+                annual_vol = rule_returns.std() * (252 ** 0.5)
+                sharpe_ratio = annual_return / annual_vol if annual_vol > 0 else 0
+
+                # Drawdown calculation
+                cumulative = (1 + rule_returns).cumprod()
+                rolling_max = cumulative.cummax()
+                drawdown = (cumulative - rolling_max) / rolling_max
+                max_drawdown = drawdown.min()
+
+                # Additional metrics
+                win_rate = (rule_returns > 0).mean()
+                skewness = rule_returns.skew()
+                kurtosis = rule_returns.kurtosis()
+
+                # Store rule performance data
+                rule_data[rule_name] = {
+                    'Annual_Return': annual_return,
+                    'Annual_Volatility': annual_vol,
+                    'Sharpe_Ratio': sharpe_ratio,
+                    'Max_Drawdown': max_drawdown,
+                    'Win_Rate': win_rate,
+                    'Skewness': skewness,
+                    'Kurtosis': kurtosis,
+                    'Data_Points': len(rule_returns),
+                    'Start_Date': rule_returns.index[0],
+                    'End_Date': rule_returns.index[-1]
+                }
+
+                rule_returns_data[rule_name] = rule_returns
+
+                # NEW: Calculate rule turnover
+                rule_turnover_metrics = self._calculate_rule_turnover(rule_name, instruments)
+                if rule_turnover_metrics:
+                    rule_turnover_data[rule_name] = rule_turnover_metrics
+
+                print(f"✅ Successfully processed rule {rule_name} (Sharpe: {sharpe_ratio:.3f})")
+
+            except Exception as e:
+                print(f"Error processing rule {rule_name}: {e}")
+                continue
+
+        if not rule_data:
+            print("ERROR: No valid rule data could be extracted")
+            return None
+
+        # Create Enhanced Excel file with turnover analysis
+        self._create_enhanced_rule_excel_output(filename, rule_data, rule_returns_data, rule_turnover_data)
+
+        print(f"✅ Trading rule analysis exported: {filename}")
+        print(f"📊 Rules analyzed: {len(rule_data)}")
+
+        return filename
+
+    def _calculate_rule_turnover(self, rule_name, instruments):
+        """Calculate turnover metrics for a specific trading rule"""
+
+        try:
+            print(f"Calculating turnover for rule: {rule_name}")
+
+            rule_forecast_changes = []
+            total_instruments = 0
+            successful_instruments = 0
+
+            for instrument in instruments[:15]:  # Limit to first 15 for performance
+                try:
+                    # Get raw forecasts for this rule and instrument
+                    forecast = self.system.rules.get_raw_forecast(instrument, rule_name)
+
+                    if forecast is None or len(forecast) < 100:
+                        continue
+
+                    # Calculate forecast changes (this represents trading activity)
+                    forecast_changes = forecast.diff().fillna(0)
+
+                    # Calculate average absolute forecast (for normalization)
+                    avg_abs_forecast = abs(forecast).mean()
+
+                    if avg_abs_forecast > 0:
+                        # Calculate rule-specific turnover metrics
+                        total_abs_changes = abs(forecast_changes).sum()
+                        trading_days = len(forecast)
+
+                        # Normalize by average forecast size and calculate annual turnover
+                        normalized_changes = total_abs_changes / avg_abs_forecast
+                        annual_turnover = (normalized_changes / trading_days) * 252
+
+                        rule_forecast_changes.append({
+                            'instrument': instrument,
+                            'annual_turnover': annual_turnover,
+                            'avg_abs_forecast': avg_abs_forecast,
+                            'total_changes': total_abs_changes,
+                            'trading_days': trading_days
+                        })
+
+                        successful_instruments += 1
+
+                    total_instruments += 1
+
+                except Exception as e:
+                    continue
+
+            if not rule_forecast_changes:
+                return None
+
+            # Aggregate turnover across instruments
+            avg_annual_turnover = np.mean([item['annual_turnover'] for item in rule_forecast_changes])
+            max_annual_turnover = np.max([item['annual_turnover'] for item in rule_forecast_changes])
+            min_annual_turnover = np.min([item['annual_turnover'] for item in rule_forecast_changes])
+
+            # Calculate average holding period
+            if avg_annual_turnover > 0:
+                avg_holding_period_days = 252 / avg_annual_turnover
+                avg_holding_period_weeks = avg_holding_period_days / 7
+            else:
+                avg_holding_period_days = 999
+                avg_holding_period_weeks = 999
+
+            # Estimate costs based on Robert's framework
+            estimated_cost_per_change = self._estimate_rule_cost(rule_name)
+            annual_cost_sr_units = avg_annual_turnover * estimated_cost_per_change
+
+            return {
+                'Avg_Annual_Turnover': avg_annual_turnover,
+                'Max_Annual_Turnover': max_annual_turnover,
+                'Min_Annual_Turnover': min_annual_turnover,
+                'Avg_Holding_Period_Days': avg_holding_period_days,
+                'Avg_Holding_Period_Weeks': avg_holding_period_weeks,
+                'Successful_Instruments': successful_instruments,
+                'Total_Instruments_Tested': total_instruments,
+                'Estimated_Annual_Cost_SR': annual_cost_sr_units,
+                'Speed_Assessment': self._assess_rule_speed(avg_annual_turnover),
+                'Cost_Category': self._categorize_rule_cost(annual_cost_sr_units)
+            }
+
+        except Exception as e:
+            print(f"Error calculating turnover for rule {rule_name}: {e}")
+            return None
+
+    def _estimate_rule_cost(self, rule_name):
+        """Estimate cost per forecast change based on rule type"""
+        # Based on Robert Carver's cost analysis in his books
+
+        if 'ewmac' in rule_name.lower():
+            # EWMAC rules tend to be smoother, lower cost per change
+            if '2_8' in rule_name or '4_16' in rule_name:
+                return 0.005  # Very fast EWMAC
+            elif '8_32' in rule_name or '16_64' in rule_name:
+                return 0.003  # Medium EWMAC
+            else:
+                return 0.002  # Slow EWMAC
+
+        elif 'breakout' in rule_name.lower():
+            # Breakout rules tend to be more binary, higher cost per change
+            return 0.008
+
+        elif 'carry' in rule_name.lower():
+            # Carry rules are typically slow
+            return 0.001
+
+        else:
+            # Default assumption
+            return 0.004
+
+    def _assess_rule_speed(self, annual_turnover):
+        """Assess rule speed against Robert's guidelines"""
+        if annual_turnover > 100:
+            return "EXCESSIVE - Way too fast"
+        elif annual_turnover > 50:
+            return "TOO_FAST - Exceeds speed limit"
+        elif annual_turnover > 20:
+            return "FAST - Monitor costs carefully"
+        elif annual_turnover > 5:
+            return "MODERATE - Good systematic pace"
+        elif annual_turnover > 1:
+            return "SLOW - Long-term approach"
+        else:
+            return "VERY_SLOW - Almost static"
+
+    def _categorize_rule_cost(self, cost_sr):
+        """Categorize rule costs against Robert's speed limits"""
+        if cost_sr > 0.15:
+            return "EXCESSIVE - Unprofitable"
+        elif cost_sr > 0.10:
+            return "HIGH - Near speed limit"
+        elif cost_sr > 0.05:
+            return "MODERATE - Acceptable"
+        else:
+            return "LOW - Very efficient"
+
+    def _create_enhanced_rule_excel_output(self, filename, rule_data, rule_returns_data, rule_turnover_data):
+        """Create enhanced Excel output with rule analysis including turnover"""
+
+        with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+            workbook = writer.book
+
+            # Sheet 1: Rule Performance Summary
+            rule_summary_df = pd.DataFrame.from_dict(rule_data, orient='index')
+            rule_summary_df = rule_summary_df.sort_values('Sharpe_Ratio', ascending=False)
+            rule_summary_df.to_excel(writer, sheet_name='Rule_Performance')
+
+            # Sheet 2: NEW - Rule Turnover Analysis
+            if rule_turnover_data:
+                turnover_df = pd.DataFrame.from_dict(rule_turnover_data, orient='index')
+                turnover_df = turnover_df.sort_values('Avg_Annual_Turnover', ascending=False)
+                turnover_df.to_excel(writer, sheet_name='Rule_Turnover')
+
+            # Sheet 3: Combined Performance + Turnover Analysis
+            if rule_turnover_data:
+                combined_data = {}
+                for rule_name in rule_data.keys():
+                    if rule_name in rule_turnover_data:
+                        combined_data[rule_name] = {
+                            **rule_data[rule_name],
+                            **rule_turnover_data[rule_name]
+                        }
+
+                if combined_data:
+                    combined_df = pd.DataFrame.from_dict(combined_data, orient='index')
+                    combined_df = combined_df.sort_values('Sharpe_Ratio', ascending=False)
+                    combined_df.to_excel(writer, sheet_name='Combined_Analysis')
+
+            # Sheet 4: Rule Speed vs Performance Analysis
+            if rule_turnover_data:
+                speed_analysis = self._create_speed_performance_analysis(rule_data, rule_turnover_data)
+                if speed_analysis is not None:
+                    speed_analysis.to_excel(writer, sheet_name='Speed_vs_Performance')
+
+            # Sheet 5: Rule Returns Time Series
+            if rule_returns_data:
+                rule_ts_df = pd.DataFrame.from_dict(rule_returns_data, orient='columns')
+                rule_ts_df.to_excel(writer, sheet_name='Rule_Returns')
+
+            # Sheet 6: Rule Correlations
+            if len(rule_returns_data) >= 2:
+                rule_corr_df = pd.DataFrame.from_dict(rule_returns_data, orient='columns').corr()
+                rule_corr_df.to_excel(writer, sheet_name='Rule_Correlations')
+
+    def _create_speed_performance_analysis(self, rule_data, rule_turnover_data):
+        """Create analysis showing relationship between rule speed and performance"""
+
+        try:
+            analysis_data = {}
+
+            for rule_name in rule_data.keys():
+                if rule_name in rule_turnover_data:
+                    analysis_data[rule_name] = {
+                        'Sharpe_Ratio': rule_data[rule_name]['Sharpe_Ratio'],
+                        'Annual_Return': rule_data[rule_name]['Annual_Return'],
+                        'Annual_Turnover': rule_turnover_data[rule_name]['Avg_Annual_Turnover'],
+                        'Holding_Period_Days': rule_turnover_data[rule_name]['Avg_Holding_Period_Days'],
+                        'Estimated_Cost': rule_turnover_data[rule_name]['Estimated_Annual_Cost_SR'],
+                        'Net_Sharpe': rule_data[rule_name]['Sharpe_Ratio'] - rule_turnover_data[rule_name][
+                            'Estimated_Annual_Cost_SR'],
+                        'Efficiency_Ratio': rule_data[rule_name]['Sharpe_Ratio'] / rule_turnover_data[rule_name][
+                            'Avg_Annual_Turnover'] if rule_turnover_data[rule_name]['Avg_Annual_Turnover'] > 0 else 0,
+                        'Rule_Category': rule_name.split('_')[0] if '_' in rule_name else rule_name
+                    }
+
+            return pd.DataFrame.from_dict(analysis_data, orient='index')
+
+        except:
+            return None
+
+    def _ensure_system_processed(self):
+        """Ensure system has completed all processing before rule extraction"""
+        try:
+            print("Ensuring system components are fully processed...")
+
+            # Force calculation of key system components
+            instruments = self.system.get_instrument_list()[:3]  # Test with first 3
+            rules = list(self.system.rules.trading_rules().keys())[:2]  # First 2 rules
+
+            for instrument in instruments:
+                for rule_name in rules:
+                    try:
+                        # Try to access forecast scalars
+                        _ = self.system.forecastScaleCap.get_forecast_scalar(instrument, rule_name)
+                        # Try to access forecasts
+                        _ = self.system.rules.get_raw_forecast(instrument, rule_name)
+                    except:
+                        continue
+
+            print("✅ System processing verification complete")
+
+        except Exception as e:
+            print(f"Warning: System processing check failed: {e}")
+
+    def _get_rule_aggregate_returns(self, rule_name, instruments):
+        """Alternative method to get rule performance across instruments"""
+
+        rule_returns_by_instrument = []
+        successful_instruments = 0
+
+        # Try multiple approaches to get rule data
+        for instrument in instruments[:10]:  # Limit to first 10 instruments
+
+            # Method 1: Try pandl_for_trading_rule
+            try:
+                rule_pnl = self.system.accounts.pandl_for_trading_rule(instrument, rule_name)
+                if rule_pnl is not None and len(rule_pnl) > 50:
+                    # Convert to returns
+                    starting_capital = 100000  # Use fixed capital base
+                    capital_curve = starting_capital + rule_pnl
+                    returns = capital_curve.pct_change().dropna()
+
+                    if len(returns) > 0 and not returns.isna().all():
+                        rule_returns_by_instrument.append(returns)
+                        successful_instruments += 1
+                        continue
+            except:
+                pass
+
+            # Method 2: Try using forecasts and instrument returns
+            try:
+                forecast = self.system.rules.get_raw_forecast(instrument, rule_name)
+                instrument_returns = self._get_instrument_returns(instrument)
+
+                if forecast is not None and instrument_returns is not None:
+                    if len(forecast) > 50 and len(instrument_returns) > 50:
+                        # Align data
+                        aligned_data = pd.DataFrame({
+                            'forecast': forecast,
+                            'returns': instrument_returns
+                        }).dropna()
+
+                        if len(aligned_data) > 50:
+                            # Calculate rule returns as forecast * instrument_returns
+                            rule_returns = (aligned_data['forecast'] / 10.0) * aligned_data['returns']
+                            rule_returns_by_instrument.append(rule_returns)
+                            successful_instruments += 1
+            except:
+                pass
+
+        print(f"Rule {rule_name}: Successfully processed {successful_instruments} instruments")
+
+        if not rule_returns_by_instrument:
+            return None
+
+        # Combine returns across instruments (equal weight)
+        combined_df = pd.concat(rule_returns_by_instrument, axis=1).fillna(0)
+        aggregate_returns = combined_df.mean(axis=1)
+
+        return aggregate_returns
+
+    def _get_instrument_returns(self, instrument):
+        """Get basic instrument returns"""
+        try:
+            prices = self.system.rawdata.get_daily_prices(instrument)
+            if prices is not None and len(prices) > 1:
+                returns = prices.pct_change().dropna()
+                return returns
+        except:
+            pass
+        return None
+
+    def _create_rule_excel_output(self, filename, rule_data, rule_returns_data):
+        """Create Excel output with rule analysis"""
+
+        with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+            # Rule Summary Sheet
+            rule_summary_df = pd.DataFrame.from_dict(rule_data, orient='index')
+            rule_summary_df = rule_summary_df.sort_values('Sharpe_Ratio', ascending=False)
+            rule_summary_df.to_excel(writer, sheet_name='Rule_Summary')
+
+            # Rule Returns Time Series
+            if rule_returns_data:
+                rule_ts_df = pd.DataFrame.from_dict(rule_returns_data, orient='columns')
+                rule_ts_df.to_excel(writer, sheet_name='Rule_Returns')
+
+            # Rule Correlations
+            if len(rule_returns_data) >= 2:
+                rule_corr_df = pd.DataFrame.from_dict(rule_returns_data, orient='columns').corr()
+                rule_corr_df.to_excel(writer, sheet_name='Rule_Correlations')
+
+    def _grade_rule_performance(self, sharpe_ratio):
+        """Grade rule performance based on Robert Carver's criteria"""
+        if sharpe_ratio > 0.5:
+            return "EXCELLENT - Strong standalone performance"
+        elif sharpe_ratio > 0.3:
+            return "GOOD - Solid contribution"
+        elif sharpe_ratio > 0.1:
+            return "ACCEPTABLE - Diversification value"
+        elif sharpe_ratio > 0:
+            return "WEAK - Consider removal"
+        else:
+            return "POOR - Remove from system"
+
+    def _assess_diversification_value(self, sharpe_ratio, consistency):
+        """Assess rule's diversification value following Robert's framework"""
+        if sharpe_ratio > 0.3 and consistency > 0.5:
+            return "HIGH - Good performance and stable"
+        elif sharpe_ratio > 0.1 and consistency > 0.3:
+            return "MEDIUM - Decent diversification benefit"
+        elif sharpe_ratio > 0:
+            return "LOW - Minimal benefit"
+        else:
+            return "NEGATIVE - Hurts portfolio"
+
+    def _create_rule_instrument_matrix(self, rule_instrument_performance, rules, instruments):
+        """Create matrix showing rule performance by instrument"""
+        try:
+            matrix_data = {}
+
+            for rule_name in rules:
+                if rule_name in rule_instrument_performance:
+                    rule_sharpes = {}
+
+                    for instrument in instruments:
+                        if instrument in rule_instrument_performance[rule_name]:
+                            returns = rule_instrument_performance[rule_name][instrument]
+                            if len(returns) > 50:
+                                annual_return = returns.mean() * 252
+                                annual_vol = returns.std() * (252 ** 0.5)
+                                sharpe = annual_return / annual_vol if annual_vol > 0 else 0
+                                rule_sharpes[instrument] = sharpe
+                            else:
+                                rule_sharpes[instrument] = np.nan
+                        else:
+                            rule_sharpes[instrument] = np.nan
+
+                    matrix_data[rule_name] = rule_sharpes
+
+            return pd.DataFrame.from_dict(matrix_data, orient='index')
+        except:
+            return None
+
+    def _analyze_rule_stability(self, rule_returns_data):
+        """Analyze rule stability over time"""
+        try:
+            stability_data = {}
+
+            for rule_name, returns in rule_returns_data.items():
+                if len(returns) < 500:  # Need sufficient data
+                    continue
+
+                # Calculate rolling metrics
+                window = 252  # 1 year
+                rolling_sharpe = returns.rolling(window).apply(
+                    lambda x: (x.mean() / x.std()) * (252 ** 0.5) if x.std() > 0 else 0
+                ).dropna()
+
+                rolling_vol = returns.rolling(window).std() * (252 ** 0.5)
+
+                # Stability metrics
+                stability_data[rule_name] = {
+                    'Sharpe_Mean': rolling_sharpe.mean(),
+                    'Sharpe_Std': rolling_sharpe.std(),
+                    'Sharpe_Min': rolling_sharpe.min(),
+                    'Sharpe_Max': rolling_sharpe.max(),
+                    'Vol_Mean': rolling_vol.mean(),
+                    'Vol_Std': rolling_vol.std(),
+                    'Stability_Score': 1 / rolling_sharpe.std() if rolling_sharpe.std() > 0 else 0,
+                    'Periods_Positive_Sharpe': (rolling_sharpe > 0).sum(),
+                    'Total_Periods': len(rolling_sharpe)
+                }
+
+            return pd.DataFrame.from_dict(stability_data, orient='index')
+        except:
+            return None
+
+    def _calculate_rule_attribution(self, rule_data, rule_returns_data):
+        """Calculate rule attribution to portfolio performance"""
+        try:
+            attribution_data = {}
+
+            # Calculate total portfolio return as benchmark
+            if len(rule_returns_data) > 1:
+                combined_df = pd.DataFrame.from_dict(rule_returns_data, orient='columns')
+                portfolio_returns = combined_df.mean(axis=1)  # Equal weight
+                portfolio_sharpe = (portfolio_returns.mean() / portfolio_returns.std()) * (252 ** 0.5)
+
+                for rule_name, rule_metrics in rule_data.items():
+                    if rule_name in rule_returns_data:
+                        rule_sharpe = rule_metrics['Sharpe_Ratio']
+
+                        # Calculate marginal contribution
+                        marginal_contribution = rule_sharpe - portfolio_sharpe
+
+                        # Calculate percentage contribution to total return
+                        rule_annual_return = rule_metrics['Annual_Return']
+                        total_return = sum([metrics['Annual_Return'] for metrics in rule_data.values()])
+                        return_contribution = (rule_annual_return / total_return) * 100 if total_return != 0 else 0
+
+                        attribution_data[rule_name] = {
+                            'Rule_Sharpe': rule_sharpe,
+                            'Portfolio_Sharpe': portfolio_sharpe,
+                            'Marginal_Contribution': marginal_contribution,
+                            'Return_Contribution_Pct': return_contribution,
+                            'Recommendation': self._get_rule_recommendation(marginal_contribution, rule_sharpe)
+                        }
+
+            return pd.DataFrame.from_dict(attribution_data, orient='index')
+        except:
+            return None
+
+    def _get_rule_recommendation(self, marginal_contribution, rule_sharpe):
+        """Get recommendation for rule based on Robert's framework"""
+        if marginal_contribution > 0.1 and rule_sharpe > 0.3:
+            return "INCREASE WEIGHT - Strong contributor"
+        elif marginal_contribution > 0 and rule_sharpe > 0.1:
+            return "MAINTAIN - Good diversifier"
+        elif marginal_contribution > -0.1 and rule_sharpe > 0:
+            return "MONITOR - Marginal value"
+        else:
+            return "CONSIDER REMOVAL - Negative impact"
+
+    def _format_rule_analysis_sheets(self, writer, workbook):
+        """Format the rule analysis sheets"""
+        # Define formats
+        header_format = workbook.add_format({
+            'bold': True,
+            'text_wrap': True,
+            'valign': 'top',
+            'fg_color': '#D7E4BC',
+            'border': 1
+        })
+
+        excellent_format = workbook.add_format({'bg_color': '#90EE90'})  # Light green
+        good_format = workbook.add_format({'bg_color': '#FFE4B5'})  # Light orange
+        poor_format = workbook.add_format({'bg_color': '#FFB6C1'})  # Light red
+
+        # Format Rule_Summary sheet
+        if 'Rule_Summary' in writer.sheets:
+            worksheet = writer.sheets['Rule_Summary']
+            worksheet.set_column('A:A', 15)  # Rule names
+            worksheet.set_column('B:Z', 12)  # Data columns
+
