@@ -1413,3 +1413,324 @@ Win Rate: {performance['win_rate']:.1%}
             worksheet.set_column('A:A', 15)  # Rule names
             worksheet.set_column('B:Z', 12)  # Data columns
 
+    def export_weights_and_multipliers_excel(self, filename="system_weights_multipliers_analysis.xlsx"):
+        """Export instrument weights, forecast weights, and diversification multipliers over time"""
+
+        print(f"Exporting weights and multipliers analysis to {filename}...")
+
+        try:
+            # Get system data
+            instruments = self.system.get_instrument_list()
+            rules = list(self.system.rules.trading_rules().keys())
+
+            print(f"Extracting data for {len(instruments)} instruments and {len(rules)} trading rules...")
+
+            # Extract time series data
+            weights_data = {}
+
+            print("1. Extracting instrument weights...")
+            instrument_weights_ts = self._extract_instrument_weights(instruments)
+            if instrument_weights_ts is not None:
+                weights_data['instrument_weights'] = instrument_weights_ts
+
+            print("2. Extracting forecast weights...")
+            forecast_weights_ts = self._extract_forecast_weights(instruments, rules)
+            if forecast_weights_ts is not None:
+                weights_data['forecast_weights'] = forecast_weights_ts
+
+            print("3. Extracting instrument diversification multiplier...")
+            idm_ts = self._extract_instrument_diversification_multiplier()
+            if idm_ts is not None:
+                weights_data['idm'] = idm_ts
+
+            print("4. Extracting forecast diversification multipliers...")
+            fdm_ts = self._extract_forecast_diversification_multipliers(instruments)
+            if fdm_ts is not None:
+                weights_data['fdm'] = fdm_ts
+
+            if not weights_data:
+                print("No weights/multipliers data could be extracted")
+                return None
+
+            # Create Excel file with multiple sheets
+            with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+                workbook = writer.book
+
+                # Sheet 1: Instrument Weights Over Time
+                if 'instrument_weights' in weights_data:
+                    weights_data['instrument_weights'].to_excel(writer, sheet_name='Instrument_Weights')
+                    self._format_weights_sheet(writer, workbook, 'Instrument_Weights',
+                                               'Instrument Weights Over Time')
+
+                # Sheet 2: Forecast Weights Over Time (by instrument)
+                if 'forecast_weights' in weights_data:
+                    # Create separate sheets for each instrument's forecast weights
+                    for instrument in instruments[:10]:  # Limit to first 10 for readability
+                        if instrument in weights_data['forecast_weights']:
+                            fw_data = weights_data['forecast_weights'][instrument]
+                            if fw_data is not None and len(fw_data) > 0:
+                                sheet_name = f'FW_{instrument}'[:31]  # Excel sheet name limit
+                                fw_data.to_excel(writer, sheet_name=sheet_name)
+                                self._format_weights_sheet(writer, workbook, sheet_name,
+                                                           f'Forecast Weights - {instrument}')
+
+                    # Summary sheet with latest forecast weights for all instruments
+                    fw_summary = self._create_forecast_weights_summary(weights_data['forecast_weights'])
+                    if fw_summary is not None:
+                        fw_summary.to_excel(writer, sheet_name='Forecast_Weights_Latest')
+                        self._format_weights_sheet(writer, workbook, 'Forecast_Weights_Latest',
+                                                   'Latest Forecast Weights by Instrument')
+
+                # Sheet 3: Instrument Diversification Multiplier
+                if 'idm' in weights_data:
+                    idm_df = pd.DataFrame({'IDM': weights_data['idm']})
+                    idm_df.to_excel(writer, sheet_name='IDM_Over_Time')
+                    self._format_weights_sheet(writer, workbook, 'IDM_Over_Time',
+                                               'Instrument Diversification Multiplier')
+
+                # Sheet 4: Forecast Diversification Multipliers
+                if 'fdm' in weights_data:
+                    for instrument in list(weights_data['fdm'].keys())[:10]:  # First 10 instruments
+                        fdm_data = weights_data['fdm'][instrument]
+                        if fdm_data is not None and len(fdm_data) > 0:
+                            sheet_name = f'FDM_{instrument}'[:31]
+                            fdm_df = pd.DataFrame({f'FDM_{instrument}': fdm_data})
+                            fdm_df.to_excel(writer, sheet_name=sheet_name)
+                            self._format_weights_sheet(writer, workbook, sheet_name,
+                                                       f'Forecast Diversification Multiplier - {instrument}')
+
+                # Sheet 5: Summary Statistics
+                summary_stats = self._create_weights_summary_stats(weights_data)
+                if summary_stats is not None:
+                    summary_stats.to_excel(writer, sheet_name='Summary_Statistics')
+                    self._format_weights_sheet(writer, workbook, 'Summary_Statistics',
+                                               'Weights and Multipliers Summary')
+
+                # Sheet 6: Parameter Evolution Analysis
+                evolution_analysis = self._analyze_parameter_evolution(weights_data)
+                if evolution_analysis is not None:
+                    evolution_analysis.to_excel(writer, sheet_name='Parameter_Evolution')
+                    self._format_weights_sheet(writer, workbook, 'Parameter_Evolution',
+                                               'Parameter Evolution Analysis')
+
+            print(f"✅ Weights and multipliers analysis exported: {filename}")
+            return filename
+
+        except Exception as e:
+            print(f"Error exporting weights and multipliers: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def _extract_instrument_weights(self, instruments):
+        """Extract instrument weights time series"""
+        try:
+            # Try to get instrument weights over time
+            instrument_weights = self.system.portfolio.get_instrument_weights()
+
+            if instrument_weights is not None:
+                print(f"   Found instrument weights with {len(instrument_weights)} time points")
+                return instrument_weights
+            else:
+                print("   No instrument weights time series found")
+                return None
+
+        except Exception as e:
+            print(f"   Error extracting instrument weights: {e}")
+            return None
+
+    def _extract_forecast_weights(self, instruments, rules):
+        """Extract forecast weights time series for each instrument"""
+        try:
+            forecast_weights_data = {}
+
+            for instrument in instruments:
+                try:
+                    # Get forecast weights for this instrument
+                    fw = self.system.combForecast.get_forecast_weights(instrument)
+
+                    if fw is not None and len(fw) > 0:
+                        forecast_weights_data[instrument] = fw
+                        print(f"   Found forecast weights for {instrument}: {len(fw)} time points")
+                    else:
+                        print(f"   No forecast weights found for {instrument}")
+
+                except Exception as e:
+                    print(f"   Error getting forecast weights for {instrument}: {e}")
+                    continue
+
+            return forecast_weights_data if forecast_weights_data else None
+
+        except Exception as e:
+            print(f"   Error extracting forecast weights: {e}")
+            return None
+
+    def _extract_instrument_diversification_multiplier(self):
+        """Extract instrument diversification multiplier over time"""
+        try:
+            # Get IDM time series
+            idm = self.system.portfolio.get_instrument_diversification_multiplier()
+
+            if idm is not None:
+                print(f"   Found IDM with {len(idm)} time points")
+                return idm
+            else:
+                print("   No IDM time series found")
+                return None
+
+        except Exception as e:
+            print(f"   Error extracting IDM: {e}")
+            return None
+
+    def _extract_forecast_diversification_multipliers(self, instruments):
+        """Extract forecast diversification multipliers for each instrument"""
+        try:
+            fdm_data = {}
+
+            for instrument in instruments:
+                try:
+                    # Get FDM for this instrument
+                    fdm = self.system.combForecast.get_forecast_diversification_multiplier(instrument)
+
+                    if fdm is not None and len(fdm) > 0:
+                        fdm_data[instrument] = fdm
+                        print(f"   Found FDM for {instrument}: {len(fdm)} time points")
+                    else:
+                        print(f"   No FDM found for {instrument}")
+
+                except Exception as e:
+                    print(f"   Error getting FDM for {instrument}: {e}")
+                    continue
+
+            return fdm_data if fdm_data else None
+
+        except Exception as e:
+            print(f"   Error extracting FDMs: {e}")
+            return None
+
+    def _create_forecast_weights_summary(self, forecast_weights_data):
+        """Create summary of latest forecast weights for all instruments"""
+        try:
+            summary_data = {}
+
+            for instrument, fw_ts in forecast_weights_data.items():
+                if fw_ts is not None and len(fw_ts) > 0:
+                    # Get latest weights
+                    latest_weights = fw_ts.iloc[-1]
+                    summary_data[instrument] = latest_weights
+
+            if summary_data:
+                return pd.DataFrame.from_dict(summary_data, orient='index')
+            return None
+
+        except Exception as e:
+            print(f"Error creating forecast weights summary: {e}")
+            return None
+
+    def _create_weights_summary_stats(self, weights_data):
+        """Create summary statistics for weights and multipliers"""
+        try:
+            stats_data = {}
+
+            # Instrument weights stats
+            if 'instrument_weights' in weights_data:
+                iw = weights_data['instrument_weights']
+                for col in iw.columns:
+                    stats_data[f'IW_{col}_Mean'] = iw[col].mean()
+                    stats_data[f'IW_{col}_Std'] = iw[col].std()
+                    stats_data[f'IW_{col}_Min'] = iw[col].min()
+                    stats_data[f'IW_{col}_Max'] = iw[col].max()
+
+            # IDM stats
+            if 'idm' in weights_data:
+                idm = weights_data['idm']
+                stats_data['IDM_Mean'] = idm.mean()
+                stats_data['IDM_Std'] = idm.std()
+                stats_data['IDM_Min'] = idm.min()
+                stats_data['IDM_Max'] = idm.max()
+
+            # FDM stats (aggregate across instruments)
+            if 'fdm' in weights_data:
+                all_fdm = []
+                for instrument, fdm_ts in weights_data['fdm'].items():
+                    if fdm_ts is not None:
+                        all_fdm.extend(fdm_ts.values)
+
+                if all_fdm:
+                    stats_data['FDM_Mean'] = np.mean(all_fdm)
+                    stats_data['FDM_Std'] = np.std(all_fdm)
+                    stats_data['FDM_Min'] = np.min(all_fdm)
+                    stats_data['FDM_Max'] = np.max(all_fdm)
+
+            if stats_data:
+                return pd.DataFrame.from_dict({'Value': stats_data}, orient='columns')
+            return None
+
+        except Exception as e:
+            print(f"Error creating summary stats: {e}")
+            return None
+
+    def _analyze_parameter_evolution(self, weights_data):
+        """Analyze how parameters evolve over time"""
+        try:
+            evolution_data = {}
+
+            # Analyze instrument weight changes
+            if 'instrument_weights' in weights_data:
+                iw = weights_data['instrument_weights']
+
+                # Calculate rolling standard deviation to measure stability
+                for col in iw.columns:
+                    rolling_std = iw[col].rolling(window=252).std()  # 1-year window
+                    evolution_data[f'IW_{col}_Rolling_Volatility'] = rolling_std.iloc[-1] if len(
+                        rolling_std) > 0 else np.nan
+
+                # Weight concentration (how concentrated the weights are)
+                latest_weights = iw.iloc[-1]
+                concentration = (latest_weights ** 2).sum()  # Herfindahl index
+                evolution_data['Weight_Concentration_Index'] = concentration
+
+            # Analyze IDM evolution
+            if 'idm' in weights_data:
+                idm = weights_data['idm']
+
+                # Trend analysis
+                if len(idm) > 252:
+                    recent_idm = idm.iloc[-252:].mean()  # Last year average
+                    older_idm = idm.iloc[-504:-252].mean() if len(idm) > 504 else idm.iloc[:-252].mean()
+                    evolution_data['IDM_Trend'] = (recent_idm - older_idm) / older_idm if older_idm != 0 else 0
+
+                evolution_data['IDM_Current'] = idm.iloc[-1]
+
+            if evolution_data:
+                return pd.DataFrame.from_dict({'Value': evolution_data}, orient='columns')
+            return None
+
+        except Exception as e:
+            print(f"Error analyzing parameter evolution: {e}")
+            return None
+
+    def _format_weights_sheet(self, writer, workbook, sheet_name, title):
+        """Format weights and multipliers sheets"""
+        try:
+            if sheet_name in writer.sheets:
+                worksheet = writer.sheets[sheet_name]
+
+                # Define formats
+                header_format = workbook.add_format({
+                    'bold': True,
+                    'text_wrap': True,
+                    'valign': 'top',
+                    'fg_color': '#D7E4BC',
+                    'border': 1
+                })
+
+                # Add title
+                worksheet.write('A1', title, header_format)
+
+                # Set column widths
+                worksheet.set_column('A:A', 15)  # Date column
+                worksheet.set_column('B:Z', 12)  # Data columns
+
+        except Exception as e:
+            print(f"Error formatting sheet {sheet_name}: {e}")

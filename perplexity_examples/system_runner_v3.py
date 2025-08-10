@@ -184,6 +184,13 @@ def main():
         if rule_file:
             print(f"📊 Trading rule analysis saved to: {rule_file}")
 
+        # Step 11: Generate Weights and Multipliers Analysis
+        print("Exporting weights and multipliers analysis...")
+        weights_file = dashboard.export_weights_and_multipliers_excel("system_weights_multipliers.xlsx")
+
+        if weights_file:
+            print(f"📊 Weights and multipliers analysis saved to: {weights_file}")
+
         return results
 
     except Exception as e:
