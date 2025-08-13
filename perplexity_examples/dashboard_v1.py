@@ -2132,3 +2132,191 @@ Win Rate: {performance['win_rate']:.1%}
                 worksheet = writer.sheets[sheet_name]
                 worksheet.set_column('A:A', 12)  # Instrument names
                 worksheet.set_column('B:Z', 15)  # Data columns
+
+    def verify_risk_to_cash_conversion(self, system):
+        """Verify that the system correctly converts risk weights to cash weights"""
+
+        print("=== VERIFYING RISK-TO-CASH WEIGHT CONVERSION ===")
+
+        try:
+            # Get actual instrument weights from system
+            actual_weights = system.portfolio.get_instrument_weights()
+            if actual_weights is None:
+                print("❌ Cannot get actual weights from system")
+                return None
+
+            latest_weights = actual_weights.iloc[-1]
+
+            # Get config risk weights
+            config_weights = getattr(system.config, 'instrument_weights', {})
+            if not config_weights:
+                print("❌ No config weights found")
+                return None
+
+            # Get volatility data
+            verification_results = {}
+            total_discrepancy = 0
+
+            print("\n📊 RISK WEIGHT → CASH WEIGHT CONVERSION CHECK:")
+            print("=" * 80)
+            print(
+                f"{'Instrument':<8} {'Risk%':<8} {'Vol':<8} {'Scaling':<8} {'Expected%':<10} {'Actual%':<10} {'Match?':<8}")
+            print("=" * 80)
+
+            for instrument in system.get_instrument_list()[:10]:  # Check first 10
+                if instrument in config_weights and instrument in latest_weights.index:
+
+                    # Get volatility scalar
+                    try:
+                        vol_scalar = system.positionSize.get_volatility_scalar(instrument)
+                        if vol_scalar is not None and len(vol_scalar) > 0:
+                            latest_vol_scalar = vol_scalar.iloc[-1]
+                            instrument_vol = 1 / latest_vol_scalar if latest_vol_scalar != 0 else 0
+                        else:
+                            # Fallback calculation
+                            prices = system.rawdata.get_daily_prices(instrument)
+                            returns = prices.pct_change().dropna()
+                            instrument_vol = returns.std() * (252 ** 0.5)
+                    except:
+                        continue
+
+                    if instrument_vol == 0:
+                        continue
+
+                    # Calculate expected cash weight
+                    risk_weight = config_weights[instrument]
+                    target_vol = 0.12
+                    vol_scaling = target_vol / instrument_vol
+
+                    # Normalize risk weights to sum to 1
+                    total_risk_weight = sum(config_weights.values())
+                    normalized_risk_weight = risk_weight / total_risk_weight
+
+                    # Expected cash weight (before IDM adjustment)
+                    expected_cash_weight = normalized_risk_weight * vol_scaling
+
+                    # Actual cash weight from system
+                    actual_cash_weight = latest_weights[instrument]
+
+                    # Check if they match (allowing for IDM adjustments)
+                    discrepancy = abs(expected_cash_weight - actual_cash_weight)
+                    total_discrepancy += discrepancy
+
+                    # Determine if it's a reasonable match (within IDM tolerance)
+                    match_status = "✅ YES" if discrepancy < 0.05 else "❌ NO"
+                    if discrepancy > 0.02 and discrepancy < 0.05:
+                        match_status = "⚠️ CLOSE"
+
+                    verification_results[instrument] = {
+                        'risk_weight': risk_weight,
+                        'instrument_vol': instrument_vol,
+                        'vol_scaling': vol_scaling,
+                        'expected_cash_weight': expected_cash_weight,
+                        'actual_cash_weight': actual_cash_weight,
+                        'discrepancy': discrepancy,
+                        'match': match_status
+                    }
+
+                    print(
+                        f"{instrument:<8} {risk_weight:<8.3f} {instrument_vol:<8.1%} {vol_scaling:<8.2f} {expected_cash_weight:<10.3f} {actual_cash_weight:<10.3f} {match_status:<8}")
+
+            print("=" * 80)
+            print(f"Total discrepancy across instruments: {total_discrepancy:.4f}")
+
+            # Overall assessment
+            if total_discrepancy < 0.1:
+                print("✅ CONVERSION WORKING CORRECTLY - Small discrepancies likely due to IDM adjustments")
+            elif total_discrepancy < 0.2:
+                print("⚠️ CONVERSION MOSTLY WORKING - Some discrepancies may need investigation")
+            else:
+                print("❌ CONVERSION NOT WORKING - Major discrepancies detected")
+
+            return verification_results
+
+        except Exception as e:
+            print(f"❌ Verification failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def verify_position_sizing_pipeline(self, system):
+        """Verify the complete position sizing pipeline"""
+
+        print("=== VERIFYING POSITION SIZING PIPELINE ===")
+
+        sample_instruments = system.get_instrument_list()[:5]
+
+        for instrument in sample_instruments:
+            print(f"\n--- {instrument} Position Sizing Pipeline ---")
+
+            try:
+                # Step 1: Get combined forecast
+                forecast = system.combForecast.get_combined_forecast(instrument)
+                latest_forecast = forecast.iloc[-1] if len(forecast) > 0 else 0
+                print(f"1. Combined Forecast: {latest_forecast:.2f}")
+
+                # Step 2: Get volatility scalar
+                vol_scalar = system.positionSize.get_volatility_scalar(instrument)
+                latest_vol_scalar = vol_scalar.iloc[-1] if len(vol_scalar) > 0 else 0
+                print(f"2. Volatility Scalar: {latest_vol_scalar:.4f}")
+
+                # Step 3: Get instrument weight
+                instr_weights = system.portfolio.get_instrument_weights()
+                latest_weight = instr_weights[instrument].iloc[-1] if instrument in instr_weights.columns else 0
+                print(f"3. Instrument Weight: {latest_weight:.4f}")
+
+                # Step 4: Get IDM
+                idm = system.portfolio.get_instrument_diversification_multiplier()
+                latest_idm = idm.iloc[-1] if len(idm) > 0 else 1.0
+                print(f"4. IDM: {latest_idm:.4f}")
+
+                # Step 5: Get final position
+                position = system.portfolio.get_notional_position(instrument)
+                latest_position = position.iloc[-1] if len(position) > 0 else 0
+                print(f"5. Final Position: {latest_position:.2f}")
+
+                # Calculate expected position manually
+                expected_position = latest_forecast * latest_vol_scalar * latest_weight * latest_idm
+                print(f"6. Expected Position: {expected_position:.2f}")
+
+                # Check if they match
+                position_match = abs(latest_position - expected_position) < 1.0
+                print(f"7. Position Match: {'✅ YES' if position_match else '❌ NO'}")
+
+            except Exception as e:
+                print(f"❌ Error checking {instrument}: {e}")
+
+    def check_weight_evolution(self, system):
+        """Check if weights evolve as expected over time"""
+
+        print("=== CHECKING WEIGHT EVOLUTION ===")
+
+        try:
+            # Get instrument weights time series
+            weights_ts = system.portfolio.get_instrument_weights()
+            if weights_ts is None or len(weights_ts) < 100:
+                print("❌ Insufficient weight history")
+                return None
+
+            # Check if weights are static (bad) or dynamic (good)
+            sample_instruments = list(weights_ts.columns)[:5]
+
+            for instrument in sample_instruments:
+                weight_series = weights_ts[instrument]
+
+                # Calculate weight volatility
+                weight_std = weight_series.std()
+                weight_range = weight_series.max() - weight_series.min()
+
+                print(f"{instrument}:")
+                print(f"  Weight Std: {weight_std:.4f}")
+                print(f"  Weight Range: {weight_range:.4f}")
+
+                # Weights should change over time due to volatility targeting
+                if weight_std > 0.001:
+                    print(f"  Status: ✅ DYNAMIC (volatility targeting working)")
+                else:
+                    print(f"  Status: ❌ STATIC (volatility targeting may not be working)")
+
+        except Exception as e:
+            print(f"❌ Weight evolution check failed: {e}")

@@ -202,6 +202,16 @@ def main():
         if volatility_file:
             print(f"📊 Volatility analysis saved to: {volatility_file}")
 
+        # Add to your system_runner_v3.py after the existing analysis
+        print("Verifying risk-to-cash weight conversion...")
+        conversion_results = dashboard.verify_risk_to_cash_conversion(system)
+
+        print("Verifying position sizing pipeline...")
+        dashboard.verify_position_sizing_pipeline(system)
+
+        print("Checking weight evolution...")
+        dashboard.check_weight_evolution(system)
+
         return results
 
     except Exception as e:
