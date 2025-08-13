@@ -1734,3 +1734,401 @@ Win Rate: {performance['win_rate']:.1%}
 
         except Exception as e:
             print(f"Error formatting sheet {sheet_name}: {e}")
+
+    def verify_instrument_weight_estimation(self, system, save_to_file=True):
+        """Verify whether instrument weight estimation is actually working"""
+
+        print("=== VERIFYING INSTRUMENT WEIGHT ESTIMATION ===")
+
+        verification_results = {
+            'config_settings': {},
+            'actual_behavior': {},
+            'weight_analysis': {},
+            'conclusion': None
+        }
+
+        try:
+            # Check configuration settings
+            config = system.config
+            verification_results['config_settings'] = {
+                'use_instrument_weight_estimates': getattr(config, 'use_instrument_weight_estimates', 'NOT SET'),
+                'has_instrument_weights_config': hasattr(config, 'instrument_weights'),
+                'has_instruments_list': hasattr(config, 'instruments'),
+                'instrument_count': len(system.get_instrument_list())
+            }
+
+            print(
+                f"Config use_instrument_weight_estimates: {verification_results['config_settings']['use_instrument_weight_estimates']}")
+            print(
+                f"Has instrument_weights in config: {verification_results['config_settings']['has_instrument_weights_config']}")
+            print(f"Has instruments list in config: {verification_results['config_settings']['has_instruments_list']}")
+
+            # Get actual weights over time
+            try:
+                actual_weights_ts = system.portfolio.get_instrument_weights()
+                if actual_weights_ts is not None and len(actual_weights_ts) > 0:
+                    print(f"✅ Successfully extracted instrument weights time series: {len(actual_weights_ts)} periods")
+
+                    # Analyze weight behavior
+                    latest_weights = actual_weights_ts.iloc[-1]
+                    earliest_weights = actual_weights_ts.iloc[0]
+
+                    # Check if weights are changing over time (estimation indicator)
+                    weight_changes = abs(latest_weights - earliest_weights)
+                    max_change = weight_changes.max()
+                    instruments_changed = (weight_changes > 0.01).sum()  # 1% threshold
+
+                    verification_results['weight_analysis'] = {
+                        'max_weight_change': max_change,
+                        'instruments_with_changes': instruments_changed,
+                        'total_instruments': len(latest_weights),
+                        'latest_weights': latest_weights.to_dict(),
+                        'earliest_weights': earliest_weights.to_dict(),
+                        'weight_sum_latest': latest_weights.sum(),
+                        'weight_sum_earliest': earliest_weights.sum()
+                    }
+
+                    print(f"Weight analysis:")
+                    print(f"  Max weight change over time: {max_change:.4f}")
+                    print(f"  Instruments with >1% change: {instruments_changed}/{len(latest_weights)}")
+                    print(f"  Weight sum (latest): {latest_weights.sum():.4f}")
+
+                    # Check if weights match your config weights
+                    if hasattr(config, 'instrument_weights'):
+                        config_weights = config.instrument_weights
+                        instruments_in_both = set(latest_weights.index) & set(config_weights.keys())
+
+                        if instruments_in_both:
+                            config_vals = [config_weights[inst] for inst in instruments_in_both]
+                            actual_vals = [latest_weights[inst] for inst in instruments_in_both]
+
+                            # Normalize config weights to sum to 1 for comparison
+                            config_sum = sum(config_vals)
+                            normalized_config = [w / config_sum for w in config_vals]
+
+                            differences = [abs(a - c) for a, c in zip(actual_vals, normalized_config)]
+                            max_diff = max(differences) if differences else 0
+
+                            verification_results['weight_analysis']['config_vs_actual_max_diff'] = max_diff
+                            print(f"  Max difference vs config weights: {max_diff:.4f}")
+
+                            if max_diff < 0.001:
+                                verification_results['conclusion'] = "USING_CONFIG_WEIGHTS"
+                                print("❌ CONCLUSION: System is using config weights, not estimates")
+                            else:
+                                verification_results['conclusion'] = "USING_ESTIMATES"
+                                print("✅ CONCLUSION: System appears to be using weight estimates")
+                        else:
+                            verification_results['conclusion'] = "UNCLEAR_NO_OVERLAP"
+                            print("⚠️ CONCLUSION: Cannot compare - no instrument overlap")
+                    else:
+                        verification_results['conclusion'] = "NO_CONFIG_WEIGHTS"
+                        print("ℹ️ No config weights to compare against")
+
+                else:
+                    print("❌ Failed to extract instrument weights time series")
+                    verification_results['actual_behavior']['weights_extraction'] = "FAILED"
+
+            except Exception as e:
+                print(f"❌ Error extracting weights: {e}")
+                verification_results['actual_behavior']['weights_error'] = str(e)
+
+            # Save results to file
+            if save_to_file:
+                import json
+                with open("instrument_weight_verification.json", "w") as f:
+                    # Convert numpy types to regular Python types for JSON serialization
+                    def convert_numpy(obj):
+                        if hasattr(obj, 'item'):
+                            return obj.item()
+                        elif hasattr(obj, 'tolist'):
+                            return obj.tolist()
+                        return obj
+
+                    json_results = {}
+                    for key, value in verification_results.items():
+                        if isinstance(value, dict):
+                            json_results[key] = {k: convert_numpy(v) for k, v in value.items()}
+                        else:
+                            json_results[key] = convert_numpy(value)
+
+                    json.dump(json_results, f, indent=2, default=str)
+                print("📁 Verification results saved to: instrument_weight_verification.json")
+
+            return verification_results
+
+        except Exception as e:
+            print(f"❌ Verification failed: {e}")
+            return None
+
+    def export_instrument_volatility_analysis_excel(self, filename="instrument_volatility_analysis.xlsx"):
+        """Export detailed instrument volatility analysis used for position sizing"""
+
+        print(f"Exporting instrument volatility analysis to {filename}...")
+
+        # Get system data
+        instruments = self.system.get_instrument_list()
+
+        if not instruments:
+            print("No instruments found in system")
+            return None
+
+        # Collect volatility data
+        volatility_data = {}
+        raw_volatility_series = {}
+
+        for instrument in instruments:
+            try:
+                print(f"Analyzing volatility for {instrument}...")
+
+                # FIXED METHOD 1: Try multiple approaches to get system volatility
+                actual_instrument_vol = None
+                vol_scalar_ts = None
+
+                # Approach 1: Try volatility scalar (original method)
+                try:
+                    vol_scalar = self.system.positionSize.get_volatility_scalar(instrument)
+                    if vol_scalar is not None and len(vol_scalar) > 0:
+                        latest_vol_scalar = vol_scalar.iloc[-1]
+                        if latest_vol_scalar != 0:
+                            actual_instrument_vol = 1 / latest_vol_scalar
+                            vol_scalar_ts = vol_scalar
+                            print(f"   Method 1 SUCCESS: volatility scalar = {actual_instrument_vol:.4f}")
+                except Exception as e:
+                    print(f"   Method 1 failed: {e}")
+
+                # Approach 2: Try instrument value volatility directly
+                if actual_instrument_vol is None:
+                    try:
+                        instrument_vol = self.system.positionSize.get_instrument_value_vol(instrument)
+                        if instrument_vol is not None and len(instrument_vol) > 0:
+                            # This gives daily vol in price units, convert to percentage
+                            prices = self.system.rawdata.get_daily_prices(instrument)
+                            if prices is not None and len(prices) > 0:
+                                # Convert to annual percentage volatility
+                                daily_price_vol = instrument_vol.iloc[-1]
+                                latest_price = prices.iloc[-1]
+                                daily_pct_vol = daily_price_vol / latest_price
+                                actual_instrument_vol = daily_pct_vol * (252 ** 0.5)
+                                print(f"   Method 2 SUCCESS: instrument value vol = {actual_instrument_vol:.4f}")
+                    except Exception as e:
+                        print(f"   Method 2 failed: {e}")
+
+                # Approach 3: Calculate from raw price data (fallback)
+                if actual_instrument_vol is None:
+                    try:
+                        prices = self.system.rawdata.get_daily_prices(instrument)
+                        if prices is not None and len(prices) > 252:  # Need sufficient data
+                            returns = prices.pct_change().dropna()
+                            # Use recent volatility (last 252 days)
+                            recent_returns = returns.iloc[-252:]
+                            daily_vol = recent_returns.std()
+                            actual_instrument_vol = daily_vol * (252 ** 0.5)
+                            print(f"   Method 3 SUCCESS: calculated from prices = {actual_instrument_vol:.4f}")
+                    except Exception as e:
+                        print(f"   Method 3 failed: {e}")
+
+                # If all methods failed, skip this instrument
+                if actual_instrument_vol is None or actual_instrument_vol == 0:
+                    print(f"   ❌ Could not extract volatility for {instrument}")
+                    continue
+
+                # Method 2: Calculate volatility manually for verification (keep existing code)
+                try:
+                    prices = self.system.rawdata.get_daily_prices(instrument)
+                    if prices is not None and len(prices) > 50:
+                        returns = prices.pct_change().dropna()
+
+                        # Calculate different volatility measures
+                        daily_vol = returns.std()
+                        annual_vol_manual = daily_vol * (252 ** 0.5)
+
+                        # Rolling volatilities
+                        rolling_vol_30d = returns.rolling(30).std() * (252 ** 0.5)
+                        rolling_vol_252d = returns.rolling(252).std() * (252 ** 0.5)
+
+                        # Latest values
+                        current_30d_vol = rolling_vol_30d.iloc[-1] if len(rolling_vol_30d) > 0 else 0
+                        current_252d_vol = rolling_vol_252d.iloc[-1] if len(rolling_vol_252d) > 0 else 0
+
+                    else:
+                        annual_vol_manual = 0
+                        current_30d_vol = 0
+                        current_252d_vol = 0
+                        daily_vol = 0
+                except Exception as e:
+                    print(f"   Error calculating manual volatility for {instrument}: {e}")
+                    annual_vol_manual = 0
+                    current_30d_vol = 0
+                    current_252d_vol = 0
+                    daily_vol = 0
+
+                # Get instrument weights for context
+                try:
+                    instrument_weights = self.system.portfolio.get_instrument_weights()
+                    if instrument_weights is not None and instrument in instrument_weights.columns:
+                        latest_cash_weight = instrument_weights[instrument].iloc[-1]
+                    else:
+                        latest_cash_weight = 0
+                except:
+                    latest_cash_weight = 0
+
+                # Get risk weight from config (if available)
+                try:
+                    config_weight = getattr(self.system.config, 'instrument_weights', {}).get(instrument, 0)
+                except:
+                    config_weight = 0
+
+                # Calculate scaling factor
+                target_vol = 0.12  # 12% target
+                scaling_factor = target_vol / actual_instrument_vol if actual_instrument_vol > 0 else 0
+
+                # Store comprehensive volatility data
+                volatility_data[instrument] = {
+                    'System_Used_Vol_Annual': actual_instrument_vol,
+                    'Manual_Calc_Vol_Annual': annual_vol_manual,
+                    'Rolling_30d_Vol': current_30d_vol,
+                    'Rolling_252d_Vol': current_252d_vol,
+                    'Daily_Vol_Raw': daily_vol,
+                    'Target_Vol': target_vol,
+                    'Vol_Scaling_Factor': scaling_factor,
+                    'Config_Risk_Weight': config_weight,
+                    'Actual_Cash_Weight': latest_cash_weight,
+                    'Weight_Ratio': latest_cash_weight / config_weight if config_weight > 0 else 0,
+                    'Vol_Calculation_Method': 'System_Volatility_Scalar' if vol_scalar_ts is not None else 'Manual_Calculation',
+                    'Data_Points_Used': len(vol_scalar_ts) if vol_scalar_ts is not None else len(
+                        prices) if 'prices' in locals() else 0
+                }
+
+                print(f"   ✅ {instrument}: System Vol = {actual_instrument_vol:.1%}, Scaling = {scaling_factor:.2f}x")
+
+            except Exception as e:
+                print(f"   ❌ Error processing {instrument}: {e}")
+                continue
+
+        if not volatility_data:
+            print("No valid volatility data found")
+            return None
+
+        # Create Excel file with multiple sheets
+        with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+            workbook = writer.book
+
+            # Sheet 1: Volatility Summary
+            vol_summary_df = pd.DataFrame.from_dict(volatility_data, orient='index')
+            vol_summary_df = vol_summary_df.sort_values('Vol_Scaling_Factor', ascending=False)
+
+            # Format percentages
+            percentage_cols = ['System_Used_Vol_Annual', 'Manual_Calc_Vol_Annual', 'Rolling_30d_Vol',
+                               'Rolling_252d_Vol', 'Daily_Vol_Raw', 'Target_Vol']
+            for col in percentage_cols:
+                if col in vol_summary_df.columns:
+                    vol_summary_df[f'{col}_Formatted'] = vol_summary_df[col].apply(lambda x: f"{x:.2%}")
+
+            vol_summary_df.to_excel(writer, sheet_name='Volatility_Summary')
+
+            # Sheet 2: Volatility Time Series
+            if raw_volatility_series:
+                vol_ts_df = pd.DataFrame.from_dict(raw_volatility_series, orient='columns')
+                vol_ts_df.to_excel(writer, sheet_name='Volatility_TimeSeries')
+
+            # Sheet 3: Weight Explanation Analysis
+            explanation_data = {}
+            for instrument, data in volatility_data.items():
+                if data['Config_Risk_Weight'] > 0 and data['System_Used_Vol_Annual'] > 0:
+                    expected_cash_weight = data['Config_Risk_Weight'] * data['Vol_Scaling_Factor']
+                    explanation_data[instrument] = {
+                        'Risk_Weight_Config': data['Config_Risk_Weight'],
+                        'System_Volatility': data['System_Used_Vol_Annual'],
+                        'Target_Volatility': data['Target_Vol'],
+                        'Volatility_Scaling': data['Vol_Scaling_Factor'],
+                        'Expected_Cash_Weight': expected_cash_weight,
+                        'Actual_Cash_Weight': data['Actual_Cash_Weight'],
+                        'Weight_Difference': abs(expected_cash_weight - data['Actual_Cash_Weight']),
+                        'Explanation': self._explain_weight_conversion(
+                            data['Config_Risk_Weight'],
+                            data['System_Used_Vol_Annual'],
+                            data['Target_Vol'],
+                            data['Actual_Cash_Weight']
+                        )
+                    }
+
+            if explanation_data:
+                explanation_df = pd.DataFrame.from_dict(explanation_data, orient='index')
+                explanation_df.to_excel(writer, sheet_name='Weight_Conversion_Analysis')
+
+            # Sheet 4: Volatility Statistics
+            vol_stats = self._calculate_volatility_statistics(volatility_data)
+            if vol_stats is not None:
+                vol_stats.to_excel(writer, sheet_name='Volatility_Statistics')
+
+            # Add formatting
+            self._format_volatility_sheets(writer, workbook)
+
+        print(f"✅ Instrument volatility analysis exported: {filename}")
+        print(f"📊 Key insights: Volatility periods, scaling factors, weight conversions")
+
+        return filename
+
+    def _explain_weight_conversion(self, risk_weight, instrument_vol, target_vol, actual_cash_weight):
+        """Provide human-readable explanation of weight conversion"""
+
+        scaling_factor = target_vol / instrument_vol if instrument_vol > 0 else 0
+        expected_weight = risk_weight * scaling_factor
+
+        if instrument_vol < target_vol * 0.5:  # Very low volatility
+            return f"LOW_VOL: {instrument_vol:.1%} vol needs {scaling_factor:.1f}x more capital to reach {target_vol:.0%} target"
+        elif instrument_vol > target_vol * 1.5:  # High volatility
+            return f"HIGH_VOL: {instrument_vol:.1%} vol needs {scaling_factor:.2f}x less capital to reach {target_vol:.0%} target"
+        else:
+            return f"NORMAL_VOL: {instrument_vol:.1%} vol close to {target_vol:.0%} target, scaling {scaling_factor:.2f}x"
+
+    def _calculate_volatility_statistics(self, volatility_data):
+        """Calculate portfolio-wide volatility statistics"""
+
+        try:
+            vol_values = [data['System_Used_Vol_Annual'] for data in volatility_data.values() if
+                          data['System_Used_Vol_Annual'] > 0]
+
+            if not vol_values:
+                return None
+
+            stats = {
+                'Portfolio_Avg_Volatility': np.mean(vol_values),
+                'Portfolio_Median_Volatility': np.median(vol_values),
+                'Portfolio_Min_Volatility': np.min(vol_values),
+                'Portfolio_Max_Volatility': np.max(vol_values),
+                'Portfolio_Vol_Std': np.std(vol_values),
+                'Low_Vol_Instruments': sum(1 for v in vol_values if v < 0.08),
+                'High_Vol_Instruments': sum(1 for v in vol_values if v > 0.18),
+                'Target_Vol': 0.12,
+                'Instruments_Below_Target': sum(1 for v in vol_values if v < 0.12),
+                'Instruments_Above_Target': sum(1 for v in vol_values if v > 0.12)
+            }
+
+            return pd.DataFrame.from_dict({'Value': stats}, orient='columns')
+
+        except Exception as e:
+            print(f"Error calculating volatility statistics: {e}")
+            return None
+
+    def _format_volatility_sheets(self, writer, workbook):
+        """Format volatility analysis sheets"""
+
+        # Define formats
+        header_format = workbook.add_format({
+            'bold': True,
+            'text_wrap': True,
+            'valign': 'top',
+            'fg_color': '#D7E4BC',
+            'border': 1
+        })
+
+        percentage_format = workbook.add_format({'num_format': '0.00%'})
+
+        # Format sheets
+        for sheet_name in ['Volatility_Summary', 'Weight_Conversion_Analysis', 'Volatility_Statistics']:
+            if sheet_name in writer.sheets:
+                worksheet = writer.sheets[sheet_name]
+                worksheet.set_column('A:A', 12)  # Instrument names
+                worksheet.set_column('B:Z', 15)  # Data columns

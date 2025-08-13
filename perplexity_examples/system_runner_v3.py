@@ -191,6 +191,17 @@ def main():
         if weights_file:
             print(f"📊 Weights and multipliers analysis saved to: {weights_file}")
 
+        # Step 12: Verify Instrument Weight Estimation
+        print("Verifying instrument weight estimation...")
+        verification_results = dashboard.verify_instrument_weight_estimation(system)
+
+        # Step 13: Generate Instrument Volatility Analysis
+        print("Exporting instrument volatility analysis...")
+        volatility_file = dashboard.export_instrument_volatility_analysis_excel("instrument_volatility_analysis.xlsx")
+
+        if volatility_file:
+            print(f"📊 Volatility analysis saved to: {volatility_file}")
+
         return results
 
     except Exception as e:

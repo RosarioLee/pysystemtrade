@@ -416,7 +416,7 @@ class EnhancedETFSystem:
 
             # Dynamic IDM (preserved)
             "use_instrument_div_mult_estimates": True,
-            "use_instrument_weight_estimates": True,
+            "use_instrument_weight_estimates": False,
 
             # CARVER METHODOLOGY: Pooled estimation
             "use_forecast_scale_estimates": True,
