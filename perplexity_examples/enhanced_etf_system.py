@@ -296,7 +296,7 @@ class EnhancedETFSystem:
 
             # Dynamic IDM (preserved)
             "use_instrument_div_mult_estimates": True,
-            "use_instrument_weight_estimates": True,
+            "use_instrument_weight_estimates": False,
 
             # Enhanced forecast estimation for mixed rule types
             "use_forecast_scale_estimates": True,
@@ -606,3 +606,31 @@ class EnhancedETFSystem:
         except Exception as e:
             print(f"❌ Compliance monitoring failed: {e}")
             return False
+
+
+    def diagnose_and_fix_weight_conversion(self, system):
+        """Diagnose and attempt to fix weight conversion issues"""
+        print("=== DIAGNOSING WEIGHT CONVERSION ISSUES ===")
+
+        # Import dashboard for diagnostics
+        from dashboard_v1 import SimpleETFDashboard
+        dashboard = SimpleETFDashboard(system)
+
+        # Run comprehensive diagnosis
+        diagnosis = dashboard.comprehensive_weight_diagnosis(system)
+
+        # Attempt fixes based on diagnosis
+        if diagnosis['root_cause'] == "VOLATILITY_CALCULATION_FAILURE":
+            print("Attempting to fix volatility calculation...")
+            success = dashboard.force_system_recalculation(system)
+            if success:
+                print("✅ Fix applied - recheck conversion")
+            else:
+                print("❌ Fix failed - manual intervention needed")
+
+        elif diagnosis['root_cause'] == "IDM_CALCULATION_FAILURE":
+            print("Attempting IDM workaround...")
+            # You could temporarily disable IDM here
+            print("💡 Consider setting use_instrument_div_mult_estimates=False in config")
+
+        return diagnosis

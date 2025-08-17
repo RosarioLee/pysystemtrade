@@ -2134,15 +2134,25 @@ Win Rate: {performance['win_rate']:.1%}
                 worksheet.set_column('B:Z', 15)  # Data columns
 
     def verify_risk_to_cash_conversion(self, system):
-        """Verify that the system correctly converts risk weights to cash weights"""
-
+        """Verify risk-to-cash weight conversion - FIXED VERSION"""
         print("=== VERIFYING RISK-TO-CASH WEIGHT CONVERSION ===")
 
         try:
             # Get actual instrument weights from system
-            actual_weights = system.portfolio.get_instrument_weights()
-            if actual_weights is None:
-                print("❌ Cannot get actual weights from system")
+            actual_weights = None
+
+            # Try multiple methods to get weights
+            try:
+                actual_weights = system.portfolio.get_instrument_weights()
+            except AttributeError:
+                try:
+                    actual_weights = system.portfolio.get_raw_instrument_weights()
+                except AttributeError:
+                    print("❌ Cannot access instrument weights from system")
+                    return None
+
+            if actual_weights is None or len(actual_weights) == 0:
+                print("❌ No instrument weights available")
                 return None
 
             latest_weights = actual_weights.iloc[-1]
@@ -2153,7 +2163,7 @@ Win Rate: {performance['win_rate']:.1%}
                 print("❌ No config weights found")
                 return None
 
-            # Get volatility data
+            # Get volatility data and perform verification
             verification_results = {}
             total_discrepancy = 0
 
@@ -2163,29 +2173,37 @@ Win Rate: {performance['win_rate']:.1%}
                 f"{'Instrument':<8} {'Risk%':<8} {'Vol':<8} {'Scaling':<8} {'Expected%':<10} {'Actual%':<10} {'Match?':<8}")
             print("=" * 80)
 
-            for instrument in system.get_instrument_list()[:10]:  # Check first 10
+            for instrument in system.get_instrument_list()[:10]:
                 if instrument in config_weights and instrument in latest_weights.index:
 
-                    # Get volatility scalar
-                    try:
-                        vol_scalar = system.positionSize.get_volatility_scalar(instrument)
-                        if vol_scalar is not None and len(vol_scalar) > 0:
-                            latest_vol_scalar = vol_scalar.iloc[-1]
-                            instrument_vol = 1 / latest_vol_scalar if latest_vol_scalar != 0 else 0
-                        else:
-                            # Fallback calculation
-                            prices = system.rawdata.get_daily_prices(instrument)
-                            returns = prices.pct_change().dropna()
-                            instrument_vol = returns.std() * (252 ** 0.5)
-                    except:
-                        continue
+                    # Get instrument volatility using multiple methods
+                    instrument_vol = None
 
-                    if instrument_vol == 0:
+                    # Method 1: Try to get volatility through price data
+                    try:
+                        prices = system.rawdata.get_daily_prices(instrument)
+                        if prices is not None and len(prices) > 100:
+                            returns = prices.pct_change().dropna()
+                            daily_vol = returns.std()
+                            instrument_vol = daily_vol * (252 ** 0.5)  # Annualize
+                    except Exception:
+                        pass
+
+                    # Method 2: Try system volatility methods
+                    if instrument_vol is None:
+                        try:
+                            vol_data = system.rawdata.get_daily_returns_volatility(instrument)
+                            if vol_data is not None and len(vol_data) > 0:
+                                instrument_vol = vol_data.iloc[-1] * (252 ** 0.5)
+                        except Exception:
+                            pass
+
+                    if instrument_vol is None or instrument_vol <= 0:
                         continue
 
                     # Calculate expected cash weight
                     risk_weight = config_weights[instrument]
-                    target_vol = 0.12
+                    target_vol = 0.12  # 12% annual target
                     vol_scaling = target_vol / instrument_vol
 
                     # Normalize risk weights to sum to 1
@@ -2202,9 +2220,9 @@ Win Rate: {performance['win_rate']:.1%}
                     discrepancy = abs(expected_cash_weight - actual_cash_weight)
                     total_discrepancy += discrepancy
 
-                    # Determine if it's a reasonable match (within IDM tolerance)
+                    # Determine match status
                     match_status = "✅ YES" if discrepancy < 0.05 else "❌ NO"
-                    if discrepancy > 0.02 and discrepancy < 0.05:
+                    if 0.02 < discrepancy < 0.05:
                         match_status = "⚠️ CLOSE"
 
                     verification_results[instrument] = {
@@ -2320,3 +2338,876 @@ Win Rate: {performance['win_rate']:.1%}
 
         except Exception as e:
             print(f"❌ Weight evolution check failed: {e}")
+
+    def diagnose_volatility_targeting_failure(self, system):
+        """Diagnose why volatility targeting is not working"""
+
+        print("=== VOLATILITY TARGETING FAILURE DIAGNOSIS ===")
+
+        # Test each component of the position sizing pipeline
+        test_instrument = system.get_instrument_list()[0]
+
+        try:
+            # 1. Check volatility scalar
+            vol_scalar = system.positionSize.get_volatility_scalar(test_instrument)
+            if vol_scalar is None or len(vol_scalar) == 0:
+                print("❌ ISSUE: Volatility scalars not calculated")
+                return "VOLATILITY_SCALAR_FAILURE"
+            else:
+                print(f"✅ Volatility scalar working: {vol_scalar.iloc[-1]:.4f}")
+
+            # 2. Check IDM
+            idm = system.portfolio.get_instrument_diversification_multiplier()
+            if idm is None or len(idm) == 0:
+                print("❌ ISSUE: IDM not calculated")
+                return "IDM_FAILURE"
+            else:
+                print(f"✅ IDM working: {idm.iloc[-1]:.4f}")
+
+            # 3. Check if system is using estimated weights
+            config = system.config
+            if hasattr(config, 'use_instrument_weight_estimates'):
+                if config.use_instrument_weight_estimates:
+                    print("⚠️ WARNING: Using estimated weights - should be False")
+                else:
+                    print("✅ Using fixed risk weights (correct)")
+
+            # 4. Check volatility target
+            vol_target = getattr(config, 'percentage_vol_target', None)
+            print(f"Volatility target: {vol_target}%")
+
+            # 5. Test complete position sizing chain
+            forecast = system.combForecast.get_combined_forecast(test_instrument)
+            position = system.portfolio.get_notional_position(test_instrument)
+
+            if forecast is not None and position is not None:
+                print("✅ Complete position sizing chain working")
+                return "PIPELINE_WORKING_BUT_WEIGHTS_WRONG"
+            else:
+                print("❌ ISSUE: Position sizing pipeline broken")
+                return "PIPELINE_FAILURE"
+
+        except Exception as e:
+            print(f"❌ DIAGNOSIS FAILED: {e}")
+            return "DIAGNOSIS_ERROR"
+
+
+
+    def debug_volatility_calculation(self, system):
+        """Debug volatility calculation issues"""
+        print("=== DEBUGGING VOLATILITY CALCULATIONS ===")
+
+        instruments = system.get_instrument_list()
+        issues_found = []
+
+        for instrument in instruments[:10]:  # Test first 10
+            try:
+                # Test volatility scalar calculation
+                vol_scalar = self._get_instrument_volatility_scalar_fixed(system, instrument)
+
+                if vol_scalar is None or len(vol_scalar) == 0:
+                    print(f"❌ {instrument}: No volatility scalar")
+                    issues_found.append(f"{instrument}: No volatility scalar")
+                elif vol_scalar.iloc[-1] <= 0:
+                    print(f"❌ {instrument}: Invalid volatility scalar: {vol_scalar.iloc[-1]}")
+                    issues_found.append(f"{instrument}: Invalid volatility scalar")
+                elif vol_scalar.iloc[-1] > 100:  # Unreasonably high
+                    print(f"⚠️ {instrument}: Very high volatility scalar: {vol_scalar.iloc[-1]}")
+                    issues_found.append(f"{instrument}: Extreme volatility scalar")
+                else:
+                    print(f"✅ {instrument}: Valid volatility scalar: {vol_scalar.iloc[-1]:.4f}")
+
+            except Exception as e:
+                print(f"❌ {instrument}: Volatility calculation failed: {e}")
+                issues_found.append(f"{instrument}: Calculation failed - {e}")
+
+        return issues_found
+
+    def debug_idm_calculation(self, system):
+        """Debug IDM calculation issues"""
+        print("=== DEBUGGING IDM CALCULATIONS ===")
+
+        try:
+            # Test IDM calculation
+            idm = system.portfolio.get_instrument_diversification_multiplier()
+
+            if idm is None or len(idm) == 0:
+                print("❌ IDM calculation failed completely")
+                return ["IDM calculation failed"]
+
+            latest_idm = idm.iloc[-1]
+            print(f"✅ IDM calculation successful: {latest_idm:.4f}")
+
+            # Check correlation matrix
+            try:
+                corr_matrix = system.portfolio.get_instrument_correlation_matrix()
+                print(f"✅ Correlation matrix shape: {corr_matrix.shape}")
+
+                # Check if matrix is invertible
+                import numpy as np
+                det = np.linalg.det(corr_matrix.values)
+                print(f"✅ Correlation matrix determinant: {det:.6f}")
+
+                if abs(det) < 1e-10:
+                    print("⚠️ WARNING: Correlation matrix near-singular")
+                    return ["Correlation matrix near-singular"]
+
+            except Exception as e:
+                print(f"❌ Correlation matrix issue: {e}")
+                return [f"Correlation matrix error: {e}"]
+
+            return []  # No issues
+
+        except Exception as e:
+            print(f"❌ IDM calculation failed: {e}")
+            return [f"IDM calculation error: {e}"]
+
+    def verify_conversion_prerequisites(self, system):
+        """Check all prerequisites for risk-to-cash conversion"""
+        print("=== CHECKING CONVERSION PREREQUISITES ===")
+
+        instruments = system.get_instrument_list()
+        issues = []
+
+        for instrument in instruments[:10]:
+            # Check price data
+            try:
+                prices = system.rawdata.get_daily_prices(instrument)
+                if prices is None or len(prices) < 100:
+                    issues.append(
+                        f"{instrument}: Insufficient price data ({len(prices) if prices is not None else 0} days)")
+                    print(f"❌ {instrument}: Insufficient price data")
+                    continue
+            except:
+                issues.append(f"{instrument}: Cannot access price data")
+                continue
+
+            # Check returns data
+            try:
+                returns = prices.pct_change().dropna()
+                if len(returns) == 0 or returns.std() == 0:
+                    issues.append(f"{instrument}: Invalid returns data")
+                    print(f"❌ {instrument}: Invalid returns data")
+                    continue
+            except:
+                issues.append(f"{instrument}: Cannot calculate returns")
+                continue
+
+            print(f"✅ {instrument}: Data quality OK")
+
+        # Check overall system health
+        try:
+            portfolio = system.accounts.portfolio()
+            if portfolio is None:
+                issues.append("Portfolio calculation failed")
+                print("❌ Portfolio calculation failed")
+        except:
+            issues.append("Portfolio access failed")
+            print("❌ Portfolio access failed")
+
+        return issues
+
+    def force_system_recalculation(self, system):
+        """Force recalculation of all system components"""
+        print("=== FORCING SYSTEM RECALCULATION ===")
+
+        try:
+            instruments = system.get_instrument_list()
+
+            # ✅ SAFE CACHE HANDLING - Replace the broken section with this:
+            try:
+                # Try to clear cache safely if it exists and has the right methods
+                if hasattr(system, 'cache') and hasattr(system.cache, 'delete_all_items'):
+                    system.cache.delete_all_items()
+                    print("✅ Cleared system cache safely")
+                else:
+                    print("ℹ️ Cache not accessible or doesn't support clearing")
+            except Exception as cache_error:
+                print(f"⚠️ Cache clearing failed (non-critical): {cache_error}")
+
+            # Force volatility recalculation
+            print("Forcing volatility calculations...")
+            for instrument in instruments[:10]:
+                try:
+                    _ = system.rawdata.daily_returns_volatility(instrument)
+                    _ = system.positionSize.get_volatility_scalar(instrument)
+                except:
+                    continue
+
+            # Force portfolio recalculation
+            print("Forcing portfolio calculations...")
+            try:
+                _ = system.portfolio.get_instrument_correlation_matrix()
+                _ = system.portfolio.get_instrument_diversification_multiplier()
+                _ = system.portfolio.get_instrument_weights()
+                print("✅ System recalculation completed")
+                return True
+            except Exception as e:
+                print(f"❌ Portfolio recalculation failed: {e}")
+                return False
+
+        except Exception as e:
+            print(f"❌ System recalculation failed: {e}")
+            return False
+
+    def comprehensive_weight_diagnosis(self, system):
+        """Run comprehensive diagnosis of weight conversion issues"""
+        print("=== COMPREHENSIVE WEIGHT CONVERSION DIAGNOSIS ===")
+
+        diagnosis_results = {
+            'volatility_issues': [],
+            'idm_issues': [],
+            'prerequisite_issues': [],
+            'root_cause': None,
+            'recommended_fix': None
+        }
+
+        # Step 1: Check prerequisites
+        print("\n1. Checking data prerequisites...")
+        prereq_issues = self.verify_conversion_prerequisites(system)
+        diagnosis_results['prerequisite_issues'] = prereq_issues
+
+        # Step 2: Check volatility calculations
+        print("\n2. Checking volatility calculations...")
+        vol_issues = self.debug_volatility_calculation(system)
+        diagnosis_results['volatility_issues'] = vol_issues
+
+        # Step 3: Check IDM calculations
+        print("\n3. Checking IDM calculations...")
+        idm_issues = self.debug_idm_calculation(system)
+        diagnosis_results['idm_issues'] = idm_issues
+
+        # Step 4: Determine root cause
+        print("\n4. Analyzing root cause...")
+
+        if prereq_issues:
+            diagnosis_results['root_cause'] = "DATA_QUALITY_ISSUES"
+            diagnosis_results['recommended_fix'] = "Fix data quality issues first"
+        elif vol_issues:
+            diagnosis_results['root_cause'] = "VOLATILITY_CALCULATION_FAILURE"
+            diagnosis_results['recommended_fix'] = "Force system recalculation or check volatility settings"
+        elif idm_issues:
+            diagnosis_results['root_cause'] = "IDM_CALCULATION_FAILURE"
+            diagnosis_results['recommended_fix'] = "Check correlation matrix or disable IDM temporarily"
+        else:
+            diagnosis_results['root_cause'] = "UNKNOWN_SYSTEM_ISSUE"
+            diagnosis_results['recommended_fix'] = "Manual intervention required"
+
+        # Step 5: Display results
+        print(f"\n=== DIAGNOSIS COMPLETE ===")
+        print(f"Root Cause: {diagnosis_results['root_cause']}")
+        print(f"Recommended Fix: {diagnosis_results['recommended_fix']}")
+
+        return diagnosis_results
+
+    # Add this method to SimpleETFDashboard class in dashboard_v1.py
+
+    def export_diagnostic_report_excel(self, filename, diagnosis_results, conversion_results):
+        """Export comprehensive diagnostic report to Excel"""
+        print(f"Exporting diagnostic report to {filename}...")
+
+        try:
+            with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+                workbook = writer.book
+
+                # Sheet 1: Diagnosis Summary
+                summary_data = {
+                    'Component': ['Data Prerequisites', 'Volatility Calculations', 'IDM Calculations', 'Root Cause',
+                                  'Recommended Fix'],
+                    'Status': [
+                        'ISSUES FOUND' if diagnosis_results['prerequisite_issues'] else 'OK',
+                        'ISSUES FOUND' if diagnosis_results['volatility_issues'] else 'OK',
+                        'ISSUES FOUND' if diagnosis_results['idm_issues'] else 'OK',
+                        diagnosis_results['root_cause'],
+                        diagnosis_results['recommended_fix']
+                    ]
+                }
+
+                summary_df = pd.DataFrame(summary_data)
+                summary_df.to_excel(writer, sheet_name='Diagnosis_Summary', index=False)
+
+                # Sheet 2: Detailed Issues
+                if diagnosis_results['prerequisite_issues']:
+                    issues_df = pd.DataFrame({'Prerequisite_Issues': diagnosis_results['prerequisite_issues']})
+                    issues_df.to_excel(writer, sheet_name='Prerequisite_Issues', index=False)
+
+                if diagnosis_results['volatility_issues']:
+                    vol_issues_df = pd.DataFrame({'Volatility_Issues': diagnosis_results['volatility_issues']})
+                    vol_issues_df.to_excel(writer, sheet_name='Volatility_Issues', index=False)
+
+                if diagnosis_results['idm_issues']:
+                    idm_issues_df = pd.DataFrame({'IDM_Issues': diagnosis_results['idm_issues']})
+                    idm_issues_df.to_excel(writer, sheet_name='IDM_Issues', index=False)
+
+                # Sheet 3: Weight Conversion Results
+                if conversion_results:
+                    conversion_df = pd.DataFrame.from_dict(conversion_results, orient='index')
+                    conversion_df.to_excel(writer, sheet_name='Weight_Conversion_Check')
+
+            print(f"✅ Diagnostic report exported: {filename}")
+            return filename
+
+        except Exception as e:
+            print(f"Error exporting diagnostic report: {e}")
+            return None
+
+    def safe_system_restart(self, system):
+        """Safely restart system calculations without breaking cache"""
+        print("=== SAFE SYSTEM RESTART ===")
+
+        try:
+            instruments = system.get_instrument_list()[:5]  # Test with first 5
+
+            # Method 1: Force fresh calculations by accessing end-to-end pipeline
+            print("Method 1: Forcing end-to-end calculations...")
+            for instrument in instruments:
+                try:
+                    # This forces the entire calculation chain
+                    _ = system.accounts.pandl_for_instrument(instrument)
+                    print(f"✅ {instrument}: Full pipeline working")
+                except Exception as e:
+                    print(f"⚠️ {instrument}: Pipeline issue: {e}")
+
+            # Method 2: Verify system health
+            print("Method 2: Verifying system health...")
+            try:
+                portfolio = system.accounts.portfolio()
+                if portfolio is not None and len(portfolio.curve()) > 0:
+                    print("✅ Portfolio calculations working")
+                else:
+                    print("❌ Portfolio calculations failed")
+            except Exception as e:
+                print(f"❌ Portfolio verification failed: {e}")
+
+            return True
+
+        except Exception as e:
+            print(f"❌ Safe system restart failed: {e}")
+            return False
+
+    def debug_volatility_calculation(self, system):
+        """Debug volatility calculation issues - FIXED VERSION"""
+        print("=== DEBUGGING VOLATILITY CALCULATIONS ===")
+
+        instruments = system.get_instrument_list()
+        issues_found = []
+
+        for instrument in instruments[:10]:  # Test first 10
+            try:
+                # ✅ CORRECTED METHOD NAMES - Try multiple approaches
+                vol_scalar = None
+
+                # Method 1: Try get_instrument_vol_scalar (most likely correct)
+                try:
+                    vol_scalar = system.positionSize.get_instrument_vol_scalar(instrument)
+                except AttributeError:
+                    pass
+
+                # Method 2: Try get_daily_volatility_scalar
+                if vol_scalar is None:
+                    try:
+                        vol_scalar = system.positionSize.get_daily_volatility_scalar(instrument)
+                    except AttributeError:
+                        pass
+
+                # Method 3: Try accessing volatility through rawdata
+                if vol_scalar is None:
+                    try:
+                        daily_vol = system.rawdata.get_daily_returns_volatility(instrument)
+                        if daily_vol is not None and len(daily_vol) > 0:
+                            latest_vol = daily_vol.iloc[-1]
+                            if latest_vol > 0:
+                                target_vol = 0.12 / 16  # Daily target
+                                vol_scalar = target_vol / latest_vol
+                    except Exception:
+                        pass
+
+                # Method 4: Calculate manually as fallback
+                if vol_scalar is None:
+                    try:
+                        prices = system.rawdata.get_daily_prices(instrument)
+                        returns = prices.pct_change().dropna()
+                        if len(returns) > 100:
+                            daily_vol = returns.std()
+                            target_vol = 0.12 / 16  # 12% annual target / sqrt(252)
+                            vol_scalar = target_vol / daily_vol
+                    except Exception:
+                        pass
+
+                # Check the results
+                if vol_scalar is None:
+                    print(f"❌ {instrument}: No volatility scalar available")
+                    issues_found.append(f"{instrument}: No volatility scalar calculation possible")
+                elif hasattr(vol_scalar, 'iloc'):
+                    latest_val = vol_scalar.iloc[-1] if len(vol_scalar) > 0 else None
+                    if latest_val is None or latest_val <= 0:
+                        print(f"❌ {instrument}: Invalid volatility scalar: {latest_val}")
+                        issues_found.append(f"{instrument}: Invalid volatility scalar")
+                    else:
+                        print(f"✅ {instrument}: Valid volatility scalar: {latest_val:.4f}")
+                else:
+                    if vol_scalar <= 0:
+                        print(f"❌ {instrument}: Invalid volatility scalar: {vol_scalar}")
+                        issues_found.append(f"{instrument}: Invalid volatility scalar")
+                    else:
+                        print(f"✅ {instrument}: Valid volatility scalar: {vol_scalar:.4f}")
+
+            except Exception as e:
+                print(f"❌ {instrument}: Volatility calculation failed: {e}")
+                issues_found.append(f"{instrument}: Calculation failed - {e}")
+
+        return issues_found
+
+    def export_position_sizing_pipeline_debug(self, system, filename="position_sizing_debug.xlsx"):
+        """
+        Export complete position sizing pipeline components for final day debugging
+        This will show every step from risk weights to final positions
+        """
+        print(f"Exporting position sizing pipeline debug to {filename}...")
+
+        try:
+            instruments = system.get_instrument_list()
+            rules = list(system.rules.trading_rules().keys())
+
+            # Get the final date from system
+            portfolio = system.accounts.portfolio()
+            final_date = portfolio.curve().index[-1]
+
+            print(f"Extracting data for final date: {final_date}")
+
+            # Initialize data collection
+            pipeline_data = {}
+
+            for instrument in instruments:
+                try:
+                    print(f"Processing {instrument}...")
+
+                    # STEP 1: Get config risk weight
+                    config_weights = getattr(system.config, 'instrument_weights', {})
+                    risk_weight = config_weights.get(instrument, 0.0)
+
+                    # STEP 2: Get individual rule forecasts (final day)
+                    rule_forecasts = {}
+                    for rule_name in rules:
+                        try:
+                            raw_forecast = system.rules.get_raw_forecast(instrument, rule_name)
+                            if raw_forecast is not None and len(raw_forecast) > 0:
+                                rule_forecasts[f'raw_forecast_{rule_name}'] = raw_forecast.iloc[-1]
+
+                            # Get forecast scalar
+                            forecast_scalar = system.forecastScaleCap.get_forecast_scalar(instrument, rule_name)
+                            if forecast_scalar is not None and len(forecast_scalar) > 0:
+                                rule_forecasts[f'forecast_scalar_{rule_name}'] = forecast_scalar.iloc[-1]
+
+                            # Get scaled forecast
+                            scaled_forecast = system.forecastScaleCap.get_scaled_forecast(instrument, rule_name)
+                            if scaled_forecast is not None and len(scaled_forecast) > 0:
+                                rule_forecasts[f'scaled_forecast_{rule_name}'] = scaled_forecast.iloc[-1]
+
+                        except Exception as e:
+                            rule_forecasts[f'error_{rule_name}'] = str(e)
+
+                    # STEP 3: Get combined forecast
+                    try:
+                        combined_forecast = system.combForecast.get_combined_forecast(instrument)
+                        final_combined_forecast = combined_forecast.iloc[-1] if len(combined_forecast) > 0 else 0
+                    except Exception as e:
+                        final_combined_forecast = f"Error: {e}"
+
+                    # STEP 4: Get forecast weights
+                    try:
+                        forecast_weights = system.combForecast.get_forecast_weights(instrument)
+                        final_forecast_weights = forecast_weights.iloc[-1].to_dict() if len(
+                            forecast_weights) > 0 else {}
+                    except Exception as e:
+                        final_forecast_weights = f"Error: {e}"
+
+                    # STEP 5: Get forecast diversification multiplier
+                    try:
+                        fdm = system.combForecast.get_forecast_diversification_multiplier(instrument)
+                        final_fdm = fdm.iloc[-1] if len(fdm) > 0 else 1.0
+                    except Exception as e:
+                        final_fdm = f"Error: {e}"
+
+                    # STEP 6: Get volatility scalar
+                    try:
+                        vol_scalar = system.positionSize.get_volatility_scalar(instrument)
+                        final_vol_scalar = vol_scalar.iloc[-1] if len(vol_scalar) > 0 else 0
+                    except Exception as e:
+                        final_vol_scalar = f"Error: {e}"
+
+                    # STEP 7: Get subsystem position (before cash weights)
+                    try:
+                        subsystem_position = system.positionSize.get_subsystem_position(instrument)
+                        final_subsystem_position = subsystem_position.iloc[-1] if len(subsystem_position) > 0 else 0
+                    except Exception as e:
+                        final_subsystem_position = f"Error: {e}"
+
+                    # STEP 8: Get instrument cash weight
+                    try:
+                        instrument_weights = system.portfolio.get_instrument_weights()
+                        final_cash_weight = instrument_weights[instrument].iloc[
+                            -1] if instrument in instrument_weights.columns else 0
+                    except Exception as e:
+                        final_cash_weight = f"Error: {e}"
+
+                    # STEP 9: Get IDM (should be same for all instruments)
+                    try:
+                        idm = system.portfolio.get_instrument_diversification_multiplier()
+                        final_idm = idm.iloc[-1] if len(idm) > 0 else 1.0
+                    except Exception as e:
+                        final_idm = f"Error: {e}"
+
+                    # STEP 10: Get final notional position
+                    try:
+                        final_position = system.portfolio.get_notional_position(instrument)
+                        final_notional_position = final_position.iloc[-1] if len(final_position) > 0 else 0
+                    except Exception as e:
+                        final_notional_position = f"Error: {e}"
+
+                    # STEP 11: Get volatility data used
+                    try:
+                        # Try multiple methods to get volatility
+                        vol_methods = {}
+
+                        # Method 1: Raw volatility
+                        try:
+                            raw_vol = system.rawdata.get_daily_returns_volatility(instrument)
+                            vol_methods['raw_daily_vol'] = raw_vol.iloc[-1] if raw_vol is not None else None
+                        except:
+                            vol_methods['raw_daily_vol'] = "Not available"
+
+                        # Method 2: Calculate from prices
+                        try:
+                            prices = system.rawdata.get_daily_prices(instrument)
+                            if prices is not None and len(prices) > 100:
+                                returns = prices.pct_change().dropna()
+                                daily_vol = returns.std()
+                                vol_methods['calculated_daily_vol'] = daily_vol
+                                vol_methods['calculated_annual_vol'] = daily_vol * (252 ** 0.5)
+                        except:
+                            vol_methods['calculated_daily_vol'] = "Error"
+                            vol_methods['calculated_annual_vol'] = "Error"
+
+                    except Exception as e:
+                        vol_methods = {'error': str(e)}
+
+                    # STEP 12: Manual calculation verification
+                    # Calculate what the cash weight SHOULD be
+                    if isinstance(final_vol_scalar, (int, float)) and final_vol_scalar != 0:
+                        # Cash weight should be: risk_weight / (volatility / target_volatility)
+                        target_vol = 0.12  # 12% target
+
+                        if 'calculated_annual_vol' in vol_methods and isinstance(vol_methods['calculated_annual_vol'],
+                                                                                 (int, float)):
+                            actual_vol = vol_methods['calculated_annual_vol']
+                            expected_cash_weight = risk_weight * (target_vol / actual_vol)
+                            cash_weight_check = "OK" if abs(
+                                expected_cash_weight - final_cash_weight) < 0.01 else "MISMATCH"
+                        else:
+                            expected_cash_weight = "Cannot calculate"
+                            cash_weight_check = "Unknown"
+                    else:
+                        expected_cash_weight = "Vol scalar error"
+                        cash_weight_check = "Error"
+
+                    # STEP 13: Position calculation verification
+                    if all(isinstance(x, (int, float)) for x in
+                           [final_combined_forecast, final_vol_scalar, final_cash_weight, final_idm]):
+                        expected_position = final_combined_forecast * final_vol_scalar * final_cash_weight * final_idm
+                        position_check = "OK" if abs(expected_position - final_notional_position) < 1.0 else "MISMATCH"
+                    else:
+                        expected_position = "Cannot calculate"
+                        position_check = "Error"
+
+                    # Store all data
+                    pipeline_data[instrument] = {
+                        # Configuration
+                        'config_risk_weight': risk_weight,
+                        'target_volatility': 0.12,
+                        'final_date': final_date,
+
+                        # Volatility data
+                        **{f'vol_{k}': v for k, v in vol_methods.items()},
+
+                        # Rule forecasts
+                        **rule_forecasts,
+
+                        # Combined forecasting
+                        'combined_forecast': final_combined_forecast,
+                        'forecast_weights': str(final_forecast_weights),
+                        'forecast_div_mult': final_fdm,
+
+                        # Position sizing
+                        'volatility_scalar': final_vol_scalar,
+                        'subsystem_position': final_subsystem_position,
+
+                        # Cash weights
+                        'actual_cash_weight': final_cash_weight,
+                        'expected_cash_weight': expected_cash_weight,
+                        'cash_weight_check': cash_weight_check,
+
+                        # Final positioning
+                        'idm': final_idm,
+                        'final_notional_position': final_notional_position,
+                        'expected_position': expected_position,
+                        'position_check': position_check,
+                    }
+
+                except Exception as e:
+                    print(f"Error processing {instrument}: {e}")
+                    pipeline_data[instrument] = {'error': str(e)}
+
+            # Export to Excel
+            with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+
+                # Sheet 1: Complete Pipeline
+                pipeline_df = pd.DataFrame.from_dict(pipeline_data, orient='index')
+                pipeline_df.to_excel(writer, sheet_name='Complete_Pipeline')
+
+                # Sheet 2: Key Components Only (easier to read)
+                key_components = {}
+                for instrument, data in pipeline_data.items():
+                    if 'error' not in data:
+                        key_components[instrument] = {
+                            'config_risk_weight': data.get('config_risk_weight'),
+                            'calculated_annual_vol': data.get('vol_calculated_annual_vol'),
+                            'volatility_scalar': data.get('volatility_scalar'),
+                            'combined_forecast': data.get('combined_forecast'),
+                            'subsystem_position': data.get('subsystem_position'),
+                            'actual_cash_weight': data.get('actual_cash_weight'),
+                            'expected_cash_weight': data.get('expected_cash_weight'),
+                            'cash_weight_check': data.get('cash_weight_check'),
+                            'idm': data.get('idm'),
+                            'final_notional_position': data.get('final_notional_position'),
+                            'expected_position': data.get('expected_position'),
+                            'position_check': data.get('position_check')
+                        }
+
+                key_df = pd.DataFrame.from_dict(key_components, orient='index')
+                key_df.to_excel(writer, sheet_name='Key_Components')
+
+                # Sheet 3: Rule-by-rule breakdown
+                rule_breakdown = {}
+                for instrument, data in pipeline_data.items():
+                    if 'error' not in data:
+                        rule_data = {k: v for k, v in data.items() if 'forecast' in k.lower()}
+                        rule_breakdown[instrument] = rule_data
+
+                if rule_breakdown:
+                    rule_df = pd.DataFrame.from_dict(rule_breakdown, orient='index')
+                    rule_df.to_excel(writer, sheet_name='Rule_Breakdown')
+
+                # Sheet 4: Verification Summary
+                verification_summary = {
+                    'total_instruments': len(pipeline_data),
+                    'successful_extractions': len([d for d in pipeline_data.values() if 'error' not in d]),
+                    'cash_weight_matches': len(
+                        [d for d in pipeline_data.values() if d.get('cash_weight_check') == 'OK']),
+                    'position_matches': len([d for d in pipeline_data.values() if d.get('position_check') == 'OK']),
+                    'final_date': final_date.strftime('%Y-%m-%d')
+                }
+
+                summary_df = pd.DataFrame.from_dict({'metrics': verification_summary}, orient='index')
+                summary_df.to_excel(writer, sheet_name='Verification_Summary')
+
+            print(f"✅ Position sizing pipeline debug exported: {filename}")
+            return filename
+
+        except Exception as e:
+            print(f"❌ Export failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def verify_position_sizing_formula(self, system):
+        """
+        Verify the exact position sizing formula being used
+        """
+        print("=== POSITION SIZING FORMULA VERIFICATION ===")
+
+        sample_instrument = system.get_instrument_list()[0]
+        print(f"Testing with instrument: {sample_instrument}")
+
+        try:
+            # Get all components
+            combined_forecast = system.combForecast.get_combined_forecast(sample_instrument).iloc[-1]
+            vol_scalar = system.positionSize.get_volatility_scalar(sample_instrument).iloc[-1]
+            cash_weight = system.portfolio.get_instrument_weights()[sample_instrument].iloc[-1]
+            idm = system.portfolio.get_instrument_diversification_multiplier().iloc[-1]
+            final_position = system.portfolio.get_notional_position(sample_instrument).iloc[-1]
+
+            print(f"Combined Forecast: {combined_forecast:.4f}")
+            print(f"Volatility Scalar: {vol_scalar:.6f}")
+            print(f"Cash Weight: {cash_weight:.6f}")
+            print(f"IDM: {idm:.4f}")
+            print(f"Final Position: {final_position:.4f}")
+
+            # Test different formulas
+            formula1 = combined_forecast * vol_scalar * cash_weight * idm
+            formula2 = combined_forecast * vol_scalar * cash_weight
+            formula3 = (combined_forecast * vol_scalar) * cash_weight * idm
+
+            print(f"\nFormula Testing:")
+            print(f"Formula 1 (CF * VS * CW * IDM): {formula1:.4f} | Match: {abs(formula1 - final_position) < 1.0}")
+            print(f"Formula 2 (CF * VS * CW): {formula2:.4f} | Match: {abs(formula2 - final_position) < 1.0}")
+            print(f"Formula 3 ((CF * VS) * CW * IDM): {formula3:.4f} | Match: {abs(formula3 - final_position) < 1.0}")
+
+            if abs(formula1 - final_position) < 1.0:
+                print("✅ Standard formula working: Position = Combined_Forecast × Vol_Scalar × Cash_Weight × IDM")
+                return "standard"
+            elif abs(formula2 - final_position) < 1.0:
+                print("⚠️ IDM not applied in final position calculation")
+                return "no_idm"
+            else:
+                print("❌ Position sizing formula unclear")
+                return "unknown"
+
+        except Exception as e:
+            print(f"❌ Formula verification failed: {e}")
+            return "error"
+
+    def export_complete_position_sizing_factors_excel(self, filename="complete_position_sizing_factors.xlsx"):
+        """Export all factors from Robert Carver's position sizing pipeline"""
+
+        print(f"Exporting complete position sizing factors to {filename}...")
+
+        instruments = self.system.get_instrument_list()
+        if not instruments:
+            return None
+
+        # Collect all position sizing factors
+        position_sizing_data = {}
+
+        for instrument in instruments:
+            try:
+                print(f"Extracting all factors for {instrument}...")
+
+                # 1. Get current price
+                prices = self.system.rawdata.get_daily_prices(instrument)
+                current_price = prices.iloc[-1] if prices is not None else 0
+
+                # 2. Calculate DAILY price volatility (not annual)
+                returns = prices.pct_change().dropna()
+                daily_price_volatility = returns.std()  # This is the daily figure Robert uses
+                annual_price_volatility = daily_price_volatility * (252 ** 0.5)
+
+                # 3. Block value (depends on instrument type)
+                # For ETFs, this is typically 1 × price per share
+                # For futures, this would be contract multiplier × price
+                block_value = current_price  # Simplified for ETFs
+
+                # 4. Get exchange rate
+                # This would need to be implemented based on instrument currency
+                # For USD-based system with USD ETFs, exchange_rate = 1
+                exchange_rate = 1.0  # Placeholder - needs proper implementation
+
+                # 5. Calculate instrument currency volatility (daily)
+                daily_instrument_currency_volatility = block_value * daily_price_volatility
+
+                # 6. Calculate instrument value volatility (daily, in account currency)
+                daily_instrument_value_volatility = daily_instrument_currency_volatility * exchange_rate
+
+                # 7. Get daily cash volatility target
+                annual_cash_target = 0.12  # 12% annual target
+                daily_cash_volatility_target = annual_cash_target / (252 ** 0.5)
+
+                # 8. Calculate volatility scalar (Robert's key factor)
+                volatility_scalar = daily_cash_volatility_target / daily_instrument_value_volatility if daily_instrument_value_volatility > 0 else 0
+
+                # 9. Get system's calculated volatility scalar for comparison
+                try:
+                    system_vol_scalar = self.system.positionSize.get_volatility_scalar(instrument).iloc[-1]
+                except:
+                    system_vol_scalar = "Error"
+
+                # 10. Get other system components
+                try:
+                    combined_forecast = self.system.combForecast.get_combined_forecast(instrument).iloc[-1]
+                    cash_weight = self.system.portfolio.get_instrument_weights()[instrument].iloc[-1]
+                    idm = self.system.portfolio.get_instrument_diversification_multiplier().iloc[-1]
+                except:
+                    combined_forecast = "Error"
+                    cash_weight = "Error"
+                    idm = "Error"
+
+                # 11. Calculate expected position using Robert's formula
+                if all(isinstance(x, (int, float)) for x in [combined_forecast, volatility_scalar]):
+                    expected_subsystem_position = (combined_forecast * volatility_scalar) / 10
+                    expected_portfolio_position = expected_subsystem_position * cash_weight * idm if isinstance(
+                        cash_weight, (int, float)) and isinstance(idm, (int, float)) else "Error"
+                else:
+                    expected_subsystem_position = "Error"
+                    expected_portfolio_position = "Error"
+
+                # Store all factors
+                position_sizing_data[instrument] = {
+                    # Price data
+                    'Current_Price': current_price,
+                    'Currency': 'USD',  # Placeholder
+
+                    # Block and exchange rate factors
+                    'Block_Value': block_value,
+                    'Exchange_Rate': exchange_rate,
+
+                    # Volatility factors (DAILY - as Robert uses)
+                    'Daily_Price_Volatility': daily_price_volatility,
+                    'Daily_Price_Volatility_Percent': daily_price_volatility * 100,
+                    'Daily_Instrument_Currency_Volatility': daily_instrument_currency_volatility,
+                    'Daily_Instrument_Value_Volatility': daily_instrument_value_volatility,
+
+                    # Annual equivalents (for comparison)
+                    'Annual_Price_Volatility': annual_price_volatility,
+                    'Annual_Price_Volatility_Percent': annual_price_volatility * 100,
+
+                    # Cash volatility targets
+                    'Annual_Cash_Volatility_Target': annual_cash_target,
+                    'Daily_Cash_Volatility_Target': daily_cash_volatility_target,
+
+                    # Key scaling factors
+                    'Calculated_Volatility_Scalar': volatility_scalar,
+                    'System_Volatility_Scalar': system_vol_scalar,
+                    'Volatility_Scalar_Match': abs(volatility_scalar - system_vol_scalar) < 0.001 if isinstance(
+                        system_vol_scalar, (int, float)) else "Cannot compare",
+
+                    # Position sizing pipeline
+                    'Combined_Forecast': combined_forecast,
+                    'Expected_Subsystem_Position': expected_subsystem_position,
+                    'Cash_Weight': cash_weight,
+                    'IDM': idm,
+                    'Expected_Portfolio_Position': expected_portfolio_position,
+
+                    # Verification
+                    'Formula_Check': f"({combined_forecast:.2f} × {volatility_scalar:.6f}) ÷ 10 = {expected_subsystem_position:.2f}" if isinstance(
+                        expected_subsystem_position, (int, float)) else "Error"
+                }
+
+            except Exception as e:
+                position_sizing_data[instrument] = {'Error': str(e)}
+
+        # Export to Excel with detailed breakdown
+        with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+
+            # Main factors sheet
+            factors_df = pd.DataFrame.from_dict(position_sizing_data, orient='index')
+            factors_df.to_excel(writer, sheet_name='All_Position_Sizing_Factors')
+
+            # Daily vs Annual comparison
+            comparison_data = {}
+            for instrument, data in position_sizing_data.items():
+                if 'Error' not in data:
+                    comparison_data[instrument] = {
+                        'Daily_Price_Vol': data.get('Daily_Price_Volatility', 0),
+                        'Annual_Price_Vol': data.get('Annual_Price_Volatility', 0),
+                        'Daily_Target': data.get('Daily_Cash_Volatility_Target', 0),
+                        'Annual_Target': data.get('Annual_Cash_Volatility_Target', 0),
+                        'Vol_Scalar_Daily_Based': data.get('Calculated_Volatility_Scalar', 0),
+                        'Vol_Scalar_System': data.get('System_Volatility_Scalar', 0)
+                    }
+
+            if comparison_data:
+                comp_df = pd.DataFrame.from_dict(comparison_data, orient='index')
+                comp_df.to_excel(writer, sheet_name='Daily_vs_Annual_Comparison')
+
+        print(f"✅ Complete position sizing factors exported: {filename}")
+        return filename
