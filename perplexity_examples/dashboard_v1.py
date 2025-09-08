@@ -1975,16 +1975,11 @@ Win Rate: {performance['win_rate']:.1%}
                         'Volatility_Scalar_Source': 'UNKNOWN',  # NEW: Track source
                         'IDM': np.nan,  # [EXTRACTED]
                         'Instrument_Value_Volatility': np.nan,  # [CALCULATED]
-                        'Basic_Formula_Result': np.nan,  # [CALCULATED: CF × VS ÷ 10]
-                        'Advanced_Formula_Result': np.nan,  # [CALCULATED: CF × VS × IDM]
-                        'Subsystem_Position': np.nan,  # [EXTRACTED - ACTUAL]
-                        'Formula_Match': 'UNKNOWN',  # [CALCULATED - VERIFICATION]
+                        'Subsystem_Position': np.nan  # [EXTRACTED - ACTUAL]
 
                         # === OTHER POSITIONS ===
-                        'Portfolio_Weighted_Position': np.nan,
-                        'Cash_Weight': np.nan,
-                        'Cash_Allocated': np.nan,
-                        'Notional_Position': np.nan
+                        # 'Portfolio_Weighted_Position': np.nan,
+                        # 'Notional_Position': np.nan
                     }
 
                     # 1. CLOSE PRICE [EXTRACTED]
@@ -2131,61 +2126,8 @@ Win Rate: {performance['win_rate']:.1%}
                     except:
                         pass
 
-                    # 9. CALCULATE FORMULAS [CALCULATED]
-                    cf = row_data['Combined_Forecast']
-                    vs = row_data['Volatility_Scalar']
-                    idm = row_data['IDM']
-
-                    if pd.notna(cf) and pd.notna(vs):
-                        # Basic Carver formula: CF × VS ÷ 10
-                        row_data['Basic_Formula_Result'] = cf * vs / 10
-
-                        if pd.notna(idm):
-                            # Advanced formula with IDM: CF × VS × IDM
-                            row_data['Advanced_Formula_Result'] = cf * vs * idm
-
-                        # Check which formula matches actual position
-                        actual_pos = row_data['Subsystem_Position']
-                        if pd.notna(actual_pos):
-                            basic_diff = abs(row_data['Basic_Formula_Result'] - actual_pos)
-                            advanced_diff = abs(row_data['Advanced_Formula_Result'] - actual_pos)
-
-                            if basic_diff < 1.0:
-                                row_data['Formula_Match'] = 'BASIC (CF×VS÷10)'
-                            elif advanced_diff < 1.0:
-                                row_data['Formula_Match'] = 'ADVANCED (CF×VS×IDM)'
-                            elif basic_diff < advanced_diff:
-                                row_data['Formula_Match'] = f'BASIC CLOSER (diff: {basic_diff:.1f})'
-                            else:
-                                row_data['Formula_Match'] = f'ADVANCED CLOSER (diff: {advanced_diff:.1f})'
-
-                    # 10. OTHER POSITIONS [EXTRACTED]
-                    try:
-                        portfolio_pos_series = self.system.portfolio.get_notional_position(instrument)
-                        if portfolio_pos_series is not None and len(portfolio_pos_series) > 0:
-                            if final_date in portfolio_pos_series.index:
-                                row_data['Portfolio_Weighted_Position'] = portfolio_pos_series.loc[final_date]
-                            else:
-                                available_dates = portfolio_pos_series.index[portfolio_pos_series.index <= final_date]
-                                if len(available_dates) > 0:
-                                    row_data['Portfolio_Weighted_Position'] = portfolio_pos_series.loc[
-                                        available_dates[-1]]
-                    except:
-                        pass
-
-                    # 11. CASH WEIGHT AND ALLOCATION [CALCULATED]
-                    try:
-                        if (pd.notna(row_data['Risk_Weight_Config']) and row_data['Risk_Weight_Config'] > 0 and
-                                pd.notna(row_data['Volatility_Scalar']) and row_data['Volatility_Scalar'] > 0):
-                            # Carver method: cash_weight = risk_weight × volatility_scalar
-                            fundamental_cash_weight = row_data['Risk_Weight_Config'] * row_data['Volatility_Scalar']
-                            row_data['Cash_Weight'] = fundamental_cash_weight
-                            row_data['Cash_Allocated'] = fundamental_cash_weight * portfolio_value
-                    except:
-                        pass
-
                     # 12. NOTIONAL POSITION
-                    row_data['Notional_Position'] = row_data['Portfolio_Weighted_Position']
+                    '''row_data['Notional_Position'] = row_data['Portfolio_Weighted_Position']'''
 
                     final_day_data.append(row_data)
 
@@ -2203,9 +2145,8 @@ Win Rate: {performance['win_rate']:.1%}
                                                'Daily_Volatility_Decimal', 'Annual_Volatility_Pct',
                                                'Annual_Volatility_Decimal',
                                                'Target_Volatility', 'Volatility_Scalar', 'Combined_Forecast', 'IDM',
-                                               'Subsystem_Position', 'Portfolio_Weighted_Position', 'Cash_Weight',
-                                               'Cash_Allocated', 'Notional_Position', 'Instrument_Value_Volatility',
-                                               'Basic_Formula_Result', 'Advanced_Formula_Result']}
+                                               'Subsystem_Position', 'Instrument_Value_Volatility']}
+
                     })
 
             # Create DataFrame and export to Excel
@@ -2230,14 +2171,7 @@ Win Rate: {performance['win_rate']:.1%}
                 'Volatility_Scalar_Source': 'Volatility_Scalar_Source [INFO]',  # NEW
                 'IDM': 'IDM [EXTRACTED]',
                 'Instrument_Value_Volatility': 'Instrument_Value_Volatility [CALCULATED]',
-                'Basic_Formula_Result': 'Basic_Formula_Result [CALCULATED: CF×VS÷10]',
-                'Advanced_Formula_Result': 'Advanced_Formula_Result [CALCULATED: CF×VS×IDM]',
-                'Subsystem_Position': 'Subsystem_Position [EXTRACTED]',
-                'Formula_Match': 'Formula_Match [CALCULATED]',
-                'Portfolio_Weighted_Position': 'Portfolio_Weighted_Position [EXTRACTED]',
-                'Cash_Weight': 'Cash_Weight [CALCULATED]',
-                'Cash_Allocated': 'Cash_Allocated [CALCULATED]',
-                'Notional_Position': 'Notional_Position [EXTRACTED]'
+                'Subsystem_Position': 'Subsystem_Position [EXTRACTED]'
             }
 
             # Rename columns for Excel export
@@ -2301,16 +2235,11 @@ Win Rate: {performance['win_rate']:.1%}
                 worksheet.set_column('N:N', 15)  # Volatility Scalar Source
                 worksheet.set_column('O:O', 12, highlight_decimal_format)  # IDM
                 worksheet.set_column('P:P', 15, highlight_currency_format)  # Instrument Value Vol
-                worksheet.set_column('Q:Q', 15, highlight_large_number_format)  # Basic Formula
-                worksheet.set_column('R:R', 15, highlight_large_number_format)  # Advanced Formula
-                worksheet.set_column('S:S', 15, large_number_format)  # Actual Subsystem Pos
-                worksheet.set_column('T:T', 25)  # Formula Match
+                worksheet.set_column('Q:Q', 15, large_number_format)  # Actual Subsystem Pos
 
                 # Other columns (no highlighting needed)
-                worksheet.set_column('U:U', 15, large_number_format)  # Portfolio Weighted Position
-                worksheet.set_column('V:V', 12, decimal_format)  # Cash Weight
-                worksheet.set_column('W:W', 15, currency_format)  # Cash Allocated
-                worksheet.set_column('X:X', 15, large_number_format)  # Notional Position
+                '''worksheet.set_column('R:R', 15, large_number_format)  # Portfolio Weighted Position
+                worksheet.set_column('S:S', 15, large_number_format)'''  # Notional Position
 
                 print(f"✅ FIXED volatility final day backtest report exported: {filename}")
                 print(f"📊 Processed {len(final_day_data)} instruments with corrected volatility calculations")
@@ -2336,10 +2265,10 @@ Win Rate: {performance['win_rate']:.1%}
                     print(f"  {source}: {count} instruments")
 
                 # Display summary of formula matches
-                formula_matches = df['Formula_Match'].value_counts()
+                '''formula_matches = df['Formula_Match'].value_counts()
                 print(f"🔍 Formula Analysis Summary:")
                 for formula, count in formula_matches.items():
-                    print(f"  {formula}: {count} instruments")
+                    print(f"  {formula}: {count} instruments")'''
 
                 # NEW: Always create leverage analysis sheets
                 if leverage_analysis:
