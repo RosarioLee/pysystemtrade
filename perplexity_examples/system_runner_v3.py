@@ -398,11 +398,13 @@ class ETFSystemRunner:
                 reports_generated['cash_weights_time_series'] = time_series_file
                 print(f"✅ Cash weights time series: {time_series_file}")
 
-            # NEW Report 4: Final Day Backtest Report
+            # Report 4: Final Day Backtest Report (now includes timeseries sheet)
             print("📋 Exporting final day backtest report...")
             final_day_file = self.dashboard.export_final_day_backtest_report(
-                "final_day_backtest_report.xlsx"
+                "final_day_backtest_report.xlsx",
+                timeseries_instrument="IVV"  # or any instrument you prefer
             )
+
             if final_day_file:
                 reports_generated['final_day_report'] = final_day_file
                 print(f"✅ Final day backtest report: {final_day_file}")
