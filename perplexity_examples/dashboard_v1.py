@@ -181,74 +181,93 @@ class SimpleETFDashboard:
 
         return comparison_data
 
-    def _get_volatility_scalar_safe(self, system, instrument):
+    def get_volatility_scalar_safe(self, system, instrument):
         """
-        FIXED: Safely get volatility scalar using multiple PySystemTrade methods
+        ENHANCED: Safely get volatility scalar using multiple PySystemTrade methods
+        Now returns both value and source information for tracking
         """
-        vol_scalar = 0
-
-        # Method 1: Try the standard PySystemTrade way
-        try:
-            vol_scalar_series = system.positionSize.get_vol_scalar(instrument)
-            if vol_scalar_series is not None and len(vol_scalar_series) > 0:
-                vol_scalar = vol_scalar_series.iloc[-1]
-                if vol_scalar > 0:
-                    return vol_scalar
-        except (AttributeError, Exception):
-            pass
-
-        # Method 2: Try alternative method name
+        # Method 1: Direct volatility scalar access (most reliable)
         try:
             vol_scalar_series = system.positionSize.get_volatility_scalar(instrument)
             if vol_scalar_series is not None and len(vol_scalar_series) > 0:
                 vol_scalar = vol_scalar_series.iloc[-1]
                 if vol_scalar > 0:
-                    return vol_scalar
+                    return vol_scalar, "PYSYSTEMTRADE_DIRECT"
         except (AttributeError, Exception):
             pass
 
-        # Method 3: Calculate manually from volatility and vol target
+        # Method 2: Alternative method names for different versions
+        alternative_methods = ['get_vol_scalar', 'volatility_scalar', '_volatility_scalar']
+        for method_name in alternative_methods:
+            try:
+                if hasattr(system.positionSize, method_name):
+                    method = getattr(system.positionSize, method_name)
+                    vol_scalar_series = method(instrument)
+                    if vol_scalar_series is not None and len(vol_scalar_series) > 0:
+                        vol_scalar = vol_scalar_series.iloc[-1]
+                        if vol_scalar > 0:
+                            return vol_scalar, f"PYSYSTEMTRADE_{method_name.upper()}"
+            except (AttributeError, Exception):
+                continue
+
+        # Method 3: Reverse engineer from position calculations
         try:
-            # Get daily volatility from system
+            subsystem_pos = system.positionSize.get_subsystem_position(instrument)
+            combined_forecast = system.combForecast.get_combined_forecast(instrument)
+
+            if (subsystem_pos is not None and combined_forecast is not None and
+                    len(subsystem_pos) > 0 and len(combined_forecast) > 0):
+
+                # Find the most recent date with both data points
+                pos_dates = set(subsystem_pos.dropna().index)
+                forecast_dates = set(combined_forecast.dropna().index)
+                common_dates = sorted(pos_dates.intersection(forecast_dates))
+
+                if len(common_dates) > 0:
+                    latest_date = common_dates[-1]
+                    pos = subsystem_pos.loc[latest_date]
+                    forecast = combined_forecast.loc[latest_date]
+
+                    if abs(forecast) > 0.01:  # Avoid division by very small numbers
+                        # Formula: subsystem_position = (vol_scalar * combined_forecast) / 10
+                        vol_scalar = (pos * 10) / forecast
+                        if vol_scalar > 0:
+                            return abs(vol_scalar), "REVERSE_ENGINEERED"
+        except (AttributeError, Exception):
+            pass
+
+        # Method 4: Manual calculation from raw volatility data
+        try:
+            # Get daily volatility
             vol_series = system.rawdata.get_daily_percentage_volatility(instrument)
             if vol_series is not None and len(vol_series) > 0:
                 current_vol = vol_series.iloc[-1]
                 if current_vol > 0:
+                    # Get target volatility from config
                     vol_target = getattr(system.config, 'percentage_vol_target', 12.0) / 100
                     vol_scalar = vol_target / current_vol
-                    return vol_scalar
+                    return vol_scalar, "CALCULATED_FROM_VOLATILITY"
         except (AttributeError, Exception):
             pass
 
-        # Method 4: Try to get from forecast scalars (different approach)
-        try:
-            # Sometimes volatility scalar is buried in position sizing calculations
-            subsystem_pos = system.positionSize.get_subsystem_position(instrument)
-            if subsystem_pos is not None and len(subsystem_pos) > 0:
-                # Try to reverse-engineer the volatility scalar
-                # This is more complex but sometimes necessary
-                pass
-        except (AttributeError, Exception):
-            pass
-
-        # Method 5: Manual calculation from price data
+        # Method 5: Final fallback - calculate from price data
         try:
             prices = system.rawdata.get_daily_prices(instrument)
-            if prices is not None and len(prices) > 35:
+            if prices is not None and len(prices) >= 35:
                 returns = prices.pct_change().dropna()
-                if len(returns) > 35:
+                if len(returns) >= 35:
                     # Calculate 35-day rolling volatility (matching your config)
                     daily_vol = returns.rolling(window=35, min_periods=10).std().iloc[-1]
                     if daily_vol > 0:
                         annual_vol = daily_vol * (252 ** 0.5)  # Annualize
                         vol_target = getattr(system.config, 'percentage_vol_target', 12.0) / 100
                         vol_scalar = vol_target / annual_vol
-                        return vol_scalar
+                        return vol_scalar, "CALCULATED_FROM_PRICES"
         except Exception:
             pass
 
-        print(f"⚠️ Could not get volatility scalar for {instrument} - using 0")
-        return 0
+        print(f"WARNING: Could not extract volatility scalar for {instrument}")
+        return 0, "ERROR_ALL_METHODS_FAILED"
 
     def _get_actual_cash_weights_quiet(self, system, date=None):
         """
@@ -1982,7 +2001,11 @@ Win Rate: {performance['win_rate']:.1%}
                         'Notional_Position': np.nan,
                         'Position_Value': np.nan,
                         'Leverage_Contribution': np.nan,
-                        'Risk_Exposure': np.nan
+                        'Risk_Exposure': np.nan,
+                        'Native_Volatility_Scalar_PySystemTrade': np.nan,
+                        'Native_Volatility_Scalar_Source': "UNKNOWN",
+                        # NEW FIELD: Add pysystemtrade daily returns volatility
+                        'PST_Daily_Returns_Volatility': np.nan
                     }
 
                     # 1. CLOSE PRICE [EXTRACTED]
@@ -2052,34 +2075,48 @@ Win Rate: {performance['win_rate']:.1%}
                         print(f"⚠️ Volatility calculation failed for {instrument}: {e}")
                         pass
 
+                    # NEW: Extract pysystemtrade daily returns volatility (the actual one used in calculations)
+                    try:
+                        pst_daily_vol_series = self.system.rawdata.daily_returns_volatility(instrument)
+                        if pst_daily_vol_series is not None and len(pst_daily_vol_series) > 0:
+                            if final_date in pst_daily_vol_series.index:
+                                pst_daily_vol = pst_daily_vol_series.loc[final_date]
+                            else:
+                                available_dates = pst_daily_vol_series.index[pst_daily_vol_series.index <= final_date]
+                                if len(available_dates) > 0:
+                                    pst_daily_vol = pst_daily_vol_series.loc[available_dates[-1]]
+                                else:
+                                    pst_daily_vol = None
+
+                            if pd.notna(pst_daily_vol) and pst_daily_vol > 0:
+                                row_data['PST_Daily_Returns_Volatility'] = pst_daily_vol
+                                print(f"   📊 {instrument}: PST daily vol = {pst_daily_vol:.6f}")
+                    except Exception as e:
+                        print(f"   ❌ PST daily volatility extraction failed for {instrument}: {e}")
+                        pass
+
                     # 5. VOLATILITY SCALAR [EXTRACTED/CALCULATED]
                     vol_scalar = None
                     vol_scalar_source = 'UNKNOWN'
                     native_vol_scalar = None
                     native_vol_scalar_source = 'UNKNOWN'
 
-                    # NEW: Extract native pysystemtrade volatility scalar
+                    # UPDATED: Native volatility scalar extraction with proper error handling
                     try:
-                        native_vol_scalar_series = self.system.positionSize.get_volatility_scalar(instrument)
-                        if native_vol_scalar_series is not None and len(native_vol_scalar_series) > 0:
-                            if final_date in native_vol_scalar_series.index:
-                                native_vol_scalar = native_vol_scalar_series.loc[final_date]
-                            else:
-                                available_dates = native_vol_scalar_series.index[
-                                    native_vol_scalar_series.index <= final_date]
-                                if len(available_dates) > 0:
-                                    native_vol_scalar = native_vol_scalar_series.loc[available_dates[-1]]
+                        native_vol_scalar, native_vol_scalar_source = self.get_volatility_scalar_safe(self.system,
+                                                                                                      instrument)
 
-                            if pd.notna(native_vol_scalar) and native_vol_scalar > 0:
-                                row_data['Native_Volatility_Scalar_PySystemTrade'] = native_vol_scalar
-                                native_vol_scalar_source = 'PYSYSTEMTRADE_NATIVE'
-                            else:
-                                row_data['Native_Volatility_Scalar_PySystemTrade'] = np.nan
+                        if native_vol_scalar and native_vol_scalar > 0:
+                            row_data['Native_Volatility_Scalar_PySystemTrade'] = native_vol_scalar
+                            row_data['Native_Volatility_Scalar_Source'] = native_vol_scalar_source
                         else:
                             row_data['Native_Volatility_Scalar_PySystemTrade'] = np.nan
+                            row_data['Native_Volatility_Scalar_Source'] = "NO_DATA"
+
                     except Exception as e:
-                        print(f"⚠️ Native volatility scalar extraction failed for {instrument}: {e}")
+                        print(f"Native volatility scalar extraction failed for {instrument}: {e}")
                         row_data['Native_Volatility_Scalar_PySystemTrade'] = np.nan
+                        row_data['Native_Volatility_Scalar_Source'] = "ERROR"
 
                     row_data['Native_Volatility_Scalar_Source'] = native_vol_scalar_source
                     try:
@@ -2230,7 +2267,8 @@ Win Rate: {performance['win_rate']:.1%}
                 'Leverage_Contribution': 'Leverage_Contribution [CALCULATED]',
                 'Risk_Exposure': 'Risk_Exposure [CALCULATED]',
                 'Native_Volatility_Scalar_PySystemTrade': 'Native_Volatility_Scalar_PySystemTrade [EXTRACTED]',
-                'Native_Volatility_Scalar_Source': 'Native_Volatility_Scalar_Source [INFO]'
+                'Native_Volatility_Scalar_Source': 'Native_Volatility_Scalar_Source [INFO]',
+                'PST_Daily_Returns_Volatility': 'PST_Daily_Returns_Volatility [EXTRACTED]'
 
             }
 
@@ -2357,6 +2395,7 @@ Win Rate: {performance['win_rate']:.1%}
 
                 if timeseries_instrument and timeseries_instrument in instruments:
                     print(f"📈 Adding single instrument timeseries sheet for {timeseries_instrument}...")
+
 
                     # Generate timeseries dataframe
                     timeseries_df = self.get_single_instrument_timeseries_dataframe(timeseries_instrument)
@@ -2679,7 +2718,10 @@ Win Rate: {performance['win_rate']:.1%}
                         'Notional_Position': np.nan,
                         'Position_Value': np.nan,
                         'Leverage_Contribution': np.nan,
-                        'Risk_Exposure': np.nan
+                        'Risk_Exposure': np.nan,
+                        'Native_Volatility_Scalar_PySystemTrade': np.nan,
+                        'Native_Volatility_Scalar_Source': "UNKNOWN",
+                        'PST_Daily_Returns_Volatility': np.nan
                     }
 
                     # 1. CLOSE PRICE [EXTRACTED] - SAME AS FINAL_DAY_REPORT

@@ -182,6 +182,24 @@ class ETFSystemRunner:
         try:
             print("\n🔍 Step 4: Running System Diagnostics...")
 
+            # NEW: Add value_of_block_price_move debugging FIRST
+            print("\n🔧 Value of Block Price Move Debug:")
+            block_moves = self.debug_value_of_block_price_move()
+
+            # NEW: Deep volatility chain analysis
+            print("\n🔗 Deep Volatility Chain Analysis:")
+            self.debug_volatility_calculation_chain(['BBAX', 'HYD', 'IVV', 'VGK'])
+
+            # NEW: Add the 3 new debug functions
+            print("\n🏢 Corporate Actions Analysis:")
+            self.debug_corporate_actions(['HYD', 'IVV', 'BBAX'])
+
+            print("\n📅 Data Period Analysis:")
+            self.debug_data_periods(['HYD', 'IVV', 'BBAX'])
+
+            print("\n📊 Yahoo Data Quality Analysis:")
+            self.debug_yahoo_data_quality(['HYD', 'IVV', 'BBAX'])
+
             # Volatility diagnostics
             print("\n📈 Volatility Diagnostic Analysis:")
             vol_issues = self._run_volatility_diagnostics()
@@ -286,6 +304,216 @@ class ETFSystemRunner:
                 vol_issues.append(f"{instrument}: Analysis failed")
 
         return vol_issues
+
+    def debug_value_of_block_price_move(self):
+        """Debug function to check value_of_block_price_move for all instruments"""
+        try:
+            print("\n" + "=" * 80)
+            print("🔍 DEBUG: Value of Block Price Move Analysis")
+            print("=" * 80)
+
+            instruments = self.trading_system.get_instrument_list()
+            print(f"Analyzing {len(instruments)} instruments for value_of_block_price_move...\n")
+
+            block_moves = {}
+            anomalies = []
+
+            for instrument in instruments:
+                try:
+                    # Get value_of_block_price_move from the system
+                    block_move = self.trading_system.rawdata.get_value_of_block_price_move(instrument)
+
+                    # Handle Series objects
+                    if hasattr(block_move, 'iloc'):
+                        block_value = float(block_move.iloc[-1])  # Latest value
+                    else:
+                        block_value = float(block_move) if block_move is not None else 1.0
+
+                    block_moves[instrument] = block_value
+
+                    # Check for non-standard values (not 1.0)
+                    if abs(block_value - 1.0) > 0.001:  # Allow for small floating point differences
+                        anomalies.append((instrument, block_value))
+                        print(f"⚠️  {instrument}: {block_value:.6f} (NON-STANDARD)")
+                    else:
+                        print(f"✅ {instrument}: {block_value:.6f}")
+
+                except Exception as e:
+                    print(f"❌ {instrument}: ERROR - {e}")
+                    block_moves[instrument] = f"ERROR: {e}"
+
+            print(f"\n📊 SUMMARY:")
+            print(f"Total instruments: {len(instruments)}")
+            print(f"Non-standard block moves: {len(anomalies)}")
+
+            if anomalies:
+                print(f"\n🎯 FOCUS ON THESE ANOMALIES:")
+                for instrument, value in anomalies:
+                    print(f"  {instrument}: {value:.6f}")
+
+                    # Special focus on HYD and IVV
+                    if instrument in ['HYD', 'IVV']:
+                        print(f"    >>> THIS MATCHES YOUR MISSING FACTOR ISSUE! <<<")
+
+                        # Calculate expected missing factor
+                        expected_factor = value  # This should match your Missing Factor
+                        print(f"    Expected Missing Factor: {expected_factor:.3f}")
+
+            # Store results for further analysis
+            self.results['block_move_debug'] = {
+                'block_moves': block_moves,
+                'anomalies': anomalies,
+                'standard_instruments': [k for k, v in block_moves.items()
+                                         if isinstance(v, (int, float)) and abs(v - 1.0) <= 0.001]
+            }
+
+            return block_moves
+
+        except Exception as e:
+            print(f"❌ DEBUG function failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return {}
+
+    def debug_volatility_calculation_chain(self, focus_instruments=None):
+        """Deep debug of the complete volatility scalar calculation chain"""
+        try:
+            print("\n" + "=" * 80)
+            print("🔍 DEBUG: Complete Volatility Calculation Chain")
+            print("=" * 80)
+
+            if focus_instruments is None:
+                focus_instruments = ['BBAX', 'HYD', 'IVV']  # Include working example + problem cases
+
+            for instrument in focus_instruments:
+                if instrument not in self.trading_system.get_instrument_list():
+                    print(f"⚠️ {instrument} not in instrument list, skipping...")
+                    continue
+
+                print(f"\n🎯 ANALYZING {instrument} - COMPLETE CHAIN:")
+                print("-" * 60)
+
+                try:
+                    # Step 1: Raw Price Data
+                    prices = self.trading_system.rawdata.get_daily_prices(instrument)
+                    latest_price = prices.iloc[-1] if prices is not None else None
+                    print(f"1️⃣ Latest Price: ${latest_price:.4f}" if latest_price else "1️⃣ Price: MISSING")
+
+                    # Step 2: Value of Block Price Move (already confirmed = 1.0)
+                    block_move = self.trading_system.rawdata.get_value_of_block_price_move(instrument)
+                    block_value = float(block_move.iloc[-1]) if hasattr(block_move, 'iloc') else float(block_move)
+                    print(f"2️⃣ Block Price Move: {block_value:.6f}")
+
+                    # Step 3: FX Rate (key suspect!)
+                    try:
+                        fx_rate = self.trading_system.rawdata.get_fx_for_instrument(instrument, "USD")
+                        if hasattr(fx_rate, 'iloc'):
+                            fx_value = float(fx_rate.iloc[-1])
+                        else:
+                            fx_value = float(fx_rate) if fx_rate is not None else 1.0
+                        print(f"3️⃣ FX Rate (to USD): {fx_value:.6f}")
+
+                        if abs(fx_value - 1.0) > 0.001:
+                            print(f"    ⚠️ NON-USD CURRENCY DETECTED!")
+
+                    except Exception as fx_error:
+                        print(f"3️⃣ FX Rate: ERROR - {fx_error}")
+                        fx_value = 1.0
+
+                    # Step 4: Block Value Calculation
+                    block_dollar_value = latest_price * block_value * 0.01 * fx_value
+                    print(f"4️⃣ Block Value ($): ${block_dollar_value:.4f}")
+
+                    # Step 5: Daily Returns Volatility
+                    try:
+                        daily_vol = self.trading_system.rawdata.daily_returns_volatility(instrument)
+                        if daily_vol is not None:
+                            latest_daily_vol = float(daily_vol.iloc[-1])
+                            print(f"5️⃣ Daily Returns Vol: {latest_daily_vol:.6f} ({latest_daily_vol * 100:.4f}%)")
+
+                            # Manual verification
+                            returns = prices.pct_change().dropna()
+                            manual_daily_vol = returns.std()
+                            print(f"    Manual verification: {manual_daily_vol:.6f} ({manual_daily_vol * 100:.4f}%)")
+
+                            vol_diff = abs(latest_daily_vol - manual_daily_vol)
+                            if vol_diff > 0.0001:
+                                print(f"    ⚠️ VOLATILITY DISCREPANCY: {vol_diff:.6f}")
+                        else:
+                            print(f"5️⃣ Daily Vol: MISSING")
+                            latest_daily_vol = 0
+
+                    except Exception as vol_error:
+                        print(f"5️⃣ Daily Vol: ERROR - {vol_error}")
+                        latest_daily_vol = 0
+
+                    # Step 6: Instrument Value Volatility (Key Calculation!)
+                    try:
+                        instrument_value_vol = self.trading_system.positionSize.get_instrument_value_volatility(
+                            instrument)
+                        if instrument_value_vol is not None:
+                            latest_instr_vol = float(instrument_value_vol.iloc[-1])
+                            print(f"6️⃣ Instrument Value Vol: ${latest_instr_vol:.4f}")
+
+                            # Manual calculation check
+                            manual_instr_vol = block_dollar_value * latest_daily_vol
+                            print(f"    Manual calculation: ${manual_instr_vol:.4f}")
+
+                            instr_vol_diff = abs(latest_instr_vol - manual_instr_vol)
+                            if instr_vol_diff > 0.01:
+                                print(f"    ⚠️ INSTRUMENT VOL DISCREPANCY: ${instr_vol_diff:.4f}")
+                                print(f"    🔍 This could be the source of the missing factor!")
+                        else:
+                            print(f"6️⃣ Instrument Value Vol: MISSING")
+                            latest_instr_vol = 0
+
+                    except Exception as instr_error:
+                        print(f"6️⃣ Instrument Value Vol: ERROR - {instr_error}")
+                        latest_instr_vol = 0
+
+                    # Step 7: Daily Cash Vol Target
+                    daily_cash_vol_target = 1000000 * 0.12 / 16  # Your confirmed formula
+                    print(f"7️⃣ Daily Cash Vol Target: ${daily_cash_vol_target:.2f}")
+
+                    # Step 8: Final Volatility Scalar
+                    if latest_instr_vol > 0:
+                        calculated_vol_scalar = daily_cash_vol_target / latest_instr_vol
+                        print(f"8️⃣ Calculated Vol Scalar: {calculated_vol_scalar:.6f}")
+
+                        # Compare with system value
+                        system_vol_scalar = self.trading_system.positionSize.get_volatility_scalar(instrument)
+                        if system_vol_scalar is not None:
+                            system_scalar_value = float(system_vol_scalar.iloc[-1])
+                            print(f"    System Vol Scalar: {system_scalar_value:.6f}")
+
+                            scalar_diff = abs(calculated_vol_scalar - system_scalar_value)
+                            if scalar_diff > 0.001:
+                                print(f"    ⚠️ SCALAR DISCREPANCY: {scalar_diff:.6f}")
+
+                            # Calculate the missing factor based on your Excel data
+                            if instrument == 'HYD':
+                                expected_missing = 0.873
+                                actual_missing = system_scalar_value / calculated_vol_scalar
+                                print(f"    🎯 Expected Missing Factor: {expected_missing:.3f}")
+                                print(f"    🎯 Actual Missing Factor: {actual_missing:.3f}")
+
+                            elif instrument == 'IVV':
+                                expected_missing = 0.715
+                                actual_missing = system_scalar_value / calculated_vol_scalar
+                                print(f"    🎯 Expected Missing Factor: {expected_missing:.3f}")
+                                print(f"    🎯 Actual Missing Factor: {actual_missing:.3f}")
+
+                    print("-" * 60)
+
+                except Exception as chain_error:
+                    print(f"❌ {instrument} chain analysis failed: {chain_error}")
+
+            print(f"\n📊 VOLATILITY CHAIN ANALYSIS COMPLETED")
+
+        except Exception as e:
+            print(f"❌ Volatility chain debug failed: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _calculate_system_performance(self):
         """Calculate comprehensive system performance"""
@@ -402,7 +630,7 @@ class ETFSystemRunner:
             print("📋 Exporting final day backtest report...")
             final_day_file = self.dashboard.export_final_day_backtest_report(
                 "final_day_backtest_report.xlsx",
-                timeseries_instrument="IVV"  # or any instrument you prefer
+                timeseries_instrument="BBAX"  # or any instrument you prefer
             )
 
             if final_day_file:
@@ -520,6 +748,134 @@ class ETFSystemRunner:
         except Exception as e:
             print(f"❌ Error displaying final summary: {e}")
 
+    def debug_corporate_actions(self, focus_instruments=['HYD', 'IVV', 'BBAX']):
+        """Check for corporate actions affecting price/volatility calculations"""
+        import pandas as pd
+        try:
+            print(f"\n🔍 CORPORATE ACTIONS DEBUG")
+            print("=" * 60)
+
+            for instrument in focus_instruments:
+                print(f"\n📊 {instrument} - Price History Analysis:")
+
+                # Get raw price data
+                prices = self.trading_system.rawdata.get_daily_prices(instrument)
+                returns = prices.pct_change().dropna()
+
+                # Check for unusual price jumps (splits/dividends)
+                large_moves = returns[abs(returns) > 0.05]  # >5% moves
+                very_large_moves = returns[abs(returns) > 0.10]  # >10% moves
+
+                print(f"   📈 Total observations: {len(prices)}")
+                print(f"   📈 Large moves (>5%): {len(large_moves)}")
+                print(f"   📈 Very large moves (>10%): {len(very_large_moves)}")
+
+                if len(very_large_moves) > 0:
+                    print(f"   ⚠️ SUSPICIOUS LARGE MOVES DETECTED:")
+                    for date, move in very_large_moves.tail(5).items():
+                        print(f"      {date.strftime('%Y-%m-%d')}: {move:.4f} ({move * 100:.2f}%)")
+
+                # Check price level consistency
+                price_start = prices.iloc[0]
+                price_end = prices.iloc[-1]
+                total_return = (price_end / price_start) - 1
+
+                print(f"   💰 Start price: ${price_start:.4f}")
+                print(f"   💰 End price: ${price_end:.4f}")
+                print(f"   📈 Total return: {total_return:.4f} ({total_return * 100:.2f}%)")
+
+                # Check for price discontinuities
+                price_ratios = prices / prices.shift(1)
+                unusual_ratios = price_ratios[(price_ratios < 0.8) | (price_ratios > 1.2)]
+
+                if len(unusual_ratios) > 0:
+                    print(f"   ⚠️ PRICE DISCONTINUITIES DETECTED:")
+                    for date, ratio in unusual_ratios.tail(3).items():
+                        prev_price = prices.shift(1).loc[date]
+                        curr_price = prices.loc[date]
+                        print(
+                            f"      {date.strftime('%Y-%m-%d')}: ${prev_price:.4f} → ${curr_price:.4f} (ratio: {ratio:.4f})")
+
+        except Exception as e:
+            print(f"❌ Corporate actions debug failed: {e}")
+
+    def debug_data_periods(self, focus_instruments=['HYD', 'IVV', 'BBAX']):
+        """Check data period consistency across instruments"""
+        import pandas as pd
+        try:
+            print(f"\n🔍 DATA PERIOD ANALYSIS")
+            print("=" * 60)
+
+            for instrument in focus_instruments:
+                prices = self.trading_system.rawdata.get_daily_prices(instrument)
+                returns = prices.pct_change().dropna()
+
+                print(f"\n📅 {instrument}:")
+                print(f"   Start: {prices.index[0].strftime('%Y-%m-%d')}")
+                print(f"   End: {prices.index[-1].strftime('%Y-%m-%d')}")
+                print(f"   Total days: {len(prices)}")
+                print(f"   Valid returns: {len(returns)}")
+                print(f"   Missing data: {prices.isnull().sum()}")
+
+                # Check for gaps in data
+                price_dates = pd.DataFrame(index=prices.index)
+                price_dates['trading_day'] = 1
+                full_range = pd.date_range(start=prices.index[0], end=prices.index[-1], freq='D')
+                missing_dates = []
+
+                for date in full_range:
+                    if date.weekday() < 5:  # Weekdays only
+                        if date not in prices.index:
+                            missing_dates.append(date)
+
+                if len(missing_dates) > 5:  # Only show if significant gaps
+                    print(f"   ⚠️ Missing trading days: {len(missing_dates)}")
+                    print(f"      Recent gaps: {[d.strftime('%Y-%m-%d') for d in missing_dates[-3:]]}")
+
+        except Exception as e:
+            print(f"❌ Data periods debug failed: {e}")
+
+    def debug_yahoo_data_quality(self, focus_instruments=['HYD', 'IVV', 'BBAX']):
+        """Check Yahoo Finance data quality for specific instruments"""
+        try:
+            print(f"\n🔍 YAHOO FINANCE DATA QUALITY CHECK")
+            print("=" * 60)
+
+            for instrument in focus_instruments:
+                print(f"\n📊 {instrument} - Data Quality Analysis:")
+
+                # Get price data and check basic stats
+                prices = self.trading_system.rawdata.get_daily_prices(instrument)
+                returns = prices.pct_change().dropna()
+
+                # Basic statistics
+                vol_simple = returns.std()
+                vol_pst = self.trading_system.rawdata.daily_returns_volatility(instrument).iloc[-1]
+
+                print(f"   📈 Simple volatility: {vol_simple:.6f}")
+                print(f"   📈 PST volatility: {vol_pst:.6f}")
+                print(f"   📈 Ratio (PST/Simple): {vol_pst / vol_simple:.6f}")
+
+                # Check for zero returns (data issues)
+                zero_returns = (returns == 0).sum()
+                print(f"   📊 Zero return days: {zero_returns}")
+
+                # Check return distribution
+                print(f"   📊 Return stats:")
+                print(f"      Mean: {returns.mean():.6f}")
+                print(f"      Std: {returns.std():.6f}")
+                print(f"      Min: {returns.min():.6f}")
+                print(f"      Max: {returns.max():.6f}")
+                print(f"      Skew: {returns.skew():.6f}")
+
+                # Check recent price behavior
+                recent_prices = prices.tail(20)
+                recent_returns = returns.tail(20)
+                print(f"   📊 Recent 20-day volatility: {recent_returns.std():.6f}")
+
+        except Exception as e:
+            print(f"❌ Yahoo data quality debug failed: {e}")
+
     def get_trading_system(self):
         """Get the trading system for external access"""
         return self.trading_system
@@ -589,6 +945,58 @@ def create_dashboard_only(system):
     return dashboard
 
 
+def debug_block_moves_only():
+    """Standalone function to quickly debug block moves"""
+    try:
+        print("🚀 Quick Block Move Debug - ETF System")
+
+        # Quick system setup
+        runner = ETFSystemRunner(max_instruments=10, test_mode=True)
+
+        if not runner._initialize_etf_system():
+            return None
+
+        if not runner._download_and_process_data():
+            return None
+
+        if not runner._create_trading_system():
+            return None
+
+        # Run our debug
+        return runner.debug_value_of_block_price_move()
+
+    except Exception as e:
+        print(f"❌ Quick debug failed: {e}")
+        return None
+
+
+def debug_volatility_chain_only():
+    """Standalone function to debug volatility chain"""
+    try:
+        print("🚀 Quick Volatility Chain Debug")
+
+        runner = ETFSystemRunner(max_instruments=20, test_mode=True)
+
+        if not runner._initialize_etf_system():
+            return None
+        if not runner._download_and_process_data():
+            return None
+        if not runner._create_trading_system():
+            return None
+
+        # Run the chain debug on problem instruments
+        runner.debug_volatility_calculation_chain(['HYD', 'IVV', 'BBAX'])
+
+    except Exception as e:
+        print(f"❌ Chain debug failed: {e}")
+
+
+# To run just this debug:
+# debug_volatility_chain_only()
+
+
 if __name__ == "__main__":
     # Run the complete analysis
-    main()
+     main()
+    #debug_results = debug_volatility_chain_only()
+
