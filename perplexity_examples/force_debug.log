@@ -16008,3 +16008,1263 @@
 2025-09-23 22:09:37.928876: Daily volatility: 0.005638
 2025-09-23 22:09:37.929478: Calculated Sharpe ratio: 0.690
 2025-09-23 22:09:37.929698: Calculated annual return: 6.2%
+2025-09-23 22:41:33.804662: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-23 22:41:33.805002: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-23 22:41:33.805262: Portfolio exists: True
+2025-09-23 22:41:33.805475: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-23 22:41:33.806027: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-23 22:41:33.806224: Portfolio curve length: 2015
+2025-09-23 22:41:33.806481: Curve start date: 2018-01-02 00:00:00
+2025-09-23 22:41:33.806767: Curve end date: 2025-09-22 00:00:00
+2025-09-23 22:41:33.807154: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-23 22:41:33.807554: Last 5 values: [589389.72948622 582247.68206491 574537.83178633 574625.23712697
+ 586241.00775345]
+2025-09-23 22:41:33.807898: Contains NaN: False
+2025-09-23 22:41:33.808351: All zeros: False
+2025-09-23 22:41:33.808738: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-23 22:41:33.809663: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:34.091311: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:34.347655: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:34.602076: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:34.602317: === MANUAL RETURNS TEST ===
+2025-09-23 22:41:34.603128: Manual returns calculation:
+2025-09-23 22:41:34.603311:   Returns length: 2002
+2025-09-23 22:41:34.603538:   Returns mean: -inf
+2025-09-23 22:41:34.603809:   Returns std: nan
+2025-09-23 22:41:34.604055:   Contains NaN: False
+2025-09-23 22:41:34.604435:   First few returns: [        -inf -42.78574394   0.14573488   2.51256601  -0.21448044]
+2025-09-23 22:41:34.604766:   Daily volatility: nan
+2025-09-23 22:41:34.604948:   Annual volatility: nan
+2025-09-23 22:41:34.605159: === CAPITAL AND RETURNS DEBUG ===
+2025-09-23 22:41:34.605356: Starting capital from config: $1,000,000.00
+2025-09-23 22:41:34.605761: Total P&L generated: $586,241.01
+2025-09-23 22:41:34.605936: Actual portfolio return: 58.62%
+2025-09-23 22:41:34.606104: Final portfolio value: $1,586,241.01
+2025-09-23 22:41:34.606815: Proper daily returns mean: 0.000245
+2025-09-23 22:41:34.607079: Proper daily returns std: 0.005638
+2025-09-23 22:41:34.607411: Proper Sharpe ratio: 0.690
+2025-09-23 22:41:34.607638: Proper annual return: 6.2%
+2025-09-23 22:41:34.607878: Using capital-adjusted returns: 2014 returns
+2025-09-23 22:41:34.608089: --- Calculating performance metrics ---
+2025-09-23 22:41:34.608392: Mean daily return: 0.000245
+2025-09-23 22:41:34.608598: Daily volatility: 0.005638
+2025-09-23 22:41:34.609623: Calculated Sharpe ratio: 0.690
+2025-09-23 22:41:34.609997: Calculated annual return: 6.2%
+2025-09-23 22:41:35.543151: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-23 22:41:35.543618: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-23 22:41:35.543901: Portfolio exists: True
+2025-09-23 22:41:35.544093: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-23 22:41:35.544705: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-23 22:41:35.544984: Portfolio curve length: 2015
+2025-09-23 22:41:35.545292: Curve start date: 2018-01-02 00:00:00
+2025-09-23 22:41:35.545565: Curve end date: 2025-09-22 00:00:00
+2025-09-23 22:41:35.546392: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-23 22:41:35.547054: Last 5 values: [589389.72948622 582247.68206491 574537.83178633 574625.23712697
+ 586241.00775345]
+2025-09-23 22:41:35.547440: Contains NaN: False
+2025-09-23 22:41:35.547749: All zeros: False
+2025-09-23 22:41:35.547922: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-23 22:41:35.548349: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:35.823313: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:36.091083: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:36.359503: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:36.359734: === MANUAL RETURNS TEST ===
+2025-09-23 22:41:36.360651: Manual returns calculation:
+2025-09-23 22:41:36.360883:   Returns length: 2002
+2025-09-23 22:41:36.361185:   Returns mean: -inf
+2025-09-23 22:41:36.361511:   Returns std: nan
+2025-09-23 22:41:36.361812:   Contains NaN: False
+2025-09-23 22:41:36.362291:   First few returns: [        -inf -42.78574394   0.14573488   2.51256601  -0.21448044]
+2025-09-23 22:41:36.362724:   Daily volatility: nan
+2025-09-23 22:41:36.363005:   Annual volatility: nan
+2025-09-23 22:41:36.363294: === CAPITAL AND RETURNS DEBUG ===
+2025-09-23 22:41:36.363489: Starting capital from config: $1,000,000.00
+2025-09-23 22:41:36.364283: Total P&L generated: $586,241.01
+2025-09-23 22:41:36.364550: Actual portfolio return: 58.62%
+2025-09-23 22:41:36.364765: Final portfolio value: $1,586,241.01
+2025-09-23 22:41:36.365720: Proper daily returns mean: 0.000245
+2025-09-23 22:41:36.366063: Proper daily returns std: 0.005638
+2025-09-23 22:41:36.366407: Proper Sharpe ratio: 0.690
+2025-09-23 22:41:36.366600: Proper annual return: 6.2%
+2025-09-23 22:41:36.366817: Using capital-adjusted returns: 2014 returns
+2025-09-23 22:41:36.366986: --- Calculating performance metrics ---
+2025-09-23 22:41:36.367267: Mean daily return: 0.000245
+2025-09-23 22:41:36.367433: Daily volatility: 0.005638
+2025-09-23 22:41:36.368055: Calculated Sharpe ratio: 0.690
+2025-09-23 22:41:36.368227: Calculated annual return: 6.2%
+2025-09-23 22:41:38.054416: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-23 22:41:38.054651: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-23 22:41:38.054903: Portfolio exists: True
+2025-09-23 22:41:38.055141: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-23 22:41:38.055520: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-23 22:41:38.055783: Portfolio curve length: 2015
+2025-09-23 22:41:38.056218: Curve start date: 2018-01-02 00:00:00
+2025-09-23 22:41:38.056537: Curve end date: 2025-09-22 00:00:00
+2025-09-23 22:41:38.056998: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-23 22:41:38.057551: Last 5 values: [589389.72948622 582247.68206491 574537.83178633 574625.23712697
+ 586241.00775345]
+2025-09-23 22:41:38.057817: Contains NaN: False
+2025-09-23 22:41:38.058077: All zeros: False
+2025-09-23 22:41:38.058243: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-23 22:41:38.058660: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:38.334121: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:38.599428: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:38.851281: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:38.851621: === MANUAL RETURNS TEST ===
+2025-09-23 22:41:38.852425: Manual returns calculation:
+2025-09-23 22:41:38.852634:   Returns length: 2002
+2025-09-23 22:41:38.852887:   Returns mean: -inf
+2025-09-23 22:41:38.853186:   Returns std: nan
+2025-09-23 22:41:38.853458:   Contains NaN: False
+2025-09-23 22:41:38.853853:   First few returns: [        -inf -42.78574394   0.14573488   2.51256601  -0.21448044]
+2025-09-23 22:41:38.854258:   Daily volatility: nan
+2025-09-23 22:41:38.854475:   Annual volatility: nan
+2025-09-23 22:41:38.854686: === CAPITAL AND RETURNS DEBUG ===
+2025-09-23 22:41:38.854889: Starting capital from config: $1,000,000.00
+2025-09-23 22:41:38.855310: Total P&L generated: $586,241.01
+2025-09-23 22:41:38.855510: Actual portfolio return: 58.62%
+2025-09-23 22:41:38.855707: Final portfolio value: $1,586,241.01
+2025-09-23 22:41:38.856463: Proper daily returns mean: 0.000245
+2025-09-23 22:41:38.856753: Proper daily returns std: 0.005638
+2025-09-23 22:41:38.857119: Proper Sharpe ratio: 0.690
+2025-09-23 22:41:38.857321: Proper annual return: 6.2%
+2025-09-23 22:41:38.857559: Using capital-adjusted returns: 2014 returns
+2025-09-23 22:41:38.857761: --- Calculating performance metrics ---
+2025-09-23 22:41:38.858069: Mean daily return: 0.000245
+2025-09-23 22:41:38.858274: Daily volatility: 0.005638
+2025-09-23 22:41:38.858861: Calculated Sharpe ratio: 0.690
+2025-09-23 22:41:38.859108: Calculated annual return: 6.2%
+2025-09-23 22:41:45.653390: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-23 22:41:45.653636: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-23 22:41:45.653883: Portfolio exists: True
+2025-09-23 22:41:45.654074: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-23 22:41:45.654466: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-23 22:41:45.654680: Portfolio curve length: 2015
+2025-09-23 22:41:45.655008: Curve start date: 2018-01-02 00:00:00
+2025-09-23 22:41:45.655242: Curve end date: 2025-09-22 00:00:00
+2025-09-23 22:41:45.655614: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-23 22:41:45.656001: Last 5 values: [589389.72948622 582247.68206491 574537.83178633 574625.23712697
+ 586241.00775345]
+2025-09-23 22:41:45.656304: Contains NaN: False
+2025-09-23 22:41:45.656611: All zeros: False
+2025-09-23 22:41:45.656827: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-23 22:41:45.657263: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:45.921600: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:46.169310: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:46.427830: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2015
+2025-09-23 22:41:46.428075: === MANUAL RETURNS TEST ===
+2025-09-23 22:41:46.428895: Manual returns calculation:
+2025-09-23 22:41:46.429078:   Returns length: 2002
+2025-09-23 22:41:46.429308:   Returns mean: -inf
+2025-09-23 22:41:46.429603:   Returns std: nan
+2025-09-23 22:41:46.429857:   Contains NaN: False
+2025-09-23 22:41:46.430246:   First few returns: [        -inf -42.78574394   0.14573488   2.51256601  -0.21448044]
+2025-09-23 22:41:46.430611:   Daily volatility: nan
+2025-09-23 22:41:46.430799:   Annual volatility: nan
+2025-09-23 22:41:46.430985: === CAPITAL AND RETURNS DEBUG ===
+2025-09-23 22:41:46.431171: Starting capital from config: $1,000,000.00
+2025-09-23 22:41:46.431586: Total P&L generated: $586,241.01
+2025-09-23 22:41:46.431771: Actual portfolio return: 58.62%
+2025-09-23 22:41:46.431947: Final portfolio value: $1,586,241.01
+2025-09-23 22:41:46.433379: Proper daily returns mean: 0.000245
+2025-09-23 22:41:46.433725: Proper daily returns std: 0.005638
+2025-09-23 22:41:46.434063: Proper Sharpe ratio: 0.690
+2025-09-23 22:41:46.434245: Proper annual return: 6.2%
+2025-09-23 22:41:46.434467: Using capital-adjusted returns: 2014 returns
+2025-09-23 22:41:46.434666: --- Calculating performance metrics ---
+2025-09-23 22:41:46.434991: Mean daily return: 0.000245
+2025-09-23 22:41:46.435178: Daily volatility: 0.005638
+2025-09-23 22:41:46.435815: Calculated Sharpe ratio: 0.690
+2025-09-23 22:41:46.436005: Calculated annual return: 6.2%
+2025-09-24 12:14:28.577016: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:14:28.577509: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:14:28.577728: Portfolio exists: True
+2025-09-24 12:14:28.577931: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:14:28.578505: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:14:28.578736: Portfolio curve length: 2016
+2025-09-24 12:14:28.578989: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:14:28.579178: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:14:28.579595: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:14:28.579955: Last 5 values: [582261.38690742 574551.79984279 574639.35340827 586253.68405766
+ 588292.67922725]
+2025-09-24 12:14:28.580222: Contains NaN: False
+2025-09-24 12:14:28.580485: All zeros: False
+2025-09-24 12:14:28.580650: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:14:28.581036: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:28.830284: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:29.069899: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:29.308651: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:29.308950: === MANUAL RETURNS TEST ===
+2025-09-24 12:14:29.309800: Manual returns calculation:
+2025-09-24 12:14:29.310017:   Returns length: 2003
+2025-09-24 12:14:29.310288:   Returns mean: -inf
+2025-09-24 12:14:29.310623:   Returns std: nan
+2025-09-24 12:14:29.310980:   Contains NaN: False
+2025-09-24 12:14:29.311398:   First few returns: [        -inf -42.82396069   0.14579776   2.51238927  -0.21446187]
+2025-09-24 12:14:29.311765:   Daily volatility: nan
+2025-09-24 12:14:29.311981:   Annual volatility: nan
+2025-09-24 12:14:29.312246: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:14:29.312500: Starting capital from config: $1,000,000.00
+2025-09-24 12:14:29.312998: Total P&L generated: $588,292.68
+2025-09-24 12:14:29.313259: Actual portfolio return: 58.83%
+2025-09-24 12:14:29.313514: Final portfolio value: $1,588,292.68
+2025-09-24 12:14:29.314445: Proper daily returns mean: 0.000246
+2025-09-24 12:14:29.314786: Proper daily returns std: 0.005637
+2025-09-24 12:14:29.315201: Proper Sharpe ratio: 0.691
+2025-09-24 12:14:29.315456: Proper annual return: 6.2%
+2025-09-24 12:14:29.315747: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:14:29.315934: --- Calculating performance metrics ---
+2025-09-24 12:14:29.316265: Mean daily return: 0.000246
+2025-09-24 12:14:29.316472: Daily volatility: 0.005637
+2025-09-24 12:14:29.317232: Calculated Sharpe ratio: 0.691
+2025-09-24 12:14:29.317449: Calculated annual return: 6.2%
+2025-09-24 12:14:30.196077: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:14:30.196365: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:14:30.196583: Portfolio exists: True
+2025-09-24 12:14:30.196785: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:14:30.197288: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:14:30.197528: Portfolio curve length: 2016
+2025-09-24 12:14:30.197809: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:14:30.198054: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:14:30.198472: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:14:30.198903: Last 5 values: [582261.38690742 574551.79984279 574639.35340827 586253.68405766
+ 588292.67922725]
+2025-09-24 12:14:30.199238: Contains NaN: False
+2025-09-24 12:14:30.199525: All zeros: False
+2025-09-24 12:14:30.199693: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:14:30.200164: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:30.458434: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:30.721669: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:30.964076: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:14:30.964354: === MANUAL RETURNS TEST ===
+2025-09-24 12:14:30.965348: Manual returns calculation:
+2025-09-24 12:14:30.965568:   Returns length: 2003
+2025-09-24 12:14:30.965862:   Returns mean: -inf
+2025-09-24 12:14:30.966167:   Returns std: nan
+2025-09-24 12:14:30.966449:   Contains NaN: False
+2025-09-24 12:14:30.966906:   First few returns: [        -inf -42.82396069   0.14579776   2.51238927  -0.21446187]
+2025-09-24 12:14:30.967274:   Daily volatility: nan
+2025-09-24 12:14:30.967485:   Annual volatility: nan
+2025-09-24 12:14:30.967692: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:14:30.967933: Starting capital from config: $1,000,000.00
+2025-09-24 12:14:30.968364: Total P&L generated: $588,292.68
+2025-09-24 12:14:30.968576: Actual portfolio return: 58.83%
+2025-09-24 12:14:30.968783: Final portfolio value: $1,588,292.68
+2025-09-24 12:14:30.969579: Proper daily returns mean: 0.000246
+2025-09-24 12:14:30.969878: Proper daily returns std: 0.005637
+2025-09-24 12:14:30.970287: Proper Sharpe ratio: 0.691
+2025-09-24 12:14:30.970501: Proper annual return: 6.2%
+2025-09-24 12:14:30.970743: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:14:30.970946: --- Calculating performance metrics ---
+2025-09-24 12:14:30.971255: Mean daily return: 0.000246
+2025-09-24 12:14:30.971458: Daily volatility: 0.005637
+2025-09-24 12:14:30.972092: Calculated Sharpe ratio: 0.691
+2025-09-24 12:14:30.972291: Calculated annual return: 6.2%
+2025-09-24 12:26:53.828844: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:26:53.829129: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:26:53.829376: Portfolio exists: True
+2025-09-24 12:26:53.829593: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:26:53.830013: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:26:53.830260: Portfolio curve length: 2016
+2025-09-24 12:26:53.830487: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:26:53.830734: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:26:53.831119: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:26:53.831630: Last 5 values: [582272.46674445 574562.89766761 574650.45123589 586264.78188624
+ 588303.77905583]
+2025-09-24 12:26:53.832000: Contains NaN: False
+2025-09-24 12:26:53.832455: All zeros: False
+2025-09-24 12:26:53.832702: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:26:53.833131: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:54.085316: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:54.342000: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:54.598324: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:54.598582: === MANUAL RETURNS TEST ===
+2025-09-24 12:26:54.599522: Manual returns calculation:
+2025-09-24 12:26:54.599718:   Returns length: 2003
+2025-09-24 12:26:54.600061:   Returns mean: -inf
+2025-09-24 12:26:54.600357:   Returns std: nan
+2025-09-24 12:26:54.600624:   Contains NaN: False
+2025-09-24 12:26:54.601043:   First few returns: [        -inf -42.82470014   0.14580901   2.5123916   -0.21447852]
+2025-09-24 12:26:54.601440:   Daily volatility: nan
+2025-09-24 12:26:54.601651:   Annual volatility: nan
+2025-09-24 12:26:54.601833: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:26:54.602039: Starting capital from config: $1,000,000.00
+2025-09-24 12:26:54.602458: Total P&L generated: $588,303.78
+2025-09-24 12:26:54.602653: Actual portfolio return: 58.83%
+2025-09-24 12:26:54.602828: Final portfolio value: $1,588,303.78
+2025-09-24 12:26:54.603879: Proper daily returns mean: 0.000246
+2025-09-24 12:26:54.604214: Proper daily returns std: 0.005637
+2025-09-24 12:26:54.604647: Proper Sharpe ratio: 0.691
+2025-09-24 12:26:54.604829: Proper annual return: 6.2%
+2025-09-24 12:26:54.605062: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:26:54.605255: --- Calculating performance metrics ---
+2025-09-24 12:26:54.605587: Mean daily return: 0.000246
+2025-09-24 12:26:54.605806: Daily volatility: 0.005637
+2025-09-24 12:26:54.606527: Calculated Sharpe ratio: 0.691
+2025-09-24 12:26:54.606729: Calculated annual return: 6.2%
+2025-09-24 12:26:55.507377: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:26:55.507642: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:26:55.507957: Portfolio exists: True
+2025-09-24 12:26:55.508148: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:26:55.508586: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:26:55.508806: Portfolio curve length: 2016
+2025-09-24 12:26:55.509044: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:26:55.509308: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:26:55.509723: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:26:55.510115: Last 5 values: [582272.46674445 574562.89766761 574650.45123589 586264.78188624
+ 588303.77905583]
+2025-09-24 12:26:55.510504: Contains NaN: False
+2025-09-24 12:26:55.510849: All zeros: False
+2025-09-24 12:26:55.511067: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:26:55.511515: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:55.751134: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:55.983932: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:56.214856: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:56.215105: === MANUAL RETURNS TEST ===
+2025-09-24 12:26:56.215930: Manual returns calculation:
+2025-09-24 12:26:56.216140:   Returns length: 2003
+2025-09-24 12:26:56.216397:   Returns mean: -inf
+2025-09-24 12:26:56.216741:   Returns std: nan
+2025-09-24 12:26:56.217051:   Contains NaN: False
+2025-09-24 12:26:56.217466:   First few returns: [        -inf -42.82470014   0.14580901   2.5123916   -0.21447852]
+2025-09-24 12:26:56.217830:   Daily volatility: nan
+2025-09-24 12:26:56.218042:   Annual volatility: nan
+2025-09-24 12:26:56.218296: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:26:56.218542: Starting capital from config: $1,000,000.00
+2025-09-24 12:26:56.218955: Total P&L generated: $588,303.78
+2025-09-24 12:26:56.219171: Actual portfolio return: 58.83%
+2025-09-24 12:26:56.219418: Final portfolio value: $1,588,303.78
+2025-09-24 12:26:56.220164: Proper daily returns mean: 0.000246
+2025-09-24 12:26:56.220463: Proper daily returns std: 0.005637
+2025-09-24 12:26:56.220840: Proper Sharpe ratio: 0.691
+2025-09-24 12:26:56.221054: Proper annual return: 6.2%
+2025-09-24 12:26:56.221319: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:26:56.221531: --- Calculating performance metrics ---
+2025-09-24 12:26:56.221850: Mean daily return: 0.000246
+2025-09-24 12:26:56.222060: Daily volatility: 0.005637
+2025-09-24 12:26:56.222679: Calculated Sharpe ratio: 0.691
+2025-09-24 12:26:56.222898: Calculated annual return: 6.2%
+2025-09-24 12:26:56.300685: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:26:56.300935: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:26:56.301213: Portfolio exists: True
+2025-09-24 12:26:56.301496: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:26:56.302045: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:26:56.302302: Portfolio curve length: 2016
+2025-09-24 12:26:56.302573: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:26:56.302846: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:26:56.303270: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:26:56.303662: Last 5 values: [582272.46674445 574562.89766761 574650.45123589 586264.78188624
+ 588303.77905583]
+2025-09-24 12:26:56.304002: Contains NaN: False
+2025-09-24 12:26:56.304343: All zeros: False
+2025-09-24 12:26:56.304553: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:26:56.304963: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:56.553983: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:56.788172: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:57.020699: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:26:57.020910: === MANUAL RETURNS TEST ===
+2025-09-24 12:26:57.021786: Manual returns calculation:
+2025-09-24 12:26:57.021995:   Returns length: 2003
+2025-09-24 12:26:57.022271:   Returns mean: -inf
+2025-09-24 12:26:57.022560:   Returns std: nan
+2025-09-24 12:26:57.022825:   Contains NaN: False
+2025-09-24 12:26:57.023217:   First few returns: [        -inf -42.82470014   0.14580901   2.5123916   -0.21447852]
+2025-09-24 12:26:57.023609:   Daily volatility: nan
+2025-09-24 12:26:57.023813:   Annual volatility: nan
+2025-09-24 12:26:57.024014: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:26:57.024255: Starting capital from config: $1,000,000.00
+2025-09-24 12:26:57.024648: Total P&L generated: $588,303.78
+2025-09-24 12:26:57.024856: Actual portfolio return: 58.83%
+2025-09-24 12:26:57.025093: Final portfolio value: $1,588,303.78
+2025-09-24 12:26:57.025842: Proper daily returns mean: 0.000246
+2025-09-24 12:26:57.026142: Proper daily returns std: 0.005637
+2025-09-24 12:26:57.026505: Proper Sharpe ratio: 0.691
+2025-09-24 12:26:57.026709: Proper annual return: 6.2%
+2025-09-24 12:26:57.026935: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:26:57.027146: --- Calculating performance metrics ---
+2025-09-24 12:26:57.027448: Mean daily return: 0.000246
+2025-09-24 12:26:57.027645: Daily volatility: 0.005637
+2025-09-24 12:26:57.028238: Calculated Sharpe ratio: 0.691
+2025-09-24 12:26:57.028485: Calculated annual return: 6.2%
+2025-09-24 12:27:04.374953: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:27:04.375180: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:27:04.375397: Portfolio exists: True
+2025-09-24 12:27:04.375567: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:27:04.376001: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:27:04.376187: Portfolio curve length: 2016
+2025-09-24 12:27:04.376414: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:27:04.376659: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:27:04.377061: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:27:04.377474: Last 5 values: [582272.46674445 574562.89766761 574650.45123589 586264.78188624
+ 588303.77905583]
+2025-09-24 12:27:04.377764: Contains NaN: False
+2025-09-24 12:27:04.378053: All zeros: False
+2025-09-24 12:27:04.378226: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:27:04.378657: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:27:04.663320: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:27:04.928986: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:27:05.182226: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:27:05.182523: === MANUAL RETURNS TEST ===
+2025-09-24 12:27:05.183329: Manual returns calculation:
+2025-09-24 12:27:05.183545:   Returns length: 2003
+2025-09-24 12:27:05.183812:   Returns mean: -inf
+2025-09-24 12:27:05.184112:   Returns std: nan
+2025-09-24 12:27:05.184388:   Contains NaN: False
+2025-09-24 12:27:05.184794:   First few returns: [        -inf -42.82470014   0.14580901   2.5123916   -0.21447852]
+2025-09-24 12:27:05.185160:   Daily volatility: nan
+2025-09-24 12:27:05.185348:   Annual volatility: nan
+2025-09-24 12:27:05.185573: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:27:05.185788: Starting capital from config: $1,000,000.00
+2025-09-24 12:27:05.186195: Total P&L generated: $588,303.78
+2025-09-24 12:27:05.186409: Actual portfolio return: 58.83%
+2025-09-24 12:27:05.186617: Final portfolio value: $1,588,303.78
+2025-09-24 12:27:05.187347: Proper daily returns mean: 0.000246
+2025-09-24 12:27:05.187708: Proper daily returns std: 0.005637
+2025-09-24 12:27:05.188097: Proper Sharpe ratio: 0.691
+2025-09-24 12:27:05.188329: Proper annual return: 6.2%
+2025-09-24 12:27:05.188617: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:27:05.188865: --- Calculating performance metrics ---
+2025-09-24 12:27:05.189182: Mean daily return: 0.000246
+2025-09-24 12:27:05.189396: Daily volatility: 0.005637
+2025-09-24 12:27:05.190129: Calculated Sharpe ratio: 0.691
+2025-09-24 12:27:05.190347: Calculated annual return: 6.2%
+2025-09-24 12:49:18.200967: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:49:18.201252: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:49:18.201478: Portfolio exists: True
+2025-09-24 12:49:18.201714: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:49:18.202328: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:49:18.202635: Portfolio curve length: 2016
+2025-09-24 12:49:18.202892: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:49:18.203192: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:49:18.203585: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:49:18.203997: Last 5 values: [582265.31272607 574555.72566224 574643.2792282  586257.60987784
+ 588296.60504743]
+2025-09-24 12:49:18.204394: Contains NaN: False
+2025-09-24 12:49:18.204714: All zeros: False
+2025-09-24 12:49:18.204967: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:49:18.205403: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:18.455197: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:18.697750: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:18.945288: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:18.945547: === MANUAL RETURNS TEST ===
+2025-09-24 12:49:18.946408: Manual returns calculation:
+2025-09-24 12:49:18.946606:   Returns length: 2003
+2025-09-24 12:49:18.946904:   Returns mean: -inf
+2025-09-24 12:49:18.947201:   Returns std: nan
+2025-09-24 12:49:18.947476:   Contains NaN: False
+2025-09-24 12:49:18.947886:   First few returns: [        -inf -42.82456543   0.14582993   2.51218677  -0.21447973]
+2025-09-24 12:49:18.948232:   Daily volatility: nan
+2025-09-24 12:49:18.948440:   Annual volatility: nan
+2025-09-24 12:49:18.948643: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:49:18.948845: Starting capital from config: $1,000,000.00
+2025-09-24 12:49:18.949343: Total P&L generated: $588,296.61
+2025-09-24 12:49:18.949527: Actual portfolio return: 58.83%
+2025-09-24 12:49:18.949695: Final portfolio value: $1,588,296.61
+2025-09-24 12:49:18.950465: Proper daily returns mean: 0.000246
+2025-09-24 12:49:18.950725: Proper daily returns std: 0.005637
+2025-09-24 12:49:18.951058: Proper Sharpe ratio: 0.691
+2025-09-24 12:49:18.951230: Proper annual return: 6.2%
+2025-09-24 12:49:18.951437: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:49:18.951604: --- Calculating performance metrics ---
+2025-09-24 12:49:18.951883: Mean daily return: 0.000246
+2025-09-24 12:49:18.952051: Daily volatility: 0.005637
+2025-09-24 12:49:18.952651: Calculated Sharpe ratio: 0.691
+2025-09-24 12:49:18.952826: Calculated annual return: 6.2%
+2025-09-24 12:49:19.856993: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:49:19.857234: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:49:19.857542: Portfolio exists: True
+2025-09-24 12:49:19.857790: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:49:19.858343: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:49:19.858581: Portfolio curve length: 2016
+2025-09-24 12:49:19.858809: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:49:19.859027: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:49:19.859417: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:49:19.859831: Last 5 values: [582265.31272607 574555.72566224 574643.2792282  586257.60987784
+ 588296.60504743]
+2025-09-24 12:49:19.860152: Contains NaN: False
+2025-09-24 12:49:19.860464: All zeros: False
+2025-09-24 12:49:19.860665: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:49:19.861086: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:20.098255: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:20.332674: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:20.567005: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:20.567406: === MANUAL RETURNS TEST ===
+2025-09-24 12:49:20.568594: Manual returns calculation:
+2025-09-24 12:49:20.568812:   Returns length: 2003
+2025-09-24 12:49:20.569137:   Returns mean: -inf
+2025-09-24 12:49:20.569436:   Returns std: nan
+2025-09-24 12:49:20.569801:   Contains NaN: False
+2025-09-24 12:49:20.570296:   First few returns: [        -inf -42.82456543   0.14582993   2.51218677  -0.21447973]
+2025-09-24 12:49:20.570779:   Daily volatility: nan
+2025-09-24 12:49:20.570995:   Annual volatility: nan
+2025-09-24 12:49:20.571204: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:49:20.571406: Starting capital from config: $1,000,000.00
+2025-09-24 12:49:20.571821: Total P&L generated: $588,296.61
+2025-09-24 12:49:20.572078: Actual portfolio return: 58.83%
+2025-09-24 12:49:20.572303: Final portfolio value: $1,588,296.61
+2025-09-24 12:49:20.573156: Proper daily returns mean: 0.000246
+2025-09-24 12:49:20.573439: Proper daily returns std: 0.005637
+2025-09-24 12:49:20.573776: Proper Sharpe ratio: 0.691
+2025-09-24 12:49:20.573999: Proper annual return: 6.2%
+2025-09-24 12:49:20.574261: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:49:20.574431: --- Calculating performance metrics ---
+2025-09-24 12:49:20.574741: Mean daily return: 0.000246
+2025-09-24 12:49:20.574909: Daily volatility: 0.005637
+2025-09-24 12:49:20.575513: Calculated Sharpe ratio: 0.691
+2025-09-24 12:49:20.575710: Calculated annual return: 6.2%
+2025-09-24 12:49:20.658179: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:49:20.658419: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:49:20.658655: Portfolio exists: True
+2025-09-24 12:49:20.658857: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:49:20.659225: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:49:20.659433: Portfolio curve length: 2016
+2025-09-24 12:49:20.659708: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:49:20.659933: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:49:20.660285: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:49:20.660656: Last 5 values: [582265.31272607 574555.72566224 574643.2792282  586257.60987784
+ 588296.60504743]
+2025-09-24 12:49:20.660950: Contains NaN: False
+2025-09-24 12:49:20.661230: All zeros: False
+2025-09-24 12:49:20.661435: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:49:20.661834: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:20.922075: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:21.164699: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:21.417769: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:21.418005: === MANUAL RETURNS TEST ===
+2025-09-24 12:49:21.418965: Manual returns calculation:
+2025-09-24 12:49:21.419183:   Returns length: 2003
+2025-09-24 12:49:21.419395:   Returns mean: -inf
+2025-09-24 12:49:21.419871:   Returns std: nan
+2025-09-24 12:49:21.420138:   Contains NaN: False
+2025-09-24 12:49:21.420490:   First few returns: [        -inf -42.82456543   0.14582993   2.51218677  -0.21447973]
+2025-09-24 12:49:21.420872:   Daily volatility: nan
+2025-09-24 12:49:21.421065:   Annual volatility: nan
+2025-09-24 12:49:21.421227: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:49:21.421386: Starting capital from config: $1,000,000.00
+2025-09-24 12:49:21.421801: Total P&L generated: $588,296.61
+2025-09-24 12:49:21.421992: Actual portfolio return: 58.83%
+2025-09-24 12:49:21.422213: Final portfolio value: $1,588,296.61
+2025-09-24 12:49:21.423015: Proper daily returns mean: 0.000246
+2025-09-24 12:49:21.423278: Proper daily returns std: 0.005637
+2025-09-24 12:49:21.423601: Proper Sharpe ratio: 0.691
+2025-09-24 12:49:21.423793: Proper annual return: 6.2%
+2025-09-24 12:49:21.423994: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:49:21.424157: --- Calculating performance metrics ---
+2025-09-24 12:49:21.424426: Mean daily return: 0.000246
+2025-09-24 12:49:21.424588: Daily volatility: 0.005637
+2025-09-24 12:49:21.425159: Calculated Sharpe ratio: 0.691
+2025-09-24 12:49:21.425330: Calculated annual return: 6.2%
+2025-09-24 12:49:27.406144: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 12:49:27.406341: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 12:49:27.406591: Portfolio exists: True
+2025-09-24 12:49:27.406780: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 12:49:27.407211: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 12:49:27.407405: Portfolio curve length: 2016
+2025-09-24 12:49:27.407673: Curve start date: 2018-01-02 00:00:00
+2025-09-24 12:49:27.407927: Curve end date: 2025-09-23 00:00:00
+2025-09-24 12:49:27.408344: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 12:49:27.408792: Last 5 values: [582265.31272607 574555.72566224 574643.2792282  586257.60987784
+ 588296.60504743]
+2025-09-24 12:49:27.409176: Contains NaN: False
+2025-09-24 12:49:27.409529: All zeros: False
+2025-09-24 12:49:27.409750: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 12:49:27.410194: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:27.671269: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:27.918883: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:28.165948: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 12:49:28.166204: === MANUAL RETURNS TEST ===
+2025-09-24 12:49:28.167051: Manual returns calculation:
+2025-09-24 12:49:28.167277:   Returns length: 2003
+2025-09-24 12:49:28.167510:   Returns mean: -inf
+2025-09-24 12:49:28.167782:   Returns std: nan
+2025-09-24 12:49:28.168031:   Contains NaN: False
+2025-09-24 12:49:28.168415:   First few returns: [        -inf -42.82456543   0.14582993   2.51218677  -0.21447973]
+2025-09-24 12:49:28.168755:   Daily volatility: nan
+2025-09-24 12:49:28.168932:   Annual volatility: nan
+2025-09-24 12:49:28.169133: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 12:49:28.169326: Starting capital from config: $1,000,000.00
+2025-09-24 12:49:28.169775: Total P&L generated: $588,296.61
+2025-09-24 12:49:28.169950: Actual portfolio return: 58.83%
+2025-09-24 12:49:28.170120: Final portfolio value: $1,588,296.61
+2025-09-24 12:49:28.170893: Proper daily returns mean: 0.000246
+2025-09-24 12:49:28.171162: Proper daily returns std: 0.005637
+2025-09-24 12:49:28.171495: Proper Sharpe ratio: 0.691
+2025-09-24 12:49:28.171670: Proper annual return: 6.2%
+2025-09-24 12:49:28.171895: Using capital-adjusted returns: 2015 returns
+2025-09-24 12:49:28.172080: --- Calculating performance metrics ---
+2025-09-24 12:49:28.172393: Mean daily return: 0.000246
+2025-09-24 12:49:28.172562: Daily volatility: 0.005637
+2025-09-24 12:49:28.173182: Calculated Sharpe ratio: 0.691
+2025-09-24 12:49:28.173413: Calculated annual return: 6.2%
+2025-09-24 14:12:27.363735: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:12:27.364028: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:12:27.364232: Portfolio exists: True
+2025-09-24 14:12:27.364495: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:12:27.364919: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:12:27.365104: Portfolio curve length: 2016
+2025-09-24 14:12:27.365332: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:12:27.365565: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:12:27.366024: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:12:27.366537: Last 5 values: [582257.90896811 574548.32190544 574635.87547228 586250.20911812
+ 588289.57428283]
+2025-09-24 14:12:27.367050: Contains NaN: False
+2025-09-24 14:12:27.367443: All zeros: False
+2025-09-24 14:12:27.367621: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:12:27.368013: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:27.632137: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:27.870848: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:28.112524: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:28.112878: === MANUAL RETURNS TEST ===
+2025-09-24 14:12:28.113746: Manual returns calculation:
+2025-09-24 14:12:28.113992:   Returns length: 2003
+2025-09-24 14:12:28.114367:   Returns mean: -inf
+2025-09-24 14:12:28.114684:   Returns std: nan
+2025-09-24 14:12:28.114977:   Contains NaN: False
+2025-09-24 14:12:28.115422:   First few returns: [        -inf -42.82314293   0.14575265   2.51244336  -0.21447932]
+2025-09-24 14:12:28.115820:   Daily volatility: nan
+2025-09-24 14:12:28.116106:   Annual volatility: nan
+2025-09-24 14:12:28.116348: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:12:28.116595: Starting capital from config: $1,000,000.00
+2025-09-24 14:12:28.117009: Total P&L generated: $588,289.57
+2025-09-24 14:12:28.117224: Actual portfolio return: 58.83%
+2025-09-24 14:12:28.117430: Final portfolio value: $1,588,289.57
+2025-09-24 14:12:28.118170: Proper daily returns mean: 0.000246
+2025-09-24 14:12:28.118481: Proper daily returns std: 0.005637
+2025-09-24 14:12:28.118848: Proper Sharpe ratio: 0.691
+2025-09-24 14:12:28.119061: Proper annual return: 6.2%
+2025-09-24 14:12:28.119297: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:12:28.119500: --- Calculating performance metrics ---
+2025-09-24 14:12:28.119829: Mean daily return: 0.000246
+2025-09-24 14:12:28.120031: Daily volatility: 0.005637
+2025-09-24 14:12:28.120633: Calculated Sharpe ratio: 0.691
+2025-09-24 14:12:28.120836: Calculated annual return: 6.2%
+2025-09-24 14:12:29.095399: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:12:29.095661: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:12:29.095907: Portfolio exists: True
+2025-09-24 14:12:29.096113: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:12:29.096514: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:12:29.096724: Portfolio curve length: 2016
+2025-09-24 14:12:29.096956: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:12:29.097217: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:12:29.097573: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:12:29.097947: Last 5 values: [582257.90896811 574548.32190544 574635.87547228 586250.20911812
+ 588289.57428283]
+2025-09-24 14:12:29.098269: Contains NaN: False
+2025-09-24 14:12:29.098597: All zeros: False
+2025-09-24 14:12:29.098796: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:12:29.099273: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:29.357464: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:29.605508: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:29.847402: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:29.847698: === MANUAL RETURNS TEST ===
+2025-09-24 14:12:29.848830: Manual returns calculation:
+2025-09-24 14:12:29.849040:   Returns length: 2003
+2025-09-24 14:12:29.849360:   Returns mean: -inf
+2025-09-24 14:12:29.849694:   Returns std: nan
+2025-09-24 14:12:29.850030:   Contains NaN: False
+2025-09-24 14:12:29.850503:   First few returns: [        -inf -42.82314293   0.14575265   2.51244336  -0.21447932]
+2025-09-24 14:12:29.850927:   Daily volatility: nan
+2025-09-24 14:12:29.851195:   Annual volatility: nan
+2025-09-24 14:12:29.851401: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:12:29.851588: Starting capital from config: $1,000,000.00
+2025-09-24 14:12:29.852003: Total P&L generated: $588,289.57
+2025-09-24 14:12:29.852180: Actual portfolio return: 58.83%
+2025-09-24 14:12:29.852349: Final portfolio value: $1,588,289.57
+2025-09-24 14:12:29.853113: Proper daily returns mean: 0.000246
+2025-09-24 14:12:29.853392: Proper daily returns std: 0.005637
+2025-09-24 14:12:29.853739: Proper Sharpe ratio: 0.691
+2025-09-24 14:12:29.853916: Proper annual return: 6.2%
+2025-09-24 14:12:29.854148: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:12:29.854322: --- Calculating performance metrics ---
+2025-09-24 14:12:29.854607: Mean daily return: 0.000246
+2025-09-24 14:12:29.854784: Daily volatility: 0.005637
+2025-09-24 14:12:29.855405: Calculated Sharpe ratio: 0.691
+2025-09-24 14:12:29.855589: Calculated annual return: 6.2%
+2025-09-24 14:12:29.933904: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:12:29.934202: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:12:29.934475: Portfolio exists: True
+2025-09-24 14:12:29.934744: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:12:29.935117: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:12:29.935356: Portfolio curve length: 2016
+2025-09-24 14:12:29.935591: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:12:29.935827: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:12:29.936185: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:12:29.936549: Last 5 values: [582257.90896811 574548.32190544 574635.87547228 586250.20911812
+ 588289.57428283]
+2025-09-24 14:12:29.936828: Contains NaN: False
+2025-09-24 14:12:29.937113: All zeros: False
+2025-09-24 14:12:29.937316: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:12:29.937734: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:30.189205: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:30.427683: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:30.668543: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:30.668769: === MANUAL RETURNS TEST ===
+2025-09-24 14:12:30.669552: Manual returns calculation:
+2025-09-24 14:12:30.669724:   Returns length: 2003
+2025-09-24 14:12:30.669942:   Returns mean: -inf
+2025-09-24 14:12:30.670204:   Returns std: nan
+2025-09-24 14:12:30.670439:   Contains NaN: False
+2025-09-24 14:12:30.670801:   First few returns: [        -inf -42.82314293   0.14575265   2.51244336  -0.21447932]
+2025-09-24 14:12:30.671116:   Daily volatility: nan
+2025-09-24 14:12:30.671283:   Annual volatility: nan
+2025-09-24 14:12:30.671448: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:12:30.671610: Starting capital from config: $1,000,000.00
+2025-09-24 14:12:30.671980: Total P&L generated: $588,289.57
+2025-09-24 14:12:30.672146: Actual portfolio return: 58.83%
+2025-09-24 14:12:30.672306: Final portfolio value: $1,588,289.57
+2025-09-24 14:12:30.673012: Proper daily returns mean: 0.000246
+2025-09-24 14:12:30.673263: Proper daily returns std: 0.005637
+2025-09-24 14:12:30.673618: Proper Sharpe ratio: 0.691
+2025-09-24 14:12:30.673786: Proper annual return: 6.2%
+2025-09-24 14:12:30.673980: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:12:30.674140: --- Calculating performance metrics ---
+2025-09-24 14:12:30.674412: Mean daily return: 0.000246
+2025-09-24 14:12:30.674574: Daily volatility: 0.005637
+2025-09-24 14:12:30.675139: Calculated Sharpe ratio: 0.691
+2025-09-24 14:12:30.675310: Calculated annual return: 6.2%
+2025-09-24 14:12:38.246580: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:12:38.246822: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:12:38.247058: Portfolio exists: True
+2025-09-24 14:12:38.247240: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:12:38.247671: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:12:38.247879: Portfolio curve length: 2016
+2025-09-24 14:12:38.248123: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:12:38.248395: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:12:38.248815: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:12:38.249242: Last 5 values: [582257.90896811 574548.32190544 574635.87547228 586250.20911812
+ 588289.57428283]
+2025-09-24 14:12:38.249577: Contains NaN: False
+2025-09-24 14:12:38.249942: All zeros: False
+2025-09-24 14:12:38.250216: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:12:38.250647: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:38.511296: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:38.769186: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:39.031479: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:12:39.031726: === MANUAL RETURNS TEST ===
+2025-09-24 14:12:39.032521: Manual returns calculation:
+2025-09-24 14:12:39.032714:   Returns length: 2003
+2025-09-24 14:12:39.032971:   Returns mean: -inf
+2025-09-24 14:12:39.033234:   Returns std: nan
+2025-09-24 14:12:39.033485:   Contains NaN: False
+2025-09-24 14:12:39.033896:   First few returns: [        -inf -42.82314293   0.14575265   2.51244336  -0.21447932]
+2025-09-24 14:12:39.034283:   Daily volatility: nan
+2025-09-24 14:12:39.034503:   Annual volatility: nan
+2025-09-24 14:12:39.034703: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:12:39.034901: Starting capital from config: $1,000,000.00
+2025-09-24 14:12:39.035352: Total P&L generated: $588,289.57
+2025-09-24 14:12:39.035536: Actual portfolio return: 58.83%
+2025-09-24 14:12:39.035730: Final portfolio value: $1,588,289.57
+2025-09-24 14:12:39.036442: Proper daily returns mean: 0.000246
+2025-09-24 14:12:39.036693: Proper daily returns std: 0.005637
+2025-09-24 14:12:39.037018: Proper Sharpe ratio: 0.691
+2025-09-24 14:12:39.037361: Proper annual return: 6.2%
+2025-09-24 14:12:39.037640: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:12:39.037846: --- Calculating performance metrics ---
+2025-09-24 14:12:39.038177: Mean daily return: 0.000246
+2025-09-24 14:12:39.038350: Daily volatility: 0.005637
+2025-09-24 14:12:39.038988: Calculated Sharpe ratio: 0.691
+2025-09-24 14:12:39.039168: Calculated annual return: 6.2%
+2025-09-24 14:39:19.556290: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:39:19.556618: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:39:19.556866: Portfolio exists: True
+2025-09-24 14:39:19.557116: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:39:19.557551: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:39:19.557810: Portfolio curve length: 2016
+2025-09-24 14:39:19.558051: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:39:19.558280: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:39:19.558792: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:39:19.559182: Last 5 values: [582257.98197906 574548.39491675 574635.94848294 586250.27913212
+ 588289.27430171]
+2025-09-24 14:39:19.559482: Contains NaN: False
+2025-09-24 14:39:19.559829: All zeros: False
+2025-09-24 14:39:19.560081: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:39:19.560674: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:19.807491: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:20.064386: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:20.317465: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:20.317732: === MANUAL RETURNS TEST ===
+2025-09-24 14:39:20.318952: Manual returns calculation:
+2025-09-24 14:39:20.319201:   Returns length: 2003
+2025-09-24 14:39:20.319483:   Returns mean: -inf
+2025-09-24 14:39:20.319898:   Returns std: nan
+2025-09-24 14:39:20.320280:   Contains NaN: False
+2025-09-24 14:39:20.320731:   First few returns: [        -inf -42.82232777   0.1458344    2.51243781  -0.21448911]
+2025-09-24 14:39:20.321098:   Daily volatility: nan
+2025-09-24 14:39:20.321276:   Annual volatility: nan
+2025-09-24 14:39:20.321454: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:39:20.321650: Starting capital from config: $1,000,000.00
+2025-09-24 14:39:20.322075: Total P&L generated: $588,289.27
+2025-09-24 14:39:20.322254: Actual portfolio return: 58.83%
+2025-09-24 14:39:20.322424: Final portfolio value: $1,588,289.27
+2025-09-24 14:39:20.323199: Proper daily returns mean: 0.000246
+2025-09-24 14:39:20.323463: Proper daily returns std: 0.005637
+2025-09-24 14:39:20.323808: Proper Sharpe ratio: 0.691
+2025-09-24 14:39:20.323985: Proper annual return: 6.2%
+2025-09-24 14:39:20.324195: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:39:20.324465: --- Calculating performance metrics ---
+2025-09-24 14:39:20.324895: Mean daily return: 0.000246
+2025-09-24 14:39:20.325122: Daily volatility: 0.005637
+2025-09-24 14:39:20.325834: Calculated Sharpe ratio: 0.691
+2025-09-24 14:39:20.326051: Calculated annual return: 6.2%
+2025-09-24 14:39:21.250636: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:39:21.250901: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:39:21.251152: Portfolio exists: True
+2025-09-24 14:39:21.251401: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:39:21.251893: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:39:21.252145: Portfolio curve length: 2016
+2025-09-24 14:39:21.252381: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:39:21.252613: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:39:21.252980: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:39:21.253380: Last 5 values: [582257.98197906 574548.39491675 574635.94848294 586250.27913212
+ 588289.27430171]
+2025-09-24 14:39:21.253778: Contains NaN: False
+2025-09-24 14:39:21.254121: All zeros: False
+2025-09-24 14:39:21.254355: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:39:21.254796: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:21.498361: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:21.734385: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:21.974668: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:21.974989: === MANUAL RETURNS TEST ===
+2025-09-24 14:39:21.976070: Manual returns calculation:
+2025-09-24 14:39:21.976366:   Returns length: 2003
+2025-09-24 14:39:21.976671:   Returns mean: -inf
+2025-09-24 14:39:21.977018:   Returns std: nan
+2025-09-24 14:39:21.977376:   Contains NaN: False
+2025-09-24 14:39:21.977953:   First few returns: [        -inf -42.82232777   0.1458344    2.51243781  -0.21448911]
+2025-09-24 14:39:21.978368:   Daily volatility: nan
+2025-09-24 14:39:21.978613:   Annual volatility: nan
+2025-09-24 14:39:21.978840: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:39:21.979097: Starting capital from config: $1,000,000.00
+2025-09-24 14:39:21.979647: Total P&L generated: $588,289.27
+2025-09-24 14:39:21.979899: Actual portfolio return: 58.83%
+2025-09-24 14:39:21.980084: Final portfolio value: $1,588,289.27
+2025-09-24 14:39:21.981047: Proper daily returns mean: 0.000246
+2025-09-24 14:39:21.981363: Proper daily returns std: 0.005637
+2025-09-24 14:39:21.981827: Proper Sharpe ratio: 0.691
+2025-09-24 14:39:21.982091: Proper annual return: 6.2%
+2025-09-24 14:39:21.982340: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:39:21.982598: --- Calculating performance metrics ---
+2025-09-24 14:39:21.982928: Mean daily return: 0.000246
+2025-09-24 14:39:21.983182: Daily volatility: 0.005637
+2025-09-24 14:39:21.983980: Calculated Sharpe ratio: 0.691
+2025-09-24 14:39:21.984169: Calculated annual return: 6.2%
+2025-09-24 14:39:22.065782: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:39:22.066079: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:39:22.066316: Portfolio exists: True
+2025-09-24 14:39:22.066500: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:39:22.066910: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:39:22.067197: Portfolio curve length: 2016
+2025-09-24 14:39:22.067418: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:39:22.067644: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:39:22.068047: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:39:22.068422: Last 5 values: [582257.98197906 574548.39491675 574635.94848294 586250.27913212
+ 588289.27430171]
+2025-09-24 14:39:22.068749: Contains NaN: False
+2025-09-24 14:39:22.069038: All zeros: False
+2025-09-24 14:39:22.069229: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:39:22.069663: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:22.327314: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:22.577635: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:22.821161: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:22.821387: === MANUAL RETURNS TEST ===
+2025-09-24 14:39:22.822248: Manual returns calculation:
+2025-09-24 14:39:22.822433:   Returns length: 2003
+2025-09-24 14:39:22.822655:   Returns mean: -inf
+2025-09-24 14:39:22.822928:   Returns std: nan
+2025-09-24 14:39:22.823168:   Contains NaN: False
+2025-09-24 14:39:22.823533:   First few returns: [        -inf -42.82232777   0.1458344    2.51243781  -0.21448911]
+2025-09-24 14:39:22.823853:   Daily volatility: nan
+2025-09-24 14:39:22.824021:   Annual volatility: nan
+2025-09-24 14:39:22.824187: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:39:22.824350: Starting capital from config: $1,000,000.00
+2025-09-24 14:39:22.824731: Total P&L generated: $588,289.27
+2025-09-24 14:39:22.824900: Actual portfolio return: 58.83%
+2025-09-24 14:39:22.825083: Final portfolio value: $1,588,289.27
+2025-09-24 14:39:22.825798: Proper daily returns mean: 0.000246
+2025-09-24 14:39:22.826051: Proper daily returns std: 0.005637
+2025-09-24 14:39:22.826376: Proper Sharpe ratio: 0.691
+2025-09-24 14:39:22.826544: Proper annual return: 6.2%
+2025-09-24 14:39:22.826741: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:39:22.826903: --- Calculating performance metrics ---
+2025-09-24 14:39:22.827173: Mean daily return: 0.000246
+2025-09-24 14:39:22.827337: Daily volatility: 0.005637
+2025-09-24 14:39:22.827909: Calculated Sharpe ratio: 0.691
+2025-09-24 14:39:22.828080: Calculated annual return: 6.2%
+2025-09-24 14:39:28.983861: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 14:39:28.984084: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 14:39:28.984287: Portfolio exists: True
+2025-09-24 14:39:28.984491: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 14:39:28.984873: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 14:39:28.985064: Portfolio curve length: 2016
+2025-09-24 14:39:28.985322: Curve start date: 2018-01-02 00:00:00
+2025-09-24 14:39:28.985529: Curve end date: 2025-09-23 00:00:00
+2025-09-24 14:39:28.985874: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 14:39:28.986255: Last 5 values: [582257.98197906 574548.39491675 574635.94848294 586250.27913212
+ 588289.27430171]
+2025-09-24 14:39:28.986541: Contains NaN: False
+2025-09-24 14:39:28.986832: All zeros: False
+2025-09-24 14:39:28.987022: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 14:39:28.987432: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:29.249039: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:29.486459: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:29.723654: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 14:39:29.723934: === MANUAL RETURNS TEST ===
+2025-09-24 14:39:29.724745: Manual returns calculation:
+2025-09-24 14:39:29.724982:   Returns length: 2003
+2025-09-24 14:39:29.725271:   Returns mean: -inf
+2025-09-24 14:39:29.725571:   Returns std: nan
+2025-09-24 14:39:29.725847:   Contains NaN: False
+2025-09-24 14:39:29.726242:   First few returns: [        -inf -42.82232777   0.1458344    2.51243781  -0.21448911]
+2025-09-24 14:39:29.726596:   Daily volatility: nan
+2025-09-24 14:39:29.726802:   Annual volatility: nan
+2025-09-24 14:39:29.727007: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 14:39:29.727224: Starting capital from config: $1,000,000.00
+2025-09-24 14:39:29.727627: Total P&L generated: $588,289.27
+2025-09-24 14:39:29.727843: Actual portfolio return: 58.83%
+2025-09-24 14:39:29.728125: Final portfolio value: $1,588,289.27
+2025-09-24 14:39:29.728930: Proper daily returns mean: 0.000246
+2025-09-24 14:39:29.729273: Proper daily returns std: 0.005637
+2025-09-24 14:39:29.729693: Proper Sharpe ratio: 0.691
+2025-09-24 14:39:29.729949: Proper annual return: 6.2%
+2025-09-24 14:39:29.730202: Using capital-adjusted returns: 2015 returns
+2025-09-24 14:39:29.730458: --- Calculating performance metrics ---
+2025-09-24 14:39:29.730800: Mean daily return: 0.000246
+2025-09-24 14:39:29.731057: Daily volatility: 0.005637
+2025-09-24 14:39:29.731710: Calculated Sharpe ratio: 0.691
+2025-09-24 14:39:29.731998: Calculated annual return: 6.2%
+2025-09-24 15:13:34.374539: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:13:34.374830: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:13:34.375056: Portfolio exists: True
+2025-09-24 15:13:34.375287: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:13:34.375776: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:13:34.376120: Portfolio curve length: 2016
+2025-09-24 15:13:34.376442: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:13:34.376714: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:13:34.377172: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:13:34.377684: Last 5 values: [582268.10310803 574558.51604612 574646.0696136  586260.40026178
+ 588299.39643136]
+2025-09-24 15:13:34.378252: Contains NaN: False
+2025-09-24 15:13:34.378638: All zeros: False
+2025-09-24 15:13:34.378837: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:13:34.379327: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:34.632175: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:34.873799: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:35.120346: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:35.120558: === MANUAL RETURNS TEST ===
+2025-09-24 15:13:35.121340: Manual returns calculation:
+2025-09-24 15:13:35.121514:   Returns length: 2003
+2025-09-24 15:13:35.121734:   Returns mean: -inf
+2025-09-24 15:13:35.121996:   Returns std: nan
+2025-09-24 15:13:35.122233:   Contains NaN: False
+2025-09-24 15:13:35.122603:   First few returns: [        -inf -42.82212181   0.14583739   2.51239678  -0.21448728]
+2025-09-24 15:13:35.122926:   Daily volatility: nan
+2025-09-24 15:13:35.123092:   Annual volatility: nan
+2025-09-24 15:13:35.123258: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:13:35.123421: Starting capital from config: $1,000,000.00
+2025-09-24 15:13:35.123797: Total P&L generated: $588,299.40
+2025-09-24 15:13:35.123968: Actual portfolio return: 58.83%
+2025-09-24 15:13:35.124130: Final portfolio value: $1,588,299.40
+2025-09-24 15:13:35.124968: Proper daily returns mean: 0.000246
+2025-09-24 15:13:35.125256: Proper daily returns std: 0.005637
+2025-09-24 15:13:35.125666: Proper Sharpe ratio: 0.691
+2025-09-24 15:13:35.125903: Proper annual return: 6.2%
+2025-09-24 15:13:35.126137: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:13:35.126315: --- Calculating performance metrics ---
+2025-09-24 15:13:35.126628: Mean daily return: 0.000246
+2025-09-24 15:13:35.126832: Daily volatility: 0.005637
+2025-09-24 15:13:35.127504: Calculated Sharpe ratio: 0.691
+2025-09-24 15:13:35.127689: Calculated annual return: 6.2%
+2025-09-24 15:13:36.017349: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:13:36.017697: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:13:36.017936: Portfolio exists: True
+2025-09-24 15:13:36.018242: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:13:36.018795: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:13:36.019006: Portfolio curve length: 2016
+2025-09-24 15:13:36.019255: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:13:36.019470: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:13:36.019866: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:13:36.020256: Last 5 values: [582268.10310803 574558.51604612 574646.0696136  586260.40026178
+ 588299.39643136]
+2025-09-24 15:13:36.020598: Contains NaN: False
+2025-09-24 15:13:36.020949: All zeros: False
+2025-09-24 15:13:36.021199: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:13:36.021646: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:36.260679: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:36.497192: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:36.739057: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:36.739271: === MANUAL RETURNS TEST ===
+2025-09-24 15:13:36.740049: Manual returns calculation:
+2025-09-24 15:13:36.740223:   Returns length: 2003
+2025-09-24 15:13:36.740444:   Returns mean: -inf
+2025-09-24 15:13:36.740706:   Returns std: nan
+2025-09-24 15:13:36.740944:   Contains NaN: False
+2025-09-24 15:13:36.741313:   First few returns: [        -inf -42.82212181   0.14583739   2.51239678  -0.21448728]
+2025-09-24 15:13:36.741636:   Daily volatility: nan
+2025-09-24 15:13:36.741803:   Annual volatility: nan
+2025-09-24 15:13:36.741972: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:13:36.742137: Starting capital from config: $1,000,000.00
+2025-09-24 15:13:36.742511: Total P&L generated: $588,299.40
+2025-09-24 15:13:36.742680: Actual portfolio return: 58.83%
+2025-09-24 15:13:36.742841: Final portfolio value: $1,588,299.40
+2025-09-24 15:13:36.743560: Proper daily returns mean: 0.000246
+2025-09-24 15:13:36.743815: Proper daily returns std: 0.005637
+2025-09-24 15:13:36.744145: Proper Sharpe ratio: 0.691
+2025-09-24 15:13:36.744313: Proper annual return: 6.2%
+2025-09-24 15:13:36.744510: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:13:36.744695: --- Calculating performance metrics ---
+2025-09-24 15:13:36.744968: Mean daily return: 0.000246
+2025-09-24 15:13:36.745134: Daily volatility: 0.005637
+2025-09-24 15:13:36.745713: Calculated Sharpe ratio: 0.691
+2025-09-24 15:13:36.745884: Calculated annual return: 6.2%
+2025-09-24 15:13:36.828309: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:13:36.828556: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:13:36.828788: Portfolio exists: True
+2025-09-24 15:13:36.828996: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:13:36.829364: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:13:36.829551: Portfolio curve length: 2016
+2025-09-24 15:13:36.829802: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:13:36.830023: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:13:36.830368: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:13:36.830729: Last 5 values: [582268.10310803 574558.51604612 574646.0696136  586260.40026178
+ 588299.39643136]
+2025-09-24 15:13:36.831004: Contains NaN: False
+2025-09-24 15:13:36.831314: All zeros: False
+2025-09-24 15:13:36.831496: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:13:36.831891: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:37.078666: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:37.327698: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:37.562249: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:37.562500: === MANUAL RETURNS TEST ===
+2025-09-24 15:13:37.563361: Manual returns calculation:
+2025-09-24 15:13:37.563620:   Returns length: 2003
+2025-09-24 15:13:37.563914:   Returns mean: -inf
+2025-09-24 15:13:37.564218:   Returns std: nan
+2025-09-24 15:13:37.564572:   Contains NaN: False
+2025-09-24 15:13:37.565003:   First few returns: [        -inf -42.82212181   0.14583739   2.51239678  -0.21448728]
+2025-09-24 15:13:37.565382:   Daily volatility: nan
+2025-09-24 15:13:37.565683:   Annual volatility: nan
+2025-09-24 15:13:37.565931: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:13:37.566218: Starting capital from config: $1,000,000.00
+2025-09-24 15:13:37.566694: Total P&L generated: $588,299.40
+2025-09-24 15:13:37.566944: Actual portfolio return: 58.83%
+2025-09-24 15:13:37.567189: Final portfolio value: $1,588,299.40
+2025-09-24 15:13:37.568087: Proper daily returns mean: 0.000246
+2025-09-24 15:13:37.568405: Proper daily returns std: 0.005637
+2025-09-24 15:13:37.568802: Proper Sharpe ratio: 0.691
+2025-09-24 15:13:37.569013: Proper annual return: 6.2%
+2025-09-24 15:13:37.569256: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:13:37.569484: --- Calculating performance metrics ---
+2025-09-24 15:13:37.569814: Mean daily return: 0.000246
+2025-09-24 15:13:37.569983: Daily volatility: 0.005637
+2025-09-24 15:13:37.570624: Calculated Sharpe ratio: 0.691
+2025-09-24 15:13:37.570805: Calculated annual return: 6.2%
+2025-09-24 15:13:43.555542: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:13:43.555771: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:13:43.556060: Portfolio exists: True
+2025-09-24 15:13:43.556272: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:13:43.556825: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:13:43.557044: Portfolio curve length: 2016
+2025-09-24 15:13:43.557311: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:13:43.557518: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:13:43.558008: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:13:43.558402: Last 5 values: [582268.10310803 574558.51604612 574646.0696136  586260.40026178
+ 588299.39643136]
+2025-09-24 15:13:43.558746: Contains NaN: False
+2025-09-24 15:13:43.559055: All zeros: False
+2025-09-24 15:13:43.559269: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:13:43.559692: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:43.801779: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:44.039179: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:44.269672: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:13:44.269957: === MANUAL RETURNS TEST ===
+2025-09-24 15:13:44.270756: Manual returns calculation:
+2025-09-24 15:13:44.270985:   Returns length: 2003
+2025-09-24 15:13:44.271235:   Returns mean: -inf
+2025-09-24 15:13:44.271527:   Returns std: nan
+2025-09-24 15:13:44.271793:   Contains NaN: False
+2025-09-24 15:13:44.272184:   First few returns: [        -inf -42.82212181   0.14583739   2.51239678  -0.21448728]
+2025-09-24 15:13:44.272529:   Daily volatility: nan
+2025-09-24 15:13:44.272779:   Annual volatility: nan
+2025-09-24 15:13:44.272978: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:13:44.273240: Starting capital from config: $1,000,000.00
+2025-09-24 15:13:44.273632: Total P&L generated: $588,299.40
+2025-09-24 15:13:44.273844: Actual portfolio return: 58.83%
+2025-09-24 15:13:44.274280: Final portfolio value: $1,588,299.40
+2025-09-24 15:13:44.275351: Proper daily returns mean: 0.000246
+2025-09-24 15:13:44.275668: Proper daily returns std: 0.005637
+2025-09-24 15:13:44.276034: Proper Sharpe ratio: 0.691
+2025-09-24 15:13:44.276253: Proper annual return: 6.2%
+2025-09-24 15:13:44.276530: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:13:44.276764: --- Calculating performance metrics ---
+2025-09-24 15:13:44.277110: Mean daily return: 0.000246
+2025-09-24 15:13:44.277316: Daily volatility: 0.005637
+2025-09-24 15:13:44.277965: Calculated Sharpe ratio: 0.691
+2025-09-24 15:13:44.278197: Calculated annual return: 6.2%
+2025-09-24 15:16:24.545224: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:16:24.545457: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:16:24.545670: Portfolio exists: True
+2025-09-24 15:16:24.545887: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:16:24.546280: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:16:24.546455: Portfolio curve length: 2016
+2025-09-24 15:16:24.546670: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:16:24.546864: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:16:24.547245: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:16:24.547700: Last 5 values: [582265.56778943 574555.98072494 574643.53428929 586257.86493795
+ 588296.86010753]
+2025-09-24 15:16:24.548037: Contains NaN: False
+2025-09-24 15:16:24.548378: All zeros: False
+2025-09-24 15:16:24.548584: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:16:24.549020: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:24.795886: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:25.026840: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:25.259935: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:25.260245: === MANUAL RETURNS TEST ===
+2025-09-24 15:16:25.261085: Manual returns calculation:
+2025-09-24 15:16:25.261288:   Returns length: 2003
+2025-09-24 15:16:25.261520:   Returns mean: -inf
+2025-09-24 15:16:25.261795:   Returns std: nan
+2025-09-24 15:16:25.262148:   Contains NaN: False
+2025-09-24 15:16:25.262605:   First few returns: [        -inf -42.82374527   0.14570633   2.51275112  -0.21447795]
+2025-09-24 15:16:25.262973:   Daily volatility: nan
+2025-09-24 15:16:25.263194:   Annual volatility: nan
+2025-09-24 15:16:25.263455: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:16:25.263679: Starting capital from config: $1,000,000.00
+2025-09-24 15:16:25.264196: Total P&L generated: $588,296.86
+2025-09-24 15:16:25.264435: Actual portfolio return: 58.83%
+2025-09-24 15:16:25.264641: Final portfolio value: $1,588,296.86
+2025-09-24 15:16:25.265400: Proper daily returns mean: 0.000246
+2025-09-24 15:16:25.265693: Proper daily returns std: 0.005637
+2025-09-24 15:16:25.266062: Proper Sharpe ratio: 0.691
+2025-09-24 15:16:25.266319: Proper annual return: 6.2%
+2025-09-24 15:16:25.266557: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:16:25.266762: --- Calculating performance metrics ---
+2025-09-24 15:16:25.267072: Mean daily return: 0.000246
+2025-09-24 15:16:25.267259: Daily volatility: 0.005637
+2025-09-24 15:16:25.267890: Calculated Sharpe ratio: 0.691
+2025-09-24 15:16:25.268107: Calculated annual return: 6.2%
+2025-09-24 15:16:26.191276: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:16:26.191537: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:16:26.191810: Portfolio exists: True
+2025-09-24 15:16:26.192066: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:16:26.192535: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:16:26.192786: Portfolio curve length: 2016
+2025-09-24 15:16:26.193064: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:16:26.193357: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:16:26.193758: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:16:26.194213: Last 5 values: [582265.56778943 574555.98072494 574643.53428929 586257.86493795
+ 588296.86010753]
+2025-09-24 15:16:26.194513: Contains NaN: False
+2025-09-24 15:16:26.194820: All zeros: False
+2025-09-24 15:16:26.194988: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:16:26.195356: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:26.441812: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:26.675868: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:26.905914: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:26.906221: === MANUAL RETURNS TEST ===
+2025-09-24 15:16:26.907023: Manual returns calculation:
+2025-09-24 15:16:26.907232:   Returns length: 2003
+2025-09-24 15:16:26.907511:   Returns mean: -inf
+2025-09-24 15:16:26.907835:   Returns std: nan
+2025-09-24 15:16:26.908117:   Contains NaN: False
+2025-09-24 15:16:26.908567:   First few returns: [        -inf -42.82374527   0.14570633   2.51275112  -0.21447795]
+2025-09-24 15:16:26.908945:   Daily volatility: nan
+2025-09-24 15:16:26.909156:   Annual volatility: nan
+2025-09-24 15:16:26.909400: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:16:26.909608: Starting capital from config: $1,000,000.00
+2025-09-24 15:16:26.910060: Total P&L generated: $588,296.86
+2025-09-24 15:16:26.910274: Actual portfolio return: 58.83%
+2025-09-24 15:16:26.910480: Final portfolio value: $1,588,296.86
+2025-09-24 15:16:26.911276: Proper daily returns mean: 0.000246
+2025-09-24 15:16:26.911672: Proper daily returns std: 0.005637
+2025-09-24 15:16:26.912053: Proper Sharpe ratio: 0.691
+2025-09-24 15:16:26.912242: Proper annual return: 6.2%
+2025-09-24 15:16:26.912489: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:16:26.912741: --- Calculating performance metrics ---
+2025-09-24 15:16:26.913062: Mean daily return: 0.000246
+2025-09-24 15:16:26.913267: Daily volatility: 0.005637
+2025-09-24 15:16:26.913932: Calculated Sharpe ratio: 0.691
+2025-09-24 15:16:26.914139: Calculated annual return: 6.2%
+2025-09-24 15:16:26.991538: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:16:26.991847: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:16:26.992037: Portfolio exists: True
+2025-09-24 15:16:26.992234: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:16:26.992589: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:16:26.992806: Portfolio curve length: 2016
+2025-09-24 15:16:26.993035: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:16:26.993289: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:16:26.993625: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:16:26.993984: Last 5 values: [582265.56778943 574555.98072494 574643.53428929 586257.86493795
+ 588296.86010753]
+2025-09-24 15:16:26.994292: Contains NaN: False
+2025-09-24 15:16:26.994610: All zeros: False
+2025-09-24 15:16:26.994809: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:16:26.995186: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:27.239199: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:27.488929: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:27.735261: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:27.735481: === MANUAL RETURNS TEST ===
+2025-09-24 15:16:27.736267: Manual returns calculation:
+2025-09-24 15:16:27.736443:   Returns length: 2003
+2025-09-24 15:16:27.736663:   Returns mean: -inf
+2025-09-24 15:16:27.736924:   Returns std: nan
+2025-09-24 15:16:27.737161:   Contains NaN: False
+2025-09-24 15:16:27.737549:   First few returns: [        -inf -42.82374527   0.14570633   2.51275112  -0.21447795]
+2025-09-24 15:16:27.737879:   Daily volatility: nan
+2025-09-24 15:16:27.738053:   Annual volatility: nan
+2025-09-24 15:16:27.738220: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:16:27.738408: Starting capital from config: $1,000,000.00
+2025-09-24 15:16:27.738788: Total P&L generated: $588,296.86
+2025-09-24 15:16:27.738957: Actual portfolio return: 58.83%
+2025-09-24 15:16:27.739121: Final portfolio value: $1,588,296.86
+2025-09-24 15:16:27.739830: Proper daily returns mean: 0.000246
+2025-09-24 15:16:27.740083: Proper daily returns std: 0.005637
+2025-09-24 15:16:27.740411: Proper Sharpe ratio: 0.691
+2025-09-24 15:16:27.740581: Proper annual return: 6.2%
+2025-09-24 15:16:27.740776: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:16:27.740937: --- Calculating performance metrics ---
+2025-09-24 15:16:27.741210: Mean daily return: 0.000246
+2025-09-24 15:16:27.741372: Daily volatility: 0.005637
+2025-09-24 15:16:27.741937: Calculated Sharpe ratio: 0.691
+2025-09-24 15:16:27.742107: Calculated annual return: 6.2%
+2025-09-24 15:16:33.779348: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-09-24 15:16:33.779629: === ENHANCED PORTFOLIO DEBUG ===
+2025-09-24 15:16:33.779911: Portfolio exists: True
+2025-09-24 15:16:33.780165: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-09-24 15:16:33.780550: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-09-24 15:16:33.780769: Portfolio curve length: 2016
+2025-09-24 15:16:33.781027: Curve start date: 2018-01-02 00:00:00
+2025-09-24 15:16:33.781294: Curve end date: 2025-09-23 00:00:00
+2025-09-24 15:16:33.781718: First 5 values: [0. 0. 0. 0. 0.]
+2025-09-24 15:16:33.782106: Last 5 values: [582265.56778943 574555.98072494 574643.53428929 586257.86493795
+ 588296.86010753]
+2025-09-24 15:16:33.782407: Contains NaN: False
+2025-09-24 15:16:33.782718: All zeros: False
+2025-09-24 15:16:33.782990: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-09-24 15:16:33.783390: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:34.041079: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:34.286091: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:34.531099: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 2016
+2025-09-24 15:16:34.531392: === MANUAL RETURNS TEST ===
+2025-09-24 15:16:34.532201: Manual returns calculation:
+2025-09-24 15:16:34.532417:   Returns length: 2003
+2025-09-24 15:16:34.532685:   Returns mean: -inf
+2025-09-24 15:16:34.532984:   Returns std: nan
+2025-09-24 15:16:34.533264:   Contains NaN: False
+2025-09-24 15:16:34.533667:   First few returns: [        -inf -42.82374527   0.14570633   2.51275112  -0.21447795]
+2025-09-24 15:16:34.534059:   Daily volatility: nan
+2025-09-24 15:16:34.534349:   Annual volatility: nan
+2025-09-24 15:16:34.534557: === CAPITAL AND RETURNS DEBUG ===
+2025-09-24 15:16:34.534769: Starting capital from config: $1,000,000.00
+2025-09-24 15:16:34.535177: Total P&L generated: $588,296.86
+2025-09-24 15:16:34.535392: Actual portfolio return: 58.83%
+2025-09-24 15:16:34.535605: Final portfolio value: $1,588,296.86
+2025-09-24 15:16:34.536366: Proper daily returns mean: 0.000246
+2025-09-24 15:16:34.536691: Proper daily returns std: 0.005637
+2025-09-24 15:16:34.537112: Proper Sharpe ratio: 0.691
+2025-09-24 15:16:34.537340: Proper annual return: 6.2%
+2025-09-24 15:16:34.537609: Using capital-adjusted returns: 2015 returns
+2025-09-24 15:16:34.537827: --- Calculating performance metrics ---
+2025-09-24 15:16:34.538143: Mean daily return: 0.000246
+2025-09-24 15:16:34.538359: Daily volatility: 0.005637
+2025-09-24 15:16:34.539072: Calculated Sharpe ratio: 0.691
+2025-09-24 15:16:34.539343: Calculated annual return: 6.2%
