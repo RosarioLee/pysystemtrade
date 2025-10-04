@@ -294,6 +294,11 @@ class EnhancedETFSystem:
             "percentage_vol_target": self.vol_target,
             "base_currency": "USD",
 
+            # ADD THIS FOR VARIABLE CAPITAL
+            "capital_multiplier": {
+                "func": "syscore.capital.full_compounding"
+            },
+
             # Dynamic IDM (preserved)
             "use_instrument_div_mult_estimates": True,
             "use_instrument_weight_estimates": False,

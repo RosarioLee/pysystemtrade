@@ -216,12 +216,24 @@ class ETFSystemRunner:
             print("\n🧮 Position Sizing Formula Verification:")
             formula_result = self.dashboard.verify_position_sizing_formula(self.trading_system)
 
-            # Store diagnostic results
+            # NEW: Forecast scalar consistency check
+            print("🔍 Forecast Scalar Consistency Verification...")
+            forecast_consistency = self.dashboard.verify_forecast_scalar_consistency(self.trading_system)
+
+            # NEW: Export comprehensive diagnostic analysis
+            print("📋 Exporting comprehensive diagnostic analysis...")
+            diagnostic_file = self.dashboard.export_diagnostic_analysis_excel("comprehensive_diagnostic_analysis.xlsx")
+            if diagnostic_file:
+                print(f"✅ Diagnostic analysis exported: {diagnostic_file}")
+
+            # Store results
             self.results['diagnostics'] = {
                 'volatility_issues': vol_issues,
                 'weight_conversion': conversion_results,
-                'weight_comparison': weight_comparison,  # NEW
-                'formula_verification': formula_result
+                'weight_comparison': weight_comparison,
+                'formula_verification': formula_result,
+                'forecast_consistency': forecast_consistency,  # NEW
+                'diagnostic_file': diagnostic_file  # NEW
             }
 
             print("✅ System diagnostics completed")
@@ -626,13 +638,12 @@ class ETFSystemRunner:
                 reports_generated['cash_weights_time_series'] = time_series_file
                 print(f"✅ Cash weights time series: {time_series_file}")
 
-            # Report 4: Final Day Backtest Report (now includes timeseries sheet)
-            print("📋 Exporting final day backtest report...")
+            # Report 4: Final Day Backtest Report with MULTIPLE timeseries
+            print("📋 Exporting final day backtest report with multiple timeseries...")
             final_day_file = self.dashboard.export_final_day_backtest_report(
                 "final_day_backtest_report.xlsx",
-                timeseries_instrument="BBAX"  # or any instrument you prefer
+                timeseries_instruments=['BBAX', 'IVV', 'HYD']  # SPECIFY MULTIPLE INSTRUMENTS
             )
-
             if final_day_file:
                 reports_generated['final_day_report'] = final_day_file
                 print(f"✅ Final day backtest report: {final_day_file}")
@@ -650,6 +661,12 @@ class ETFSystemRunner:
                 self.dashboard.create_equity_curve_plot()
             except Exception as plot_error:
                 print(f"⚠️ Plot creation failed: {plot_error}")
+
+            print("Creating comprehensive capital multiplier analysis...")
+            try:
+                self.dashboard.createcomprehensiveequitycurveplot()
+            except Exception as comp_error:
+                print(f"Comprehensive plot creation failed: {comp_error}")
 
             self.results['reports'] = reports_generated
             print(f"✅ Generated {len(reports_generated)} comprehensive reports")

@@ -359,8 +359,8 @@ class SimpleETFDashboard:
             starting_capital = 1000000
             vol_target = getattr(system.config, 'percentage_vol_target', 12.0) / 100
 
-            # Get date range (use last 100 data points)
-            dates = portfolio_curve.index[-100:]
+            # Get date range (use ALL data points for complete backtest)
+            dates = portfolio_curve.index
 
             # Initialize data containers
             cash_weights_data = {}
@@ -1983,13 +1983,14 @@ Win Rate: {performance['win_rate']:.1%}
         return vol_info
 
     def export_final_day_backtest_report(self, filename="final_day_backtest_report.xlsx",
-                                         timeseries_instrument=None, timeseries_days=100):
+                                         timeseries_instruments=None, timeseries_days=None):
+
         """
-        Export comprehensive final day backtest report with integrated timeseries functionality.
+        Export comprehensive final day backtest report with multiple timeseries sheets.
 
         Args:
             filename (str): file path for saving the Excel report
-            timeseries_instrument (str): instrument symbol for timeseries sheet, defaults to first instrument
+            timeseries_instruments (list): list of instrument symbols for timeseries sheets
             timeseries_days (int): number of days to include in timeseries, default 100
 
         Returns:
@@ -2006,13 +2007,26 @@ Win Rate: {performance['win_rate']:.1%}
                 print("❌ No instruments found in system")
                 return None
 
-            # Auto-select first instrument if none specified
-            if timeseries_instrument is None:
-                timeseries_instrument = instruments[0]
-                print(f"📈 Auto-selected {timeseries_instrument} for timeseries analysis")
-            elif timeseries_instrument not in instruments:
-                print(f"⚠️ Specified instrument {timeseries_instrument} not found, using {instruments[0]}")
-                timeseries_instrument = instruments[0]
+            # Handle multiple timeseries instruments
+            if timeseries_instruments is None:
+                timeseries_instruments = [instruments[0]]  # Default to first instrument
+                print(f"📈 Auto-selected {timeseries_instruments[0]} for timeseries analysis")
+            elif isinstance(timeseries_instruments, str):
+                timeseries_instruments = [timeseries_instruments]  # Convert string to list
+
+            # Validate and filter timeseries instruments
+            valid_timeseries_instruments = []
+            for instrument in timeseries_instruments:
+                if instrument in instruments:
+                    valid_timeseries_instruments.append(instrument)
+                else:
+                    print(f"⚠️ Specified instrument {instrument} not found in system")
+
+            if not valid_timeseries_instruments:
+                valid_timeseries_instruments = [instruments[0]]
+                print(f"📈 Using fallback instrument {instruments[0]} for timeseries")
+
+            print(f"📈 Will create timeseries for: {', '.join(valid_timeseries_instruments)}")
 
             # Get portfolio data
             portfolio = self.system.accounts.portfolio()
@@ -2064,351 +2078,50 @@ Win Rate: {performance['win_rate']:.1%}
                                                'PSTDailyReturnsVolatility']}
                     })
 
-            # ========== PART 2: TIMESERIES DATA - INLINE GENERATION ==========
-            print(f"📈 Processing timeseries data for {timeseries_instrument}...")
-            timeseries_data = []
+            # ========== PART 2: MULTIPLE TIMESERIES DATA ==========
+            timeseries_dataframes = {}
 
-            # Get timeseries dates
-            available_dates = portfolio_curve.index
-            if len(available_dates) >= timeseries_days:
-                timeseries_dates = available_dates[-timeseries_days:]
-            else:
-                timeseries_dates = available_dates
+            for timeseries_instrument in valid_timeseries_instruments:
+                print(f"📈 Processing timeseries data for {timeseries_instrument}...")
+                timeseries_data = []
 
-            print(f"📊 Generating {len(timeseries_dates)} days of timeseries data...")
+                # Get timeseries dates
+                available_dates = portfolio_curve.index
+                if timeseries_days is None:
+                    timeseries_dates = available_dates  # Use ALL dates
+                elif len(available_dates) >= timeseries_days:
+                    timeseries_dates = available_dates[-timeseries_days:]
+                else:
+                    timeseries_dates = available_dates
 
-            for date in timeseries_dates:
-                try:
-                    # Calculate portfolio value for this date
-                    portfolio_pnl = portfolio_curve.asof(date)
-                    if pd.isna(portfolio_pnl):
-                        continue
-                    date_portfolio_value = starting_capital + portfolio_pnl
-                    date_daily_cash_vol_target = date_portfolio_value * target_vol / 16
+                print(f"📊 Generating {len(timeseries_dates)} days of timeseries data for {timeseries_instrument}...")
 
-                    # Create row data with EXACT same structure as final day
-                    ts_row_data = {
-                        'Instrument': timeseries_instrument,
-                        'Date': date,
-                        'ClosePrice': np.nan,
-                        'RiskWeightConfig': 0,
-                        'DailyVolatilityPct': np.nan,
-                        'DailyVolatilityDecimal': np.nan,
-                        'AnnualVolatilityPct': np.nan,
-                        'AnnualVolatilityDecimal': np.nan,
-                        'TargetVolatility': target_vol,
-                        'DailyCashVolTarget': date_daily_cash_vol_target,
-                        'PortfolioValue': date_portfolio_value,
-                        'CombinedForecast': np.nan,
-                        'IDM': np.nan,
-                        'InstrumentValueVolatility': np.nan,
-                        'SubsystemPosition': np.nan,
-                        'NotionalPosition': np.nan,
-                        'PositionValue': np.nan,
-                        'LeverageContribution': np.nan,
-                        'RiskExposure': np.nan,
-                        'NativeVolatilityScalarPySystemTrade': np.nan,
-                        'NativeVolatilityScalarSource': "UNKNOWN",
-                        'PSTDailyReturnsVolatility': np.nan
-                    }
-
-                    # 1. CLOSE PRICE [EXTRACTED]
+                for date in timeseries_dates:
                     try:
-                        prices = self.system.rawdata.get_daily_prices(timeseries_instrument)
-                        if prices is not None and len(prices) > 0:
-                            if date in prices.index:
-                                ts_row_data['ClosePrice'] = prices.loc[date]
-                            else:
-                                available_dates_price = prices.index[prices.index <= date]
-                                if len(available_dates_price) > 0:
-                                    ts_row_data['ClosePrice'] = prices.loc[available_dates_price[-1]]
-                    except:
-                        pass
+                        # Calculate portfolio value for this date
+                        portfolio_pnl = portfolio_curve.asof(date)
+                        if pd.isna(portfolio_pnl):
+                            continue
+                        date_portfolio_value = starting_capital + portfolio_pnl
+                        date_daily_cash_vol_target = date_portfolio_value * target_vol / 16
 
-                    # 2. RISK WEIGHT FROM CONFIG [EXTRACTED]
-                    risk_weights = getattr(self.system.config, 'instrument_weights', {})
-                    ts_row_data['RiskWeightConfig'] = risk_weights.get(timeseries_instrument, 0)
-
-                    # 3. COMBINED FORECAST [EXTRACTED]
-                    try:
-                        forecast_series = self.system.combForecast.get_combined_forecast(timeseries_instrument)
-                        if forecast_series is not None and len(forecast_series) > 0:
-                            if date in forecast_series.index:
-                                ts_row_data['CombinedForecast'] = forecast_series.loc[date]
-                            else:
-                                available_dates_forecast = forecast_series.index[forecast_series.index <= date]
-                                if len(available_dates_forecast) > 0:
-                                    ts_row_data['CombinedForecast'] = forecast_series.loc[available_dates_forecast[-1]]
-                    except:
-                        pass
-
-                    # 4. VOLATILITY CALCULATIONS - SAME AS FINAL DAY
-                    try:
-                        daily_pct_vol_series = self.system.rawdata.get_daily_percentage_volatility(
-                            timeseries_instrument)
-                        if daily_pct_vol_series is not None and len(daily_pct_vol_series) > 0:
-                            if date in daily_pct_vol_series.index:
-                                daily_pct_vol = daily_pct_vol_series.loc[date]
-                            else:
-                                available_dates_vol = daily_pct_vol_series.index[daily_pct_vol_series.index <= date]
-                                if len(available_dates_vol) > 0:
-                                    daily_pct_vol = daily_pct_vol_series.loc[available_dates_vol[-1]]
-                                else:
-                                    daily_pct_vol = None
-
-                            if pd.notna(daily_pct_vol) and daily_pct_vol > 0:
-                                ts_row_data['DailyVolatilityPct'] = daily_pct_vol
-                                ts_row_data['DailyVolatilityDecimal'] = daily_pct_vol / 100
-
-                                annual_pct_vol = daily_pct_vol * (252 ** 0.5)
-                                ts_row_data['AnnualVolatilityPct'] = annual_pct_vol
-                                ts_row_data['AnnualVolatilityDecimal'] = annual_pct_vol / 100
-                    except:
-                        pass
-
-                    # Method 2: Manual calculation from price data [CALCULATED]
-                    if pd.isna(ts_row_data['DailyVolatilityPct']):
-                        try:
-                            prices = self.system.rawdata.get_daily_prices(timeseries_instrument)
-                            if prices is not None and len(prices) > 35:
-                                returns = prices.pct_change().dropna()
-                                if len(returns) > 35:
-                                    # Use data up to current date only
-                                    returns_up_to_date = returns[returns.index <= date]
-                                    if len(returns_up_to_date) > 35:
-                                        daily_vol_decimal = returns_up_to_date.ewm(span=35, min_periods=10).std().iloc[
-                                            -1]
-                                        if pd.notna(daily_vol_decimal) and daily_vol_decimal > 0:
-                                            ts_row_data['DailyVolatilityDecimal'] = daily_vol_decimal
-                                            ts_row_data['DailyVolatilityPct'] = daily_vol_decimal * 100
-
-                                            annual_vol_decimal = daily_vol_decimal * (252 ** 0.5)
-                                            ts_row_data['AnnualVolatilityDecimal'] = annual_vol_decimal
-                                            ts_row_data['AnnualVolatilityPct'] = annual_vol_decimal * 100
-                        except:
-                            pass
-
-                    # 5. PST DAILY RETURNS VOLATILITY [EXTRACTED]
-                    try:
-                        pst_daily_vol_series = self.system.rawdata.daily_returns_volatility(timeseries_instrument)
-                        if pst_daily_vol_series is not None and len(pst_daily_vol_series) > 0:
-                            if date in pst_daily_vol_series.index:
-                                pst_daily_vol = pst_daily_vol_series.loc[date]
-                            else:
-                                available_dates_pst = pst_daily_vol_series.index[pst_daily_vol_series.index <= date]
-                                if len(available_dates_pst) > 0:
-                                    pst_daily_vol = pst_daily_vol_series.loc[available_dates_pst[-1]]
-                                else:
-                                    pst_daily_vol = None
-
-                            if pd.notna(pst_daily_vol) and pst_daily_vol > 0:
-                                ts_row_data['PSTDailyReturnsVolatility'] = pst_daily_vol
-                    except:
-                        pass
-
-                    # 6. IDM [EXTRACTED]
-                    try:
-                        idm_series = self.system.portfolio.get_instrument_diversification_multiplier()
-                        if idm_series is not None and len(idm_series) > 0:
-                            if date in idm_series.index:
-                                ts_row_data['IDM'] = idm_series.loc[date]
-                            else:
-                                available_dates_idm = idm_series.index[idm_series.index <= date]
-                                if len(available_dates_idm) > 0:
-                                    ts_row_data['IDM'] = idm_series.loc[available_dates_idm[-1]]
-                    except:
-                        pass
-
-                    # 7. INSTRUMENT VALUE VOLATILITY [CALCULATED]
-                    try:
-                        if (pd.notna(ts_row_data['ClosePrice']) and pd.notna(ts_row_data['DailyVolatilityDecimal'])
-                                and ts_row_data['ClosePrice'] > 0 and ts_row_data['DailyVolatilityDecimal'] > 0):
-                            daily_price_vol = ts_row_data['ClosePrice'] * ts_row_data['DailyVolatilityDecimal']
-                            ts_row_data['InstrumentValueVolatility'] = daily_price_vol
-                    except:
-                        pass
-
-                    # 8. SUBSYSTEM POSITION [EXTRACTED]
-                    try:
-                        subsystem_series = self.system.positionSize.get_subsystem_position(timeseries_instrument)
-                        if subsystem_series is not None and len(subsystem_series) > 0:
-                            if date in subsystem_series.index:
-                                ts_row_data['SubsystemPosition'] = subsystem_series.loc[date]
-                            else:
-                                available_dates_sub = subsystem_series.index[subsystem_series.index <= date]
-                                if len(available_dates_sub) > 0:
-                                    ts_row_data['SubsystemPosition'] = subsystem_series.loc[available_dates_sub[-1]]
-                    except:
-                        pass
-
-                    # 9. NOTIONAL POSITION [EXTRACTED]
-                    try:
-                        notional_series = self.system.portfolio.get_notional_position(timeseries_instrument)
-                        if notional_series is not None and len(notional_series) > 0:
-                            if date in notional_series.index:
-                                ts_row_data['NotionalPosition'] = notional_series.loc[date]
-                            else:
-                                available_dates_not = notional_series.index[notional_series.index <= date]
-                                if len(available_dates_not) > 0:
-                                    ts_row_data['NotionalPosition'] = notional_series.loc[available_dates_not[-1]]
-                    except:
-                        pass
-
-                    # 10. POSITION VALUE [CALCULATED]
-                    try:
-                        if (pd.notna(ts_row_data['NotionalPosition']) and pd.notna(ts_row_data['ClosePrice'])
-                                and ts_row_data['ClosePrice'] > 0):
-                            position_value = abs(ts_row_data['NotionalPosition']) * ts_row_data['ClosePrice']
-                            ts_row_data['PositionValue'] = position_value
-                    except:
-                        pass
-
-                    # 11. LEVERAGE CONTRIBUTION [CALCULATED]
-                    try:
-                        if pd.notna(ts_row_data['PositionValue']) and date_portfolio_value > 0:
-                            ts_row_data['LeverageContribution'] = ts_row_data['PositionValue'] / date_portfolio_value
-                    except:
-                        pass
-
-                    # 12. RISK EXPOSURE [CALCULATED]
-                    try:
-                        if (pd.notna(ts_row_data['PositionValue']) and pd.notna(ts_row_data['DailyVolatilityDecimal'])
-                                and ts_row_data['DailyVolatilityDecimal'] > 0):
-                            risk_exposure = ts_row_data['PositionValue'] * ts_row_data['DailyVolatilityDecimal']
-                            ts_row_data['RiskExposure'] = risk_exposure
-                    except:
-                        pass
-
-                    # 13. NATIVE VOLATILITY SCALAR [EXTRACTED] - FIXED: Use reverse engineering approach
-                    try:
-                        # METHOD 1: Direct extraction from PySystemTrade (preferred)
-                        vol_scalar_extracted = None
-                        vol_scalar_source = "UNKNOWN"
-
-                        try:
-                            # Try direct volatility scalar access
-                            vol_scalar_series = self.system.positionSize.get_volatility_scalar(
-                                timeseries_instrument)
-                            if vol_scalar_series is not None and len(vol_scalar_series) > 0:
-                                # Get value for this specific date
-                                if date in vol_scalar_series.index:
-                                    vol_scalar_extracted = vol_scalar_series.loc[date]
-                                    vol_scalar_source = "PYSYSTEMTRADE_DIRECT"
-                                else:
-                                    available_dates_vs = vol_scalar_series.index[vol_scalar_series.index <= date]
-                                    if len(available_dates_vs) > 0:
-                                        vol_scalar_extracted = vol_scalar_series.loc[available_dates_vs[-1]]
-                                        vol_scalar_source = "PYSYSTEMTRADE_NEAREST_DATE"
-                        except (AttributeError, Exception):
-                            pass
-
-                        # METHOD 2: Reverse engineer from positions (same as Final_Day_Report)
-                        if vol_scalar_extracted is None or vol_scalar_extracted <= 0:
-                            try:
-                                # Get subsystem position and combined forecast for this date
-                                subsystem_series = self.system.positionSize.get_subsystem_position(
-                                    timeseries_instrument)
-                                forecast_series = self.system.combForecast.get_combined_forecast(
-                                    timeseries_instrument)
-
-                                if subsystem_series is not None and forecast_series is not None:
-                                    # Get values for this specific date
-                                    subsystem_pos = None
-                                    forecast_val = None
-
-                                    if date in subsystem_series.index:
-                                        subsystem_pos = subsystem_series.loc[date]
-                                    else:
-                                        available_dates_sub = subsystem_series.index[subsystem_series.index <= date]
-                                        if len(available_dates_sub) > 0:
-                                            subsystem_pos = subsystem_series.loc[available_dates_sub[-1]]
-
-                                    if date in forecast_series.index:
-                                        forecast_val = forecast_series.loc[date]
-                                    else:
-                                        available_dates_fore = forecast_series.index[forecast_series.index <= date]
-                                        if len(available_dates_fore) > 0:
-                                            forecast_val = forecast_series.loc[available_dates_fore[-1]]
-
-                                    # Reverse engineer: subsystem_position = (vol_scalar * combined_forecast) / 10
-                                    if (subsystem_pos is not None and forecast_val is not None and
-                                            not pd.isna(subsystem_pos) and not pd.isna(forecast_val) and abs(
-                                                forecast_val) > 0.01):
-                                        vol_scalar_extracted = abs(subsystem_pos * 10 / forecast_val)
-                                        vol_scalar_source = "REVERSE_ENGINEERED_FROM_POSITIONS"
-                            except (AttributeError, Exception):
-                                pass
-
-                        # METHOD 3: Calculate from volatility data (same as Final_Day_Report)
-                        if vol_scalar_extracted is None or vol_scalar_extracted <= 0:
-                            try:
-                                # Get daily volatility for this date
-                                current_vol = None
-
-                                # Try to get daily percentage volatility first
-                                vol_series = self.system.rawdata.get_daily_percentage_volatility(
-                                    timeseries_instrument)
-                                if vol_series is not None and len(vol_series) > 0:
-                                    if date in vol_series.index:
-                                        current_vol = vol_series.loc[date] / 100  # Convert to decimal
-                                    else:
-                                        available_dates_vol = vol_series.index[vol_series.index <= date]
-                                        if len(available_dates_vol) > 0:
-                                            current_vol = vol_series.loc[available_dates_vol[-1]] / 100
-
-                                # Fallback: Calculate from price data
-                                if current_vol is None or current_vol <= 0:
-                                    prices = self.system.rawdata.get_daily_prices(timeseries_instrument)
-                                    if prices is not None and len(prices) > 35:
-                                        # Use only data up to current date
-                                        prices_up_to_date = prices[prices.index <= date]
-                                        if len(prices_up_to_date) > 35:
-                                            returns = prices_up_to_date.pct_change().dropna()
-                                            if len(returns) > 35:
-                                                current_vol = returns.ewm(span=35, min_periods=10).std().iloc[-1]
-
-                                if current_vol is not None and current_vol > 0:
-                                    # Convert daily volatility to annual
-                                    annual_vol = current_vol * (252 ** 0.5)
-
-                                    # Calculate volatility scalar: vol_target / annual_volatility
-                                    vol_scalar_extracted = target_vol / annual_vol
-                                    vol_scalar_source = "CALCULATED_FROM_VOLATILITY"
-
-                            except (AttributeError, Exception):
-                                pass
-
-                        # METHOD 4: Final fallback - use the working method from Final_Day_Report
-                        if vol_scalar_extracted is None or vol_scalar_extracted <= 0:
-                            try:
-                                vol_scalar_extracted, fallback_source = self.get_volatility_scalar_safe(self.system,
-                                                                                                        timeseries_instrument)
-                                if vol_scalar_extracted and vol_scalar_extracted > 0:
-                                    vol_scalar_source = f"FALLBACK_{fallback_source}"
-                                else:
-                                    vol_scalar_extracted = None
-                            except:
-                                pass
-
-                        # Set the final values
-                        if vol_scalar_extracted is not None and vol_scalar_extracted > 0:
-                            ts_row_data['NativeVolatilityScalarPySystemTrade'] = vol_scalar_extracted
-                            ts_row_data['NativeVolatilityScalarSource'] = vol_scalar_source
-                        else:
-                            ts_row_data['NativeVolatilityScalarPySystemTrade'] = np.nan
-                            ts_row_data['NativeVolatilityScalarSource'] = "NO_DATA_ALL_METHODS_FAILED"
+                        # Use the same data structure as final day report
+                        ts_row_data = self._process_instrument_timeseries_day(
+                            timeseries_instrument, date, date_portfolio_value,
+                            target_vol, date_daily_cash_vol_target
+                        )
+                        timeseries_data.append(ts_row_data)
 
                     except Exception as e:
-                        print(
-                            f"⚠️ Native volatility scalar extraction failed for {timeseries_instrument} on {date}: {e}")
-                        ts_row_data['NativeVolatilityScalarPySystemTrade'] = np.nan
-                        ts_row_data['NativeVolatilityScalarSource'] = "ERROR"
+                        print(f"⚠️ Error processing {timeseries_instrument} on {date}: {e}")
+                        continue
 
-                    timeseries_data.append(ts_row_data)
-
-                except Exception as e:
-                    print(f"⚠️ Error processing {timeseries_instrument} on {date}: {e}")
-                    continue
+                # Store the timeseries data for this instrument
+                if timeseries_data:
+                    timeseries_dataframes[timeseries_instrument] = pd.DataFrame(timeseries_data)
+                    print(f"✅ Generated {len(timeseries_data)} rows for {timeseries_instrument}")
+                else:
+                    print(f"⚠️ No timeseries data generated for {timeseries_instrument}")
 
             # ========== PART 3: LEVERAGE ANALYSIS ==========
             print("📊 Calculating leverage and capital multiplier metrics...")
@@ -2419,9 +2132,8 @@ Win Rate: {performance['win_rate']:.1%}
 
             # Create DataFrames
             df_final = pd.DataFrame(final_day_data).sort_values('Instrument')
-            df_timeseries = pd.DataFrame(timeseries_data) if timeseries_data else pd.DataFrame()
 
-            # EXACT SAME COLUMN MAPPING for both sheets
+            # EXACT SAME COLUMN MAPPING for all sheets
             excel_column_names = {
                 'Instrument': 'Instrument',
                 'Date': 'Date',
@@ -2447,12 +2159,15 @@ Win Rate: {performance['win_rate']:.1%}
                 'PSTDailyReturnsVolatility': 'PST_Daily_Returns_Volatility [EXTRACTED]'
             }
 
-            # Apply column renaming to BOTH DataFrames
+            # Apply column renaming to final day DataFrame
             df_final_excel = df_final.rename(columns=excel_column_names)
-            df_timeseries_excel = df_timeseries.rename(columns=excel_column_names) if len(
-                df_timeseries) > 0 else pd.DataFrame()
 
-            # Create leverage DataFrames
+            # Apply column renaming to all timeseries DataFrames
+            timeseries_dataframes_excel = {}
+            for instrument, df_ts in timeseries_dataframes.items():
+                timeseries_dataframes_excel[instrument] = df_ts.rename(columns=excel_column_names)
+
+            # Create leverage DataFrames (same as before)
             if leverage_analysis:
                 leverage_metrics = leverage_analysis['leverage_metrics']
                 controls_status = leverage_analysis['controls_status']
@@ -2484,38 +2199,35 @@ Win Rate: {performance['win_rate']:.1%}
                 })
                 controls_df = pd.DataFrame(columns=['Control_Check', 'Status'])
 
-            # Export to Excel with IDENTICAL formatting
+            # Export to Excel with MULTIPLE timeseries sheets
             with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
                 workbook = writer.book
 
                 # Sheet 1: Final Day Report
                 df_final_excel.to_excel(writer, sheet_name='Final_Day_Report', index=False)
 
-                # Sheet 2: Timeseries with EXACT SAME FORMAT as Final_Day_Report
-                if len(df_timeseries_excel) > 0:
-                    sheet_name = f"{timeseries_instrument}_Timeseries"
-                    df_timeseries_excel.to_excel(writer, sheet_name=sheet_name, index=False)
-                    print(f"✅ Created timeseries sheet: {sheet_name} with {len(df_timeseries_excel)} rows")
-                else:
-                    print("⚠️ No timeseries data to export")
+                # Multiple Timeseries Sheets
+                timeseries_sheet_names = []
+                for instrument, df_ts_excel in timeseries_dataframes_excel.items():
+                    sheet_name = f"{instrument}_Timeseries"
+                    df_ts_excel.to_excel(writer, sheet_name=sheet_name, index=False)
+                    timeseries_sheet_names.append(sheet_name)
+                    print(f"✅ Created timeseries sheet: {sheet_name} with {len(df_ts_excel)} rows")
 
-                # Sheet 3 & 4: Leverage Analysis
+                # Leverage Analysis Sheets
                 leverage_df.to_excel(writer, sheet_name='Leverage_Analysis', index=False)
                 controls_df.to_excel(writer, sheet_name='Leverage_Controls', index=False)
 
-                # Apply IDENTICAL formatting to both Final_Day_Report and Timeseries sheets
-                self._format_excel_sheets(writer, workbook,
-                                          timeseries_instrument if len(df_timeseries_excel) > 0 else None)
+                # Apply IDENTICAL formatting to all sheets
+                self._format_excel_sheets_multiple(writer, workbook, timeseries_sheet_names)
 
             # Summary
-            sheets_created = ['Final_Day_Report', 'Leverage_Analysis', 'Leverage_Controls']
-            if len(df_timeseries_excel) > 0:
-                sheets_created.append(f"{timeseries_instrument}_Timeseries")
+            sheets_created = ['Final_Day_Report', 'Leverage_Analysis', 'Leverage_Controls'] + timeseries_sheet_names
 
             print(f"✅ Combined report exported successfully: {filename}")
             print(f"📊 Processed {len(final_day_data)} instruments")
-            print(f"📈 Timeseries data: {len(df_timeseries_excel)} rows for {timeseries_instrument}")
-            print(f"📋 Sheets created: {', '.join(sheets_created)}")
+            print(f"📈 Created {len(timeseries_sheet_names)} timeseries sheets: {', '.join(timeseries_sheet_names)}")
+            print(f"📋 Total sheets created: {', '.join(sheets_created)}")
 
             return filename
 
@@ -2525,6 +2237,68 @@ Win Rate: {performance['win_rate']:.1%}
             traceback.print_exc()
             return None
 
+    def _format_excel_sheets_multiple(self, writer, workbook, timeseries_sheet_names):
+        """Apply consistent formatting to all Excel sheets including multiple timeseries sheets"""
+
+        # Define formats (same as before)
+        currency_format = workbook.add_format({'num_format': '#,##0.00'})
+        percent_format = workbook.add_format({'num_format': '0.00%'})
+        decimal_format = workbook.add_format({'num_format': '0.0000'})
+        pct_number_format = workbook.add_format({'num_format': '0.00'})
+        large_number_format = workbook.add_format({'num_format': '#,##0.00'})
+        date_format = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+
+        # Highlighting formats for key columns
+        highlight_large_number_format = workbook.add_format({'num_format': '#,##0.00', 'bg_color': '#FFFF99'})
+        highlight_decimal_format = workbook.add_format({'num_format': '0.0000', 'bg_color': '#FFFF99'})
+        highlight_currency_format = workbook.add_format({'num_format': '#,##0.00', 'bg_color': '#FFFF99'})
+
+        # Format Final_Day_Report sheet
+        if 'Final_Day_Report' in writer.sheets:
+            self._apply_standard_formatting(writer.sheets['Final_Day_Report'],
+                                            currency_format, percent_format, decimal_format,
+                                            pct_number_format, large_number_format, date_format,
+                                            highlight_large_number_format, highlight_decimal_format,
+                                            highlight_currency_format)
+
+        # Format ALL timeseries sheets with IDENTICAL formatting
+        for sheet_name in timeseries_sheet_names:
+            if sheet_name in writer.sheets:
+                self._apply_standard_formatting(writer.sheets[sheet_name],
+                                                currency_format, percent_format, decimal_format,
+                                                pct_number_format, large_number_format, date_format,
+                                                highlight_large_number_format, highlight_decimal_format,
+                                                highlight_currency_format)
+
+    def _apply_standard_formatting(self, worksheet, currency_format, percent_format, decimal_format,
+                                   pct_number_format, large_number_format, date_format,
+                                   highlight_large_number_format, highlight_decimal_format,
+                                   highlight_currency_format):
+        """Apply standard formatting to a worksheet"""
+
+        # Apply column formatting (adjusted for removed Volatility_Scalar columns)
+        worksheet.set_column('A:A', 12)  # Instrument
+        worksheet.set_column('B:B', 12, date_format)  # Date
+        worksheet.set_column('C:C', 12, currency_format)  # Close Price
+        worksheet.set_column('D:D', 12, percent_format)  # Risk Weight
+        worksheet.set_column('E:E', 15, pct_number_format)  # Daily Vol %
+        worksheet.set_column('F:F', 15, decimal_format)  # Daily Vol Decimal
+        worksheet.set_column('G:G', 15, pct_number_format)  # Annual Vol %
+        worksheet.set_column('H:H', 15, decimal_format)  # Annual Vol Decimal
+        worksheet.set_column('I:I', 12, percent_format)  # Target Volatility
+        worksheet.set_column('J:J', 15, currency_format)  # Daily Cash Vol Target (FIXED)
+        worksheet.set_column('K:K', 15, currency_format)  # Portfolio Value
+        worksheet.set_column('L:L', 15, highlight_large_number_format)  # Combined Forecast
+        worksheet.set_column('M:M', 12, highlight_decimal_format)  # IDM
+        worksheet.set_column('N:N', 15, highlight_currency_format)  # Instrument Value Vol
+        worksheet.set_column('O:O', 15, large_number_format)  # Subsystem Position
+        worksheet.set_column('P:P', 15, large_number_format)  # Notional Position
+        worksheet.set_column('Q:Q', 15, currency_format)  # Position Value
+        worksheet.set_column('R:R', 15, percent_format)  # Leverage Contribution
+        worksheet.set_column('S:S', 15, currency_format)  # Risk Exposure
+        worksheet.set_column('T:T', 20, highlight_decimal_format)  # Native Vol Scalar
+        worksheet.set_column('U:U', 20)  # Native Vol Scalar Source
+        worksheet.set_column('V:V', 15, decimal_format)  # PST Daily Returns Volatility
     def _process_instrument_final_day(self, instrument, final_date, portfolio_value, target_vol, daily_cash_vol_target):
         """Helper method to process single instrument for final day report"""
         import numpy as np
@@ -2734,103 +2508,277 @@ Win Rate: {performance['win_rate']:.1%}
         return row_data
 
     def _process_instrument_timeseries_day(self, instrument, date, portfolio_value, target_vol, daily_cash_vol_target):
-        """Helper method to process single instrument for single day timeseries"""
+        """Helper method to process single instrument for single day timeseries - EXACT same structure as final day"""
         import numpy as np
         import pandas as pd
 
+        # Use EXACT same structure as final day processing
         row_data = {
-            'Date': date,
             'Instrument': instrument,
+            'Date': date,
             'ClosePrice': np.nan,
             'RiskWeightConfig': 0,
-            'CombinedForecast': np.nan,
+            'DailyVolatilityPct': np.nan,
             'DailyVolatilityDecimal': np.nan,
+            'AnnualVolatilityPct': np.nan,
             'AnnualVolatilityDecimal': np.nan,
             'TargetVolatility': target_vol,
             'DailyCashVolTarget': daily_cash_vol_target,
             'PortfolioValue': portfolio_value,
+            'CombinedForecast': np.nan,
             'IDM': np.nan,
+            'InstrumentValueVolatility': np.nan,
             'SubsystemPosition': np.nan,
             'NotionalPosition': np.nan,
             'PositionValue': np.nan,
             'LeverageContribution': np.nan,
-            'RiskExposure': np.nan
+            'RiskExposure': np.nan,
+            'NativeVolatilityScalarPySystemTrade': np.nan,
+            'NativeVolatilityScalarSource': "UNKNOWN",
+            'PSTDailyReturnsVolatility': np.nan
         }
 
-        # Get close price for this date
+        # 1. CLOSE PRICE [EXTRACTED] - SAME AS FINAL_DAY_REPORT
         try:
             prices = self.system.rawdata.get_daily_prices(instrument)
             if prices is not None and len(prices) > 0:
                 if date in prices.index:
                     row_data['ClosePrice'] = prices.loc[date]
                 else:
-                    available_dates = prices.index[prices.index <= date]
-                    if len(available_dates) > 0:
-                        row_data['ClosePrice'] = prices.loc[available_dates[-1]]
+                    available_dates_price = prices.index[prices.index <= date]
+                    if len(available_dates_price) > 0:
+                        row_data['ClosePrice'] = prices.loc[available_dates_price[-1]]
         except:
             pass
 
-        # Get risk weight from config
+        # 2. RISK WEIGHT FROM CONFIG [EXTRACTED] - SAME AS FINAL_DAY_REPORT
         risk_weights = getattr(self.system.config, 'instrument_weights', {})
         row_data['RiskWeightConfig'] = risk_weights.get(instrument, 0)
 
-        # Extract volatility using the same method as final day
+        # 3. COMBINED FORECAST [EXTRACTED] - SAME AS FINAL_DAY_REPORT
         try:
-            vol_info = self.get_detailed_volatility_info(self.system, instrument, target_vol)
-            if vol_info.get('annual_volatility'):
-                annual_vol_decimal = vol_info['annual_volatility']
-                row_data['AnnualVolatilityDecimal'] = annual_vol_decimal
-                row_data['DailyVolatilityDecimal'] = annual_vol_decimal / (252 ** 0.5)
-        except:
-            pass
-
-        # Continue with other fields using the same extraction patterns...
-        # (Copy similar extraction logic from _process_instrument_final_day)
-
-        return row_data
-
-        """Helper method to process single instrument for single day timeseries"""
-        import numpy as np
-        import pandas as pd
-
-        row_data = {
-            'Date': date,
-            'Instrument': instrument,
-            'ClosePrice': np.nan,
-            'RiskWeightConfig': 0,
-            'CombinedForecast': np.nan,
-            'DailyVolatilityDecimal': np.nan,
-            'AnnualVolatilityDecimal': np.nan,
-            'TargetVolatility': target_vol,
-            'DailyCashVolTarget': daily_cash_vol_target,
-            'PortfolioValue': portfolio_value,
-            'IDM': np.nan,
-            'SubsystemPosition': np.nan,
-            'NotionalPosition': np.nan,
-            'PositionValue': np.nan,
-            'LeverageContribution': np.nan,
-            'RiskExposure': np.nan
-        }
-
-        # Get close price for this date
-        try:
-            prices = self.system.rawdata.get_daily_prices(instrument)
-            if prices is not None and len(prices) > 0:
-                if date in prices.index:
-                    row_data['ClosePrice'] = prices.loc[date]
+            forecast_series = self.system.combForecast.get_combined_forecast(instrument)
+            if forecast_series is not None and len(forecast_series) > 0:
+                if date in forecast_series.index:
+                    row_data['CombinedForecast'] = forecast_series.loc[date]
                 else:
-                    available_dates = prices.index[prices.index <= date]
-                    if len(available_dates) > 0:
-                        row_data['ClosePrice'] = prices.loc[available_dates[-1]]
+                    available_dates_forecast = forecast_series.index[forecast_series.index <= date]
+                    if len(available_dates_forecast) > 0:
+                        row_data['CombinedForecast'] = forecast_series.loc[available_dates_forecast[-1]]
         except:
             pass
 
-        # Get risk weight from config
-        risk_weights = getattr(self.system.config, 'instrument_weights', {})
-        row_data['RiskWeightConfig'] = risk_weights.get(instrument, 0)
+        # 4. VOLATILITY CALCULATIONS - SAME AS FINAL_DAY_REPORT
+        try:
+            daily_pct_vol_series = self.system.rawdata.get_daily_percentage_volatility(instrument)
+            if daily_pct_vol_series is not None and len(daily_pct_vol_series) > 0:
+                if date in daily_pct_vol_series.index:
+                    daily_pct_vol = daily_pct_vol_series.loc[date]
+                else:
+                    available_dates_vol = daily_pct_vol_series.index[daily_pct_vol_series.index <= date]
+                    if len(available_dates_vol) > 0:
+                        daily_pct_vol = daily_pct_vol_series.loc[available_dates_vol[-1]]
+                    else:
+                        daily_pct_vol = None
 
-        # Extract other fields using same logic as final day
-        self._extract_timeseries_fields(row_data, instrument, date, target_vol)
+                if pd.notna(daily_pct_vol) and daily_pct_vol > 0:
+                    row_data['DailyVolatilityPct'] = daily_pct_vol
+                    row_data['DailyVolatilityDecimal'] = daily_pct_vol / 100
+
+                    annual_pct_vol = daily_pct_vol * (252 ** 0.5)
+                    row_data['AnnualVolatilityPct'] = annual_pct_vol
+                    row_data['AnnualVolatilityDecimal'] = annual_pct_vol / 100
+        except:
+            pass
+
+        # Method 2: Manual calculation from price data [CALCULATED] - SAME AS FINAL_DAY_REPORT
+        if pd.isna(row_data['DailyVolatilityPct']):
+            try:
+                prices = self.system.rawdata.get_daily_prices(instrument)
+                if prices is not None and len(prices) > 35:
+                    # Use only data up to current date for historical accuracy
+                    prices_up_to_date = prices[prices.index <= date]
+                    if len(prices_up_to_date) > 35:
+                        returns = prices_up_to_date.pct_change().dropna()
+                        if len(returns) > 35:
+                            daily_vol_decimal = returns.ewm(span=35, min_periods=10).std().iloc[-1]
+                            if pd.notna(daily_vol_decimal) and daily_vol_decimal > 0:
+                                row_data['DailyVolatilityDecimal'] = daily_vol_decimal
+                                row_data['DailyVolatilityPct'] = daily_vol_decimal * 100
+
+                                annual_vol_decimal = daily_vol_decimal * (252 ** 0.5)
+                                row_data['AnnualVolatilityDecimal'] = annual_vol_decimal
+                                row_data['AnnualVolatilityPct'] = annual_vol_decimal * 100
+            except:
+                pass
+
+        # 5. PST DAILY RETURNS VOLATILITY [EXTRACTED] - SAME AS FINAL_DAY_REPORT
+        try:
+            pst_daily_vol_series = self.system.rawdata.daily_returns_volatility(instrument)
+            if pst_daily_vol_series is not None and len(pst_daily_vol_series) > 0:
+                if date in pst_daily_vol_series.index:
+                    pst_daily_vol = pst_daily_vol_series.loc[date]
+                else:
+                    available_dates_pst = pst_daily_vol_series.index[pst_daily_vol_series.index <= date]
+                    if len(available_dates_pst) > 0:
+                        pst_daily_vol = pst_daily_vol_series.loc[available_dates_pst[-1]]
+                    else:
+                        pst_daily_vol = None
+
+                if pd.notna(pst_daily_vol) and pst_daily_vol > 0:
+                    row_data['PSTDailyReturnsVolatility'] = pst_daily_vol
+        except:
+            pass
+
+        # 6. IDM [EXTRACTED] - SAME AS FINAL_DAY_REPORT
+        try:
+            idm_series = self.system.portfolio.get_instrument_diversification_multiplier()
+            if idm_series is not None and len(idm_series) > 0:
+                if date in idm_series.index:
+                    row_data['IDM'] = idm_series.loc[date]
+                else:
+                    available_dates_idm = idm_series.index[idm_series.index <= date]
+                    if len(available_dates_idm) > 0:
+                        row_data['IDM'] = idm_series.loc[available_dates_idm[-1]]
+        except:
+            pass
+
+        # 7. SUBSYSTEM POSITION [EXTRACTED] - SAME AS FINAL_DAY_REPORT
+        try:
+            subsystem_series = self.system.positionSize.get_subsystem_position(instrument)
+            if subsystem_series is not None and len(subsystem_series) > 0:
+                if date in subsystem_series.index:
+                    row_data['SubsystemPosition'] = subsystem_series.loc[date]
+                else:
+                    available_dates_sub = subsystem_series.index[subsystem_series.index <= date]
+                    if len(available_dates_sub) > 0:
+                        row_data['SubsystemPosition'] = subsystem_series.loc[available_dates_sub[-1]]
+        except:
+            pass
+
+        # 8. NOTIONAL POSITION [EXTRACTED] - SAME AS FINAL_DAY_REPORT
+        try:
+            notional_series = self.system.portfolio.get_notional_position(instrument)
+            if notional_series is not None and len(notional_series) > 0:
+                if date in notional_series.index:
+                    row_data['NotionalPosition'] = notional_series.loc[date]
+                else:
+                    available_dates_not = notional_series.index[notional_series.index <= date]
+                    if len(available_dates_not) > 0:
+                        row_data['NotionalPosition'] = notional_series.loc[available_dates_not[-1]]
+        except:
+            pass
+
+        # 9. INSTRUMENT VALUE VOLATILITY [CALCULATED] - SAME AS FINAL_DAY_REPORT
+        try:
+            if (pd.notna(row_data['ClosePrice']) and pd.notna(row_data['DailyVolatilityDecimal'])
+                    and row_data['ClosePrice'] > 0 and row_data['DailyVolatilityDecimal'] > 0):
+                daily_price_vol = row_data['ClosePrice'] * row_data['DailyVolatilityDecimal']
+                row_data['InstrumentValueVolatility'] = daily_price_vol
+        except:
+            pass
+
+        # 10. POSITION VALUE [CALCULATED] - SAME AS FINAL_DAY_REPORT
+        try:
+            if (pd.notna(row_data['NotionalPosition']) and pd.notna(row_data['ClosePrice'])
+                    and row_data['ClosePrice'] > 0):
+                position_value = abs(row_data['NotionalPosition']) * row_data['ClosePrice']
+                row_data['PositionValue'] = position_value
+        except:
+            pass
+
+        # 11. LEVERAGE CONTRIBUTION [CALCULATED] - SAME AS FINAL_DAY_REPORT
+        try:
+            if pd.notna(row_data['PositionValue']) and portfolio_value > 0:
+                row_data['LeverageContribution'] = row_data['PositionValue'] / portfolio_value
+        except:
+            pass
+
+        # 12. RISK EXPOSURE [CALCULATED] - SAME AS FINAL_DAY_REPORT
+        try:
+            if (pd.notna(row_data['PositionValue']) and pd.notna(row_data['DailyVolatilityDecimal'])
+                    and row_data['DailyVolatilityDecimal'] > 0):
+                risk_exposure = row_data['PositionValue'] * row_data['DailyVolatilityDecimal']
+                row_data['RiskExposure'] = risk_exposure
+        except:
+            pass
+
+        # 13. NATIVE VOLATILITY SCALAR [EXTRACTED] - REVERSE ENGINEERED APPROACH FROM FINAL_DAY_REPORT
+        try:
+            # METHOD 1: Direct extraction from PySystemTrade (preferred)
+            vol_scalar_extracted = None
+            vol_scalar_source = "UNKNOWN"
+
+            try:
+                # Try direct volatility scalar access
+                vol_scalar_series = self.system.positionSize.get_volatility_scalar(instrument)
+                if vol_scalar_series is not None and len(vol_scalar_series) > 0:
+                    # Get value for this specific date
+                    if date in vol_scalar_series.index:
+                        vol_scalar_extracted = vol_scalar_series.loc[date]
+                        vol_scalar_source = "PYSYSTEMTRADE_DIRECT"
+                    else:
+                        available_dates_vs = vol_scalar_series.index[vol_scalar_series.index <= date]
+                        if len(available_dates_vs) > 0:
+                            vol_scalar_extracted = vol_scalar_series.loc[available_dates_vs[-1]]
+                            vol_scalar_source = "PYSYSTEMTRADE_NEAREST_DATE"
+            except (AttributeError, Exception):
+                pass
+
+            # METHOD 2: Reverse engineer from positions (SAME AS FINAL_DAY_REPORT)
+            if vol_scalar_extracted is None or vol_scalar_extracted <= 0:
+                try:
+                    # Get subsystem position and combined forecast for this date
+                    subsystem_pos = row_data.get('SubsystemPosition')
+                    forecast_val = row_data.get('CombinedForecast')
+
+                    # Reverse engineer: subsystem_position = (vol_scalar * combined_forecast) / 10
+                    if (subsystem_pos is not None and forecast_val is not None and
+                            not pd.isna(subsystem_pos) and not pd.isna(forecast_val) and abs(forecast_val) > 0.01):
+                        vol_scalar_extracted = abs(subsystem_pos * 10 / forecast_val)
+                        vol_scalar_source = "REVERSE_ENGINEERED_FROM_POSITIONS"
+                except (AttributeError, Exception):
+                    pass
+
+            # METHOD 3: Calculate from volatility data (SAME AS FINAL_DAY_REPORT)
+            if vol_scalar_extracted is None or vol_scalar_extracted <= 0:
+                try:
+                    # Use the already calculated volatility from above
+                    current_vol = row_data.get('DailyVolatilityDecimal')
+
+                    if current_vol is not None and current_vol > 0:
+                        # Convert daily volatility to annual
+                        annual_vol = current_vol * (252 ** 0.5)
+
+                        # Calculate volatility scalar: vol_target / annual_volatility
+                        vol_scalar_extracted = target_vol / annual_vol
+                        vol_scalar_source = "CALCULATED_FROM_VOLATILITY"
+                except (AttributeError, Exception):
+                    pass
+
+            # METHOD 4: Final fallback - use the working method from Final_Day_Report
+            if vol_scalar_extracted is None or vol_scalar_extracted <= 0:
+                try:
+                    vol_scalar_extracted, fallback_source = self.get_volatility_scalar_safe(self.system, instrument)
+                    if vol_scalar_extracted and vol_scalar_extracted > 0:
+                        vol_scalar_source = f"FALLBACK_{fallback_source}"
+                    else:
+                        vol_scalar_extracted = None
+                except:
+                    pass
+
+            # Set the final values
+            if vol_scalar_extracted is not None and vol_scalar_extracted > 0:
+                row_data['NativeVolatilityScalarPySystemTrade'] = vol_scalar_extracted
+                row_data['NativeVolatilityScalarSource'] = vol_scalar_source
+            else:
+                row_data['NativeVolatilityScalarPySystemTrade'] = np.nan
+                row_data['NativeVolatilityScalarSource'] = "NO_DATA_ALL_METHODS_FAILED"
+
+        except Exception as e:
+            print(f"⚠️ Native volatility scalar extraction failed for {instrument} on {date}: {e}")
+            row_data['NativeVolatilityScalarPySystemTrade'] = np.nan
+            row_data['NativeVolatilityScalarSource'] = "ERROR"
 
         return row_data
 
@@ -3476,6 +3424,494 @@ Win Rate: {performance['win_rate']:.1%}
             import traceback
             traceback.print_exc()
             return None
+
+    def export_diagnostic_analysis_excel(self, filename="diagnostic_analysis.xlsx"):
+        """
+        Export comprehensive diagnostic analysis comparing IVV, HYD with other instruments
+        """
+        import pandas as pd
+        import numpy as np
+
+        try:
+            print(f"🔍 Exporting comprehensive diagnostic analysis to {filename}...")
+
+            instruments = self.system.get_instrument_list()
+            focus_instruments = ['BBAX', 'IVV', 'HYD'] if all(
+                inst in instruments for inst in ['BBAX', 'IVV', 'HYD']) else instruments[:3]
+
+            # ========== DATA COLLECTION ==========
+            diagnostic_data = {}
+
+            for instrument in focus_instruments:
+                print(f"📊 Analyzing {instrument}...")
+
+                diagnostic_info = {
+                    'Instrument': instrument,
+                    'DataStartDate': None,
+                    'DataEndDate': None,
+                    'TotalDays': 0,
+                    'ValidReturns': 0,
+                    'MissingDataPoints': 0,
+                    'DataCompleteness': 0.0,
+                    'VolatilityLookbackDays': None,
+                    'EWMASpan': None,
+                    'ManualDailyVol': np.nan,
+                    'SystemDailyVol': np.nan,
+                    'PST_DailyReturnsVol': np.nan,
+                    'VolatilityMethod': 'UNKNOWN',
+                    'ForecastScalar': np.nan,
+                    'LatestBlockValue': np.nan,
+                    'FXRate': np.nan,
+                    'CorporateActions': 0,
+                    'LargeMoves_5pct': 0,
+                    'VeryLargeMoves_10pct': 0,
+                    'VolatilityStability': np.nan
+                }
+
+                # 1. DATA LENGTH AND COMPLETENESS
+                try:
+                    prices = self.system.rawdata.get_daily_prices(instrument)
+                    if prices is not None and len(prices) > 0:
+                        diagnostic_info['DataStartDate'] = prices.index[0]
+                        diagnostic_info['DataEndDate'] = prices.index[-1]
+                        diagnostic_info['TotalDays'] = len(prices)
+
+                        # Check for missing data
+                        missing_count = prices.isnull().sum()
+                        diagnostic_info['MissingDataPoints'] = missing_count
+                        diagnostic_info['DataCompleteness'] = (len(prices) - missing_count) / len(prices)
+
+                        # Calculate returns for further analysis
+                        returns = prices.pct_change().dropna()
+                        diagnostic_info['ValidReturns'] = len(returns)
+
+                        # Manual volatility calculation
+                        if len(returns) > 35:
+                            manual_vol = returns.ewm(span=35, min_periods=10).std().iloc[-1]
+                            diagnostic_info['ManualDailyVol'] = manual_vol
+
+                            # Check volatility stability (volatility of volatility)
+                            vol_series = returns.rolling(35).std().dropna()
+                            if len(vol_series) > 10:
+                                vol_stability = vol_series.std() / vol_series.mean()
+                                diagnostic_info['VolatilityStability'] = vol_stability
+
+                        # Corporate actions detection (unusual price jumps)
+                        large_moves = returns[abs(returns) > 0.05]  # 5% moves
+                        very_large_moves = returns[abs(returns) > 0.10]  # 10% moves
+                        diagnostic_info['LargeMoves_5pct'] = len(large_moves)
+                        diagnostic_info['VeryLargeMoves_10pct'] = len(very_large_moves)
+                        diagnostic_info['CorporateActions'] = len(very_large_moves)  # Proxy for corporate actions
+                except Exception as e:
+                    print(f"⚠️ Price data analysis failed for {instrument}: {e}")
+
+                # 2. SYSTEM VOLATILITY EXTRACTION
+                try:
+                    # PySystemTrade daily percentage volatility
+                    system_vol_series = self.system.rawdata.get_daily_percentage_volatility(instrument)
+                    if system_vol_series is not None and len(system_vol_series) > 0:
+                        system_vol = system_vol_series.iloc[-1] / 100  # Convert to decimal
+                        diagnostic_info['SystemDailyVol'] = system_vol
+                        diagnostic_info['VolatilityMethod'] = 'PYSYSTEMTRADE_PERCENTAGE'
+
+                    # PST daily returns volatility (the actual one used internally)
+                    pst_vol_series = self.system.rawdata.daily_returns_volatility(instrument)
+                    if pst_vol_series is not None and len(pst_vol_series) > 0:
+                        pst_vol = pst_vol_series.iloc[-1]
+                        diagnostic_info['PST_DailyReturnsVol'] = pst_vol
+                except Exception as e:
+                    print(f"⚠️ System volatility extraction failed for {instrument}: {e}")
+
+                # 3. FORECAST SCALAR CHECK
+                try:
+                    # Check if using fixed or estimated forecast scalars
+                    use_estimates = getattr(self.system.config, 'use_forecast_scale_estimates', False)
+                    print(f"📊 {instrument} - Using estimated forecast scalars: {use_estimates}")
+
+                    if use_estimates:
+                        # Estimated scalars (instrument-specific)
+                        scalar_series = self.system.forecastScaleCap._get_forecast_scalar_estimated(instrument,
+                                                                                                    'ewmac8')
+                        if scalar_series is not None and len(scalar_series) > 0:
+                            diagnostic_info['ForecastScalar'] = scalar_series.iloc[-1]
+                            diagnostic_info['ForecastScalarType'] = 'ESTIMATED'
+                    else:
+                        # Fixed scalars (should be same for all instruments)
+                        try:
+                            scalar = self.system.config.trading_rules['ewmac8']['forecast_scalar']
+                            diagnostic_info['ForecastScalar'] = scalar
+                            diagnostic_info['ForecastScalarType'] = 'FIXED_CONFIG'
+                        except:
+                            try:
+                                scalar = self.system.config.forecast_scalars['ewmac8']
+                                diagnostic_info['ForecastScalar'] = scalar
+                                diagnostic_info['ForecastScalarType'] = 'FIXED_GLOBAL'
+                            except:
+                                scalar = self.system.config.get_element("forecast_scalar")
+                                diagnostic_info['ForecastScalar'] = scalar
+                                diagnostic_info['ForecastScalarType'] = 'FIXED_DEFAULT'
+
+                except Exception as e:
+                    print(f"⚠️ Forecast scalar check failed for {instrument}: {e}")
+
+                # 4. BLOCK VALUE AND FX CHECKS
+                try:
+                    # Block value (should be 1.0 for ETFs)
+                    block_move = self.system.rawdata.get_value_of_block_price_move(instrument)
+                    if hasattr(block_move, 'iloc'):
+                        diagnostic_info['LatestBlockValue'] = float(block_move.iloc[-1])
+                    else:
+                        diagnostic_info['LatestBlockValue'] = float(block_move) if block_move else 1.0
+
+                    # FX Rate check
+                    try:
+                        fx_rate = self.system.rawdata.get_fx_for_instrument(instrument, "USD")
+                        if hasattr(fx_rate, 'iloc'):
+                            diagnostic_info['FXRate'] = float(fx_rate.iloc[-1])
+                        else:
+                            diagnostic_info['FXRate'] = float(fx_rate) if fx_rate else 1.0
+                    except:
+                        diagnostic_info['FXRate'] = 1.0  # Default USD
+
+                except Exception as e:
+                    print(f"⚠️ Block value/FX analysis failed for {instrument}: {e}")
+
+                diagnostic_data[instrument] = diagnostic_info
+
+            # ========== VOLATILITY SCALAR ANALYSIS ==========
+            vol_scalar_comparison = {}
+
+            for instrument in focus_instruments:
+                try:
+                    # Get system volatility scalar
+                    system_scalar, scalar_source = self.get_volatility_scalar_safe(self.system, instrument)
+
+                    # Calculate expected scalar using target volatility
+                    target_vol = getattr(self.system.config, 'percentage_vol_target', 12.0) / 100
+                    manual_vol = diagnostic_data[instrument]['ManualDailyVol']
+
+                    if pd.notna(manual_vol) and manual_vol > 0:
+                        annual_vol = manual_vol * (252 ** 0.5)
+                        expected_scalar = target_vol / annual_vol
+                        missing_factor = system_scalar / expected_scalar if expected_scalar > 0 else np.nan
+                    else:
+                        expected_scalar = np.nan
+                        missing_factor = np.nan
+
+                    vol_scalar_comparison[instrument] = {
+                        'SystemVolatilityScalar': system_scalar,
+                        'ScalarSource': scalar_source,
+                        'ExpectedVolatilityScalar': expected_scalar,
+                        'MissingFactor': missing_factor,
+                        'ManualAnnualVol': manual_vol * (252 ** 0.5) if pd.notna(manual_vol) else np.nan,
+                        'TargetVol': target_vol
+                    }
+
+                except Exception as e:
+                    print(f"⚠️ Volatility scalar comparison failed for {instrument}: {e}")
+
+            # ========== EXCEL EXPORT ==========
+            with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
+                workbook = writer.book
+
+                # Sheet 1: Data Quality Analysis
+                data_quality_df = pd.DataFrame.from_dict(diagnostic_data, orient='index')
+                data_quality_df.to_excel(writer, sheet_name='Data_Quality', index=False)
+
+                # Sheet 2: Volatility Scalar Comparison
+                vol_scalar_df = pd.DataFrame.from_dict(vol_scalar_comparison, orient='index')
+                vol_scalar_df.to_excel(writer, sheet_name='Volatility_Scalar_Analysis', index=False)
+
+                # Sheet 3: Time Series Comparison (first 50 days)
+                portfolio = self.system.accounts.portfolio()
+                portfolio_curve = portfolio.curve()
+                recent_dates = portfolio_curve.index[-50:] if len(portfolio_curve) >= 50 else portfolio_curve.index
+
+                timeseries_comparison = []
+                for date in recent_dates:
+                    for instrument in focus_instruments:
+                        try:
+                            # Get data for this date
+                            prices = self.system.rawdata.get_daily_prices(instrument)
+                            close_price = prices.loc[date] if date in prices.index else np.nan
+
+                            # Get returns up to this date for volatility calculation
+                            returns_up_to_date = prices.pct_change().dropna()
+                            returns_up_to_date = returns_up_to_date[returns_up_to_date.index <= date]
+
+                            if len(returns_up_to_date) > 35:
+                                rolling_vol = returns_up_to_date.ewm(span=35).std().iloc[-1]
+                            else:
+                                rolling_vol = np.nan
+
+                            # Get system volatility scalar for this date
+                            try:
+                                vol_scalar_series = self.system.positionSize.get_volatility_scalar(instrument)
+                                if vol_scalar_series is not None and date in vol_scalar_series.index:
+                                    system_scalar = vol_scalar_series.loc[date]
+                                else:
+                                    system_scalar = np.nan
+                            except:
+                                system_scalar = np.nan
+
+                            timeseries_comparison.append({
+                                'Date': date,
+                                'Instrument': instrument,
+                                'ClosePrice': close_price,
+                                'RollingDailyVol': rolling_vol,
+                                'SystemVolScalar': system_scalar,
+                                'ExpectedVolScalar': target_vol / (rolling_vol * (252 ** 0.5)) if pd.notna(
+                                    rolling_vol) and rolling_vol > 0 else np.nan
+                            })
+
+                        except:
+                            continue
+
+                timeseries_df = pd.DataFrame(timeseries_comparison)
+                if len(timeseries_df) > 0:
+                    # Pivot for easier comparison
+                    for metric in ['ClosePrice', 'RollingDailyVol', 'SystemVolScalar', 'ExpectedVolScalar']:
+                        pivot_df = timeseries_df.pivot(index='Date', columns='Instrument', values=metric)
+                        pivot_df.to_excel(writer, sheet_name=f'TimeSeries_{metric}')
+
+                # Apply formatting
+                self._format_diagnostic_sheets(writer, workbook)
+
+            print(f"✅ Diagnostic analysis exported: {filename}")
+            return filename
+
+        except Exception as e:
+            print(f"❌ Error exporting diagnostic analysis: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def _format_diagnostic_sheets(self, writer, workbook):
+        """Format diagnostic analysis sheets"""
+
+        # Define formats
+        date_format = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+        number_format = workbook.add_format({'num_format': '#,##0.00'})
+        percent_format = workbook.add_format({'num_format': '0.00%'})
+        decimal_format = workbook.add_format({'num_format': '0.0000'})
+
+        # Format each sheet
+        for sheet_name in writer.sheets:
+            worksheet = writer.sheets[sheet_name]
+
+            if 'Data_Quality' in sheet_name:
+                worksheet.set_column('A:A', 12)  # Instrument
+                worksheet.set_column('B:C', 12, date_format)  # Dates
+                worksheet.set_column('D:G', 12, number_format)  # Counts
+                worksheet.set_column('H:H', 12, percent_format)  # Completeness
+                worksheet.set_column('I:P', 15, decimal_format)  # Volatilities
+            elif 'TimeSeries' in sheet_name:
+                worksheet.set_column('A:A', 12, date_format)  # Date
+                worksheet.set_column('B:Z', 15, number_format)  # Data
+
+    def verify_forecast_scalar_consistency(self, system):
+        """
+        Verify that forecast scalars are consistent across all instruments
+        """
+        print("🔍 FORECAST SCALAR CONSISTENCY CHECK")
+        print("-" * 60)
+
+        instruments = system.get_instrument_list()
+        trading_rules = list(system.config.trading_rules.keys())
+
+        forecast_scalar_data = {}
+
+        for rule in trading_rules:
+            print(f"📊 Checking rule: {rule}")
+            rule_scalars = {}
+
+            for instrument in instruments:
+                try:
+                    # Check if this rule applies to this instrument
+                    instrument_rules = system.rules.get_trading_rule_list(instrument)
+                    if rule in instrument_rules:
+                        # Get the scalar using the same method as the system
+                        if hasattr(system.config,
+                                   'use_forecast_scale_estimates') and system.config.use_forecast_scale_estimates:
+                            # Using estimated scalars
+                            scalar_series = system.forecastScaleCap._get_forecast_scalar_estimated(instrument, rule)
+                            if scalar_series is not None and len(scalar_series) > 0:
+                                scalar_value = scalar_series.iloc[-1]
+                                scalar_type = "ESTIMATED"
+                        else:
+                            # Using fixed scalars
+                            scalar_value = system.forecastScaleCap._get_forecast_scalar_fixed(instrument, rule)
+                            scalar_type = "FIXED"
+
+                        rule_scalars[instrument] = {
+                            'scalar': scalar_value,
+                            'type': scalar_type
+                        }
+
+                        print(f"  {instrument}: {scalar_value:.4f} ({scalar_type})")
+
+                except Exception as e:
+                    print(f"  {instrument}: ERROR - {e}")
+                    rule_scalars[instrument] = {'scalar': np.nan, 'type': 'ERROR'}
+
+            forecast_scalar_data[rule] = rule_scalars
+
+            # Check consistency within rule
+            scalar_values = [data['scalar'] for data in rule_scalars.values() if not pd.isna(data['scalar'])]
+            if len(scalar_values) > 1:
+                scalar_std = np.std(scalar_values)
+                scalar_mean = np.mean(scalar_values)
+                cv = scalar_std / scalar_mean if scalar_mean > 0 else 0
+
+                print(f"  📈 Rule {rule} consistency:")
+                print(f"    Mean: {scalar_mean:.4f}, Std: {scalar_std:.4f}, CV: {cv:.4f}")
+
+                if cv > 0.01:  # More than 1% variation
+                    print(f"    ⚠️ HIGH VARIATION DETECTED! ({cv:.2%})")
+                    print(f"    🔍 This could explain your Missing Factor discrepancies!")
+
+            print()
+
+        return forecast_scalar_data
+
+    def createcomprehensiveequitycurveplot(self):
+        """CORRECTED: True compounding analysis with proper difference detection"""
+        try:
+            import matplotlib.pyplot as plt
+            import pandas as pd
+            import numpy as np
+
+            import matplotlib
+            matplotlib.use('TkAgg')
+            plt.ioff()
+
+            print("Creating CORRECTED compounding analysis...")
+
+            portfolio = self.system.accounts.portfolio()
+            pnl_curve = portfolio.curve()
+
+            if pnl_curve is None or len(pnl_curve) == 0:
+                print("No portfolio data available.")
+                return None
+
+            starting_capital = 1000000
+
+            # TRUTH: Get the fixed capital results (what pysystemtrade actually calculated)
+            fixed_capital_pnl = self.system.accounts.portfolio().curve().copy()
+            fixed_equity = starting_capital + fixed_capital_pnl
+
+            # CORRECTED: True compounding simulation
+            # NOTE: This is a SIMULATION of what would have happened with compounding
+            # It's NOT what pysystemtrade actually calculated
+
+            daily_returns = fixed_capital_pnl.pct_change().fillna(0)  # Use return percentages
+            daily_returns = daily_returns.clip(-0.3, 0.3)  # Cap extreme days at ±30%
+
+            # True compounding equity curve
+            compounding_multipliers = (1 + daily_returns).cumprod()
+            simulated_compounding_equity = starting_capital * compounding_multipliers
+
+            # PRECISION: Calculate differences with high precision
+            difference_precise = simulated_compounding_equity - fixed_equity
+
+            print(f"\nCORRECTED ANALYSIS:")
+            print(f"Fixed Capital Final: ${fixed_equity.iloc[-1]:,.2f}")
+            print(f"Simulated Compounding Final: ${simulated_compounding_equity.iloc[-1]:,.2f}")
+            print(f"Difference: ${difference_precise.iloc[-1]:,.2f}")
+            print(f"Difference Range: ${difference_precise.min():,.2f} to ${difference_precise.max():,.2f}")
+            print(f"Difference StdDev: ${difference_precise.std():,.2f}")
+
+            # EXPLANATION: Why they might be nearly identical
+            total_return = (fixed_equity.iloc[-1] - starting_capital) / starting_capital
+            print(f"Total Strategy Return: {total_return:.2%}")
+            print(f"Annualized Return: {(total_return / (len(daily_returns) / 252)):.2%}")
+
+            # Create plots with CORRECTED formatting
+            fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 12))
+
+            # Plot 1: Equity Curves (CORRECTED: Show they should be nearly identical for low-vol strategies)
+            ax1.plot(fixed_equity.index, fixed_equity.values, 'b-', linewidth=3,
+                     label=f'Fixed Capital (Actual Backtest)', alpha=0.8)
+            ax1.plot(simulated_compounding_equity.index, simulated_compounding_equity.values, 'r--', linewidth=2,
+                     label=f'Simulated Compounding (What-If)', alpha=0.8)
+            ax1.set_title(
+                'CORRECTED: Fixed Capital vs Simulated Compounding\n(Lines may overlap for low-volatility strategies)',
+                fontsize=14, fontweight='bold')
+            ax1.set_ylabel('Portfolio Value ($)')
+            ax1.grid(True, alpha=0.3)
+            ax1.legend()
+            ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x / 1e6:.1f}M'))
+
+            # Plot 2: Compounding multipliers
+            ax2.plot(compounding_multipliers.index, compounding_multipliers.values, 'g-', linewidth=2)
+            ax2.axhline(y=1.0, color='black', linestyle='--', alpha=0.5, label='Initial Level')
+            ax2.set_title(f'Compounding Multiplier (Final: {compounding_multipliers.iloc[-1]:.4f})',
+                          fontsize=14, fontweight='bold')
+            ax2.set_ylabel('Multiplier')
+            ax2.grid(True, alpha=0.3)
+            ax2.legend()
+
+            # Plot 3: CORRECTED Difference with proper precision
+            ax3.plot(difference_precise.index, difference_precise.values, 'purple', linewidth=2)
+            ax3.axhline(y=0, color='black', linestyle='-', alpha=0.3)
+            ax3.set_title(
+                f'Difference: Compounding - Fixed (Range: ${difference_precise.min():,.0f} to ${difference_precise.max():,.0f})',
+                fontsize=14, fontweight='bold')
+            ax3.set_ylabel('Difference ($)')
+            ax3.set_xlabel('Date')
+            ax3.grid(True, alpha=0.3)
+
+            # CORRECTED: Adaptive formatter based on difference magnitude
+            max_abs_diff = max(abs(difference_precise.min()), abs(difference_precise.max()))
+            if max_abs_diff < 10:
+                ax3.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:.2f}'))  # Show cents
+            elif max_abs_diff < 1000:
+                ax3.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x:.0f}'))  # Show dollars
+            else:
+                ax3.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x / 1e3:.0f}K'))  # Show thousands
+
+            plt.tight_layout()
+
+            # CORRECTED Summary
+            final_diff = difference_precise.iloc[-1]
+            final_diff_pct = (final_diff / fixed_equity.iloc[-1]) * 100
+
+            summary_text = f"""CORRECTED Compounding Analysis:
+    Fixed Capital (Actual): ${fixed_equity.iloc[-1]:,.0f}
+    Simulated Compounding: ${simulated_compounding_equity.iloc[-1]:,.0f}
+    Difference: ${final_diff:,.2f} ({final_diff_pct:.3f}%)
+    Strategy Total Return: {total_return:.2%}
+
+    EXPLANATION: Small differences normal for low-volatility strategies
+    This is SIMULATION - pysystemtrade cannot backtest true compounding"""
+
+            plt.figtext(0.02, 0.02, summary_text, fontsize=9,
+                        bbox=dict(boxstyle="round,pad=0.3", facecolor='lightyellow'))
+
+            plt.show(block=True)
+            input("Press Enter after viewing the corrected analysis...")
+
+            print(f"\nCORRECTED FINAL SUMMARY:")
+            print(f"Fixed Capital Final: ${fixed_equity.iloc[-1]:,.2f}")
+            print(f"Simulated Compounding Final: ${simulated_compounding_equity.iloc[-1]:,.2f}")
+            print(f"Final Difference: ${final_diff:,.2f} ({final_diff_pct:.3f}%)")
+            print(f"Max Absolute Difference: ${max_abs_diff:,.2f}")
+            print(f"\nIMPORTANT UNDERSTANDING:")
+            print(f"- Pysystemtrade backtests use FIXED capital only")
+            print(f"- 'Full compounding' config affects LIVE TRADING, not backtests")
+            print(f"- This analysis shows SIMULATED compounding difference")
+            print(f"- Small differences are normal for low-volatility strategies")
+
+            return fig
+
+        except Exception as e:
+            print(f"Error in corrected analysis: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+
+
 
 
 
