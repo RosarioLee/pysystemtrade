@@ -662,11 +662,17 @@ class ETFSystemRunner:
             except Exception as plot_error:
                 print(f"⚠️ Plot creation failed: {plot_error}")
 
-            print("Creating comprehensive capital multiplier analysis...")
+            print("Creating strategy comparison plot...")
+            try:
+                self.dashboard.create_strategy_comparison_plot()
+            except Exception as plot_error:
+                print(f"Strategy comparison plot failed: {plot_error}")
+
+            '''print("Creating comprehensive capital multiplier analysis...")
             try:
                 self.dashboard.createcomprehensiveequitycurveplot()
             except Exception as comp_error:
-                print(f"Comprehensive plot creation failed: {comp_error}")
+                print(f"Comprehensive plot creation failed: {comp_error}")'''
 
             self.results['reports'] = reports_generated
             print(f"✅ Generated {len(reports_generated)} comprehensive reports")

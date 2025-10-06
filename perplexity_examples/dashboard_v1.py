@@ -3154,10 +3154,306 @@ class SimpleETFDashboard:
             traceback.print_exc()
             return None
 
+    def create_strategy_comparison_plot(self):
+        """PERSISTENT VERSION: Create enhanced comparison that stays visible"""
+        try:
+            import matplotlib.pyplot as plt
+            import pandas as pd
+            import numpy as np
+            import time
 
+            print("🚀 Creating Enhanced Strategy Comparison (4 strategies)...")
 
+            # Get the original long-short system equity curve
+            portfolio = self.system.accounts.portfolio()
+            ls_equity_curve = portfolio.curve()
 
+            if ls_equity_curve is None or len(ls_equity_curve) == 0:
+                print("❌ No portfolio data available for comparison.")
+                return None
 
+            # Starting capital base
+            starting_capital = 1000000
+            ls_equity = starting_capital + ls_equity_curve
 
+            # Create long-only version
+            print("📊 Calculating long-only strategy...")
+            lo_pnl_curve = self.calculate_long_only_pnl()
+            lo_equity = starting_capital + lo_pnl_curve
 
+            print("📈 Using system's existing IVV and HYD data for benchmarks...")
 
+            try:
+                # Use system's existing data
+                ivv_prices = self.system.rawdata.get_daily_prices('IVV')
+                hyd_prices = self.system.rawdata.get_daily_prices('HYD')
+
+                if ivv_prices is None or hyd_prices is None:
+                    raise Exception("IVV or HYD not found in system data")
+
+                print(f"✅ Using system IVV data: {len(ivv_prices)} data points")
+                print(f"✅ Using system HYD data: {len(hyd_prices)} data points")
+
+                # Calculate buy-and-hold returns
+                ivv_returns = ivv_prices.pct_change().fillna(0)
+                hyd_returns = hyd_prices.pct_change().fillna(0)
+
+                # Create buy-and-hold equity curves
+                ivv_equity = starting_capital * (1 + ivv_returns).cumprod()
+                hyd_equity = starting_capital * (1 + hyd_returns).cumprod()
+
+                # Align dates
+                common_dates = ls_equity.index.intersection(ivv_equity.index).intersection(hyd_equity.index)
+                print(f"✅ Found {len(common_dates)} overlapping trading days")
+
+                # Align all series
+                ls_equity_aligned = ls_equity.loc[common_dates]
+                lo_equity_aligned = lo_equity.loc[common_dates]
+                ivv_equity_aligned = ivv_equity.loc[common_dates]
+                hyd_equity_aligned = hyd_equity.loc[common_dates]
+
+            except Exception as system_data_error:
+                print(f"❌ System data access failed: {system_data_error}")
+                print("📊 Showing Long-Short vs Long-Only comparison only...")
+                return self.create_simple_strategy_comparison(ls_equity, lo_equity)
+
+            print("🎨 Creating PERSISTENT enhanced comparison plot...")
+
+            # CRITICAL FIX: Proper matplotlib setup for persistent display
+            import matplotlib
+            matplotlib.use('TkAgg')  # Force TkAgg backend
+            plt.close('all')  # Close any existing plots
+            plt.ioff()  # Turn OFF interactive mode initially
+
+            # Create figure with proper settings for persistence
+            fig = plt.figure(figsize=(16, 12))
+            fig.canvas.manager.set_window_title('Enhanced Strategy Comparison - Keep Open!')
+            fig.suptitle('🏆 SYSTEMATIC TRADING vs BUY & HOLD COMPARISON',
+                         fontsize=20, fontweight='bold', y=0.95)
+
+            # Plot 1: All strategies comparison
+            ax1 = plt.subplot(3, 1, 1)
+            ax1.plot(ls_equity_aligned.index, ls_equity_aligned.values, 'b-', linewidth=4,
+                     label='🔵 Long-Short Strategy', alpha=0.9)
+            ax1.plot(lo_equity_aligned.index, lo_equity_aligned.values, 'r-', linewidth=4,
+                     label='🔴 Long-Only Strategy', alpha=0.9)
+            ax1.plot(ivv_equity_aligned.index, ivv_equity_aligned.values, 'g-', linewidth=3,
+                     label='🟢 Buy & Hold IVV (S&P 500)', alpha=0.8)
+            ax1.plot(hyd_equity_aligned.index, hyd_equity_aligned.values, 'orange', linewidth=3,
+                     label='🟠 Buy & Hold HYD (Muni Bonds)', alpha=0.8)
+
+            ax1.set_title('📊 PORTFOLIO VALUE COMPARISON', fontsize=16, fontweight='bold', pad=20)
+            ax1.set_ylabel('Portfolio Value ($)', fontsize=14)
+            ax1.grid(True, alpha=0.4)
+            ax1.legend(loc='upper left', fontsize=12)
+            ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x / 1e6:.1f}M'))
+
+            # Plot 2: Excess returns
+            ax2 = plt.subplot(3, 1, 2)
+            ls_vs_ivv = ls_equity_aligned - ivv_equity_aligned
+            lo_vs_ivv = lo_equity_aligned - ivv_equity_aligned
+            ls_vs_hyd = ls_equity_aligned - hyd_equity_aligned
+
+            ax2.plot(ls_vs_ivv.index, ls_vs_ivv.values, 'b-', linewidth=3,
+                     label='🔵 Long-Short vs IVV', alpha=0.9)
+            ax2.plot(lo_vs_ivv.index, lo_vs_ivv.values, 'r-', linewidth=3,
+                     label='🔴 Long-Only vs IVV', alpha=0.9)
+            ax2.plot(ls_vs_hyd.index, ls_vs_hyd.values, 'purple', linewidth=3,
+                     label='🟣 Long-Short vs HYD', alpha=0.9)
+            ax2.axhline(y=0, color='black', linestyle='--', alpha=0.7, linewidth=2)
+
+            ax2.set_title('📈 EXCESS RETURNS OVER BENCHMARKS', fontsize=16, fontweight='bold')
+            ax2.set_ylabel('Excess Return ($)', fontsize=14)
+            ax2.grid(True, alpha=0.4)
+            ax2.legend(loc='upper left', fontsize=12)
+            ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x / 1e3:.0f}K'))
+
+            # Plot 3: Rolling volatility
+            ax3 = plt.subplot(3, 1, 3)
+            window = 60
+
+            ls_vol = ls_equity_aligned.pct_change().rolling(window).std() * np.sqrt(252) * 100
+            lo_vol = lo_equity_aligned.pct_change().rolling(window).std() * np.sqrt(252) * 100
+            ivv_vol = ivv_equity_aligned.pct_change().rolling(window).std() * np.sqrt(252) * 100
+            hyd_vol = hyd_equity_aligned.pct_change().rolling(window).std() * np.sqrt(252) * 100
+
+            ax3.plot(ls_vol.index, ls_vol.values, 'b-', linewidth=3, label='🔵 Long-Short')
+            ax3.plot(lo_vol.index, lo_vol.values, 'r-', linewidth=3, label='🔴 Long-Only')
+            ax3.plot(ivv_vol.index, ivv_vol.values, 'g-', linewidth=3, label='🟢 IVV')
+            ax3.plot(hyd_vol.index, hyd_vol.values, 'orange', linewidth=3, label='🟠 HYD')
+
+            ax3.set_title(f'📊 {window}-DAY ROLLING VOLATILITY', fontsize=16, fontweight='bold')
+            ax3.set_ylabel('Volatility (%)', fontsize=14)
+            ax3.set_xlabel('Date', fontsize=14)
+            ax3.grid(True, alpha=0.4)
+            ax3.legend(loc='upper left', fontsize=12)
+
+            # Calculate and display stats
+            strategies = {
+                'Long-Short': ls_equity_aligned,
+                'Long-Only': lo_equity_aligned,
+                'IVV B&H': ivv_equity_aligned,
+                'HYD B&H': hyd_equity_aligned
+            }
+
+            stats_summary = []
+            for name, equity in strategies.items():
+                returns = equity.pct_change().dropna()
+                total_return = (equity.iloc[-1] / starting_capital - 1) * 100
+                annual_return = ((equity.iloc[-1] / starting_capital) ** (252 / len(equity)) - 1) * 100
+                volatility = returns.std() * np.sqrt(252) * 100
+                sharpe = (annual_return - 2) / volatility if volatility > 0 else 0
+                max_dd = ((equity / equity.cummax()) - 1).min() * 100
+
+                stats_summary.append({
+                    'Strategy': name,
+                    'Total Return': f"{total_return:.1f}%",
+                    'Annual Return': f"{annual_return:.1f}%",
+                    'Volatility': f"{volatility:.1f}%",
+                    'Sharpe Ratio': f"{sharpe:.2f}",
+                    'Max Drawdown': f"{max_dd:.1f}%"
+                })
+
+            # Add performance summary to plot
+            summary_lines = []
+            for stats in stats_summary:
+                summary_lines.append(f"{stats['Strategy']}: Ret {stats['Total Return']}, "
+                                     f"Sharpe {stats['Sharpe Ratio']}, Vol {stats['Volatility']}")
+
+            summary_text = "📋 PERFORMANCE SUMMARY:\n" + "\n".join(summary_lines)
+            plt.figtext(0.02, 0.02, summary_text, fontsize=9,
+                        bbox=dict(boxstyle="round,pad=0.4", facecolor='lightblue', alpha=0.9))
+
+            plt.tight_layout()
+            plt.subplots_adjust(top=0.92, bottom=0.25)
+
+            # CRITICAL: Persistent display method
+            print("🎯 DISPLAYING PERSISTENT ENHANCED COMPARISON...")
+            print("📌 IMPORTANT: Plot window will stay open - close manually when done!")
+
+            plt.ion()  # Turn on interactive mode
+            plt.show(block=True)  # BLOCK until manually closed
+
+            # Print console results
+            print("\n" + "=" * 90)
+            print("🏆 STRATEGY COMPARISON RESULTS")
+            print("=" * 90)
+            for stats in stats_summary:
+                print(f"{stats['Strategy']:15} | {stats['Total Return']:8} | {stats['Annual Return']:8} | " +
+                      f"{stats['Volatility']:6} | {stats['Sharpe Ratio']:6} | {stats['Max Drawdown']:8}")
+
+            return fig
+
+        except Exception as e:
+            print(f"❌ Error in enhanced strategy comparison: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def create_simple_strategy_comparison(self, ls_equity, lo_equity):
+        """PERSISTENT VERSION: Simple Long-Short vs Long-Only comparison"""
+        try:
+            import matplotlib.pyplot as plt
+            import matplotlib
+
+            print("📊 Creating PERSISTENT simple strategy comparison...")
+
+            # Force proper backend
+            matplotlib.use('TkAgg')
+            plt.close('all')
+
+            fig, ax = plt.subplots(figsize=(12, 8))
+            fig.canvas.manager.set_window_title('Strategy Comparison - Keep Open!')
+
+            ax.plot(ls_equity.index, ls_equity.values, 'b-', linewidth=3,
+                    label='🔵 Long-Short Strategy', alpha=0.9)
+            ax.plot(lo_equity.index, lo_equity.values, 'r-', linewidth=3,
+                    label='🔴 Long-Only Strategy', alpha=0.9)
+
+            ax.set_title('🏆 Strategy Comparison: Long-Short vs Long-Only',
+                         fontsize=16, fontweight='bold')
+            ax.set_ylabel('Portfolio Value ($)', fontsize=14)
+            ax.set_xlabel('Date', fontsize=14)
+            ax.grid(True, alpha=0.4)
+            ax.legend(fontsize=12)
+            ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x / 1e6:.1f}M'))
+
+            plt.tight_layout()
+
+            print("🎯 DISPLAYING PERSISTENT SIMPLE COMPARISON...")
+            print("📌 IMPORTANT: Plot window will stay open - close manually when done!")
+
+            plt.ion()
+            plt.show(block=True)  # FORCE BLOCKING
+
+            return fig
+
+        except Exception as e:
+            print(f"❌ Error in simple strategy comparison: {e}")
+            return None
+
+    def calculate_buy_and_hold_benchmark(self, symbol, start_date, end_date, starting_capital):
+        """Calculate buy-and-hold performance for a benchmark ETF"""
+        try:
+            import yfinance as yf
+
+            # Download data
+            data = yf.download(symbol, start=start_date, end=end_date)['Adj Close']
+
+            if data.empty:
+                print(f"No data available for {symbol}")
+                return None
+
+            # Calculate returns and equity curve
+            returns = data.pct_change().fillna(0)
+            equity_curve = starting_capital * (1 + returns).cumprod()
+
+            return equity_curve
+
+        except Exception as e:
+            print(f"Error calculating benchmark for {symbol}: {e}")
+            return None
+
+    def calculate_long_only_pnl(self):
+        """Calculate P&L for long-only strategy by clipping negative positions"""
+        try:
+            instruments = self.system.get_instrument_list()
+            daily_pnl_series = []
+
+            print(f"Calculating long-only P&L for {len(instruments)} instruments...")
+
+            for instrument in instruments:
+                # Get original positions (long-short)
+                positions = self.system.portfolio.get_notional_position(instrument)
+
+                # Create long-only positions by clipping negatives
+                long_only_positions = positions.clip(lower=0)
+
+                # Get price changes
+                prices = self.system.rawdata.get_daily_prices(instrument)
+                if prices is None:
+                    continue
+
+                price_changes = prices.pct_change()
+
+                # Calculate P&L: position * price_change * previous_price
+                # Note: positions are shifted to avoid look-ahead bias
+                instrument_pnl = (long_only_positions.shift(1) *
+                                  price_changes * prices.shift(1)).fillna(0)
+
+                daily_pnl_series.append(instrument_pnl)
+
+            # Combine all instrument P&L into portfolio P&L
+            if daily_pnl_series:
+                portfolio_daily_pnl = pd.concat(daily_pnl_series, axis=1).sum(axis=1)
+                portfolio_cumulative_pnl = portfolio_daily_pnl.cumsum()
+
+                print(f"Long-only P&L calculation completed: {len(portfolio_cumulative_pnl)} data points")
+                return portfolio_cumulative_pnl
+            else:
+                print("No valid instruments for long-only calculation")
+                return pd.Series()
+
+        except Exception as e:
+            print(f"Error calculating long-only P&L: {e}")
+            return pd.Series()
