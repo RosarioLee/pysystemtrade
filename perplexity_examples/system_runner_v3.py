@@ -30,11 +30,13 @@ class ETFSystemRunner:
     - Comprehensive Excel reporting
     """
 
-    def __init__(self, config_path=None, max_instruments=32, test_mode=False):
+    def __init__(self, config_path=None, max_instruments=32, test_mode=False, data_source="yfinance"):
         """Initialize the system runner"""
         self.config_path = config_path or self._get_default_config_path()
         self.max_instruments = max_instruments
         self.test_mode = test_mode
+        self.data_source = data_source  # ADD THIS LINE
+
         self.etf_system = None
         self.trading_system = None
         self.dashboard = None
@@ -43,6 +45,7 @@ class ETFSystemRunner:
         print(f"🚀 ETF System Runner v3.0 Initialized")
         print(f"📊 Max Instruments: {max_instruments}")
         print(f"🧪 Test Mode: {test_mode}")
+        print(f"📡 Data Source: {data_source}")  # ADD THIS LINE
         print(f"⚙️ Config: {self.config_path}")
 
     def _get_default_config_path(self):
@@ -97,17 +100,21 @@ class ETFSystemRunner:
             traceback.print_exc()
             return None
 
-    def _initialize_etf_system(self):
+    def _initialize_etf_system(self):  # REMOVE data_source parameter
         """Initialize the Enhanced ETF System"""
         try:
-            print("\n📥 Step 1: Initializing ETF System...")
+            print(f"\n📥 Step 1: Initializing ETF System with {self.data_source.upper()}...")
+
             self.etf_system = EnhancedETFSystem(
                 config_path=self.config_path,
                 test_mode=self.test_mode,
-                max_instruments=self.max_instruments
+                max_instruments=self.max_instruments,
+                data_source=self.data_source  # USE self.data_source
             )
+
             print("✅ ETF System initialized successfully")
             return True
+
         except Exception as e:
             print(f"❌ Failed to initialize ETF system: {e}")
             return False
@@ -914,7 +921,8 @@ def main():
         # Initialize the system runner
         runner = ETFSystemRunner(
             max_instruments=32,  # Adjust as needed
-            test_mode=False  # Set to True for faster testing
+            test_mode=False,  # Set to True for faster testing
+            data_source="ib"
         )
 
         # Run complete analysis

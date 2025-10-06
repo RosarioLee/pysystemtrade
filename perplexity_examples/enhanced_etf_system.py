@@ -31,8 +31,19 @@ class EnhancedETFSystem:
     - Cost-aware optimization
     """
 
-    def __init__(self, config_path=None, test_mode=False, max_instruments=5, warm_up_days=365):
+    def __init__(self, config_path=None, test_mode=False, max_instruments=5, warm_up_days=365, data_source="yfinance"):
         """Initialize the enhanced ETF system"""
+
+        # Add data source configuration
+        self.data_source = data_source  # "yfinance" or "ib"
+
+        # IB-specific configuration
+        self.ib_config = {
+            'host': '127.0.0.1',
+            'port': 7497,
+            'client_id': 100
+        }
+
         # Load configuration
         if config_path is None:
             config_path = os.path.join(
@@ -100,7 +111,7 @@ class EnhancedETFSystem:
 
     def download_etf_data(self, start_date="2018-01-01", end_date=None):
         """
-        Download ETF data with proper instrument limiting logic and complete data processing
+        Download ETF data using either yfinance or Interactive Brokers
         """
         # Apply test mode date restriction
         if self.test_mode:
@@ -110,77 +121,76 @@ class EnhancedETFSystem:
         if end_date is None:
             end_date = datetime.now().strftime("%Y-%m-%d")
 
-        # FIXED: Apply max_instruments regardless of test_mode
+        # Apply instrument limiting
         if hasattr(self, 'max_instruments') and self.max_instruments > 0:
             tickers = self.instruments[:self.max_instruments]
-            print(f"⚠️ PROGRESSIVE MODE: Limited to {self.max_instruments} instruments")
+            print(f"⚠️ LIMITED MODE: Using {self.max_instruments} instruments")
         else:
             tickers = self.instruments
 
-        print(f"=== Downloading {len(tickers)} ETFs ===")
+        print(f"=== Downloading {len(tickers)} ETFs via {self.data_source.upper()} ===")
 
-        ok, bad = 0, []
-        for sym in tickers:
-            try:
-                print(f"🔄 Downloading {sym} …")
-                raw = yf.download(sym, start=start_date, end=end_date, auto_adjust=False, progress=False)
+        if self.data_source == "yfinance":
+            return self._download_yfinance_data(tickers, start_date, end_date)
+        elif self.data_source == "ib":
+            return self._download_ib_data(tickers, start_date, end_date)
+        else:
+            raise ValueError(f"Unknown data source: {self.data_source}")
 
-                # COMPLETE DATA EXTRACTION LOGIC
-                if isinstance(raw, pd.DataFrame) and not raw.empty:
-                    if "Adj Close" in raw.columns:
-                        data = raw["Adj Close"]
-                        # Handle case where Adj Close might be a DataFrame
-                        if isinstance(data, pd.DataFrame):
-                            data = data.iloc[:, 0]  # Take first column
-                    else:
-                        data = raw.iloc[:, -1]  # Last column as fallback
+    def _download_yfinance_data(self, tickers, start_date, end_date):
+        """Original yfinance download logic"""
+        # Move your existing yfinance download code here
+        # ... (existing yfinance logic)
 
-                    # Ensure we have a Series
-                    if isinstance(data, pd.DataFrame):
-                        data = data.squeeze()  # Convert single-column DataFrame to Series
+    def _download_ib_data(self, tickers, start_date, end_date):
+        """New IB download method using our custom downloader"""
+        try:
+            from etf_ib_data_downloader import ETFIBDataDownloader
 
-                    data.name = sym
+            # Initialize IB downloader
+            ib_downloader = ETFIBDataDownloader(
+                host=self.ib_config['host'],
+                port=self.ib_config['port'],
+                client_id=self.ib_config['client_id']
+            )
 
-                    # QUALITY FILTERS WITH PROPER CHECKS
-                    if len(data) < 250:  # at least one year
-                        print(f"⚠️ {sym}: only {len(data)} rows – skipped")
-                        bad.append(sym)
-                        continue
+            # Download data
+            ib_data = ib_downloader.download_etf_data(
+                etf_list=tickers,
+                duration_str="5 Y",
+                start_date=start_date,
+                end_date=end_date
+            )
 
-                    # Convert to float to handle any data type issues
-                    data = pd.to_numeric(data, errors='coerce')
+            # Convert IB data to our internal format
+            success_count = 0
+            for ticker, df in ib_data.items():
+                if not df.empty:
+                    # Extract close prices (matching yfinance format)
+                    price_data = df['close'].copy()
+                    price_data.name = ticker
 
-                    # Check for NaN percentage (fixed calculation)
-                    nan_percentage = data.isna().sum() / len(data)
-                    if nan_percentage > 0.05:
-                        print(f"⚠️ {sym}: {nan_percentage:.1%} NaNs – skipped")
-                        bad.append(sym)
-                        continue
+                    # Apply same quality filters as yfinance
+                    if len(price_data) >= 250:  # At least 1 year
+                        nan_percentage = price_data.isna().sum() / len(price_data)
+                        if nan_percentage <= 0.05:  # Less than 5% NaN
+                            # Clean data
+                            price_data = price_data.ffill().bfill()
 
-                    # Clean the data
-                    data = data.ffill().bfill()
+                            # Store in same format as yfinance
+                            self.etf_data[ticker] = price_data
+                            self.valid_instruments.append(ticker)
+                            success_count += 1
 
-                    # Final validation
-                    if data.isna().sum() > 0:
-                        print(f"⚠️ {sym}: Still contains NaNs after cleaning – skipped")
-                        bad.append(sym)
-                        continue
+            print(f"✅ IB Download complete: {success_count} successful")
+            return success_count
 
-                    # SUCCESSFUL DATA STORAGE
-                    self.etf_data[sym] = data
-                    self.valid_instruments.append(sym)
-                    ok += 1
-                    print(f"✅ {sym}: {len(data)} days")
-                else:
-                    print(f"⚠️ {sym}: No data returned from yfinance")
-                    bad.append(sym)
-
-            except Exception as err:
-                print(f"❌ {sym}: {err}")
-                bad.append(sym)
-
-        print(f"\n📊 Download summary – success: {ok}   fail: {len(bad)}")
-        return ok
+        except ImportError:
+            print("❌ etf_ib_data_downloader module not found")
+            return 0
+        except Exception as e:
+            print(f"❌ IB download failed: {str(e)}")
+            return 0
 
     def save_data_to_pysystemtrade(self):
         """Save ETF data in PySystemTrade CSV format"""
