@@ -131,6 +131,20 @@ class ETFIBDataDownloader:
             print(f"❌ {ticker}: Fetch failed - {str(e)}")
             return None
 
+    # Add to etf_ib_data_downloader.py
+    def fetch_dividend_data(self, ticker: str) -> Optional[pd.DataFrame]:
+        """Fetch dividend/distribution data for ETF carry calculation"""
+        try:
+            contract = Stock(ticker, 'SMART', 'USD')
+            # Use IB fundamental data for TTMDIVSHR
+            fundamentals = self.ib.reqFundamentalData(
+                contract, 'ReportSnapshot', []
+            )
+            return self._parse_dividend_data(fundamentals)
+        except Exception as e:
+            print(f"{ticker}: Dividend fetch failed - {str(e)}")
+            return None
+
     def _get_cache_path(self, ticker: str, duration_str: str, start_date: str, end_date: str) -> str:
         """Generate cache file path"""
         cache_filename = f"{ticker}_{duration_str.replace(' ', '')}_{start_date}_{end_date}.csv"

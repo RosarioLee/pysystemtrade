@@ -23442,3 +23442,2103 @@
 2025-10-06 22:08:19.838842: Daily volatility: 0.005993
 2025-10-06 22:08:19.839394: Calculated Sharpe ratio: 0.764
 2025-10-06 22:08:19.839565: Calculated annual return: 7.3%
+2025-10-07 12:19:28.042982: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 12:19:28.043550: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 12:19:28.043837: Portfolio exists: True
+2025-10-07 12:19:28.044058: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-10-07 12:19:28.044514: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-10-07 12:19:28.044720: Portfolio curve length: 521
+2025-10-07 12:19:28.044940: Curve start date: 2023-10-09 00:00:00
+2025-10-07 12:19:28.045123: Curve end date: 2025-10-06 00:00:00
+2025-10-07 12:19:28.045688: First 5 values: [0. 0. 0. 0. 0.]
+2025-10-07 12:19:28.046318: Last 5 values: [135421.25918102 138679.21178785 138702.99471299 142910.23802784
+ 146183.95302784]
+2025-10-07 12:19:28.046616: Contains NaN: False
+2025-10-07 12:19:28.046893: All zeros: False
+2025-10-07 12:19:28.047085: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 12:19:28.047502: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:28.183794: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:28.324924: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:28.464393: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:28.464615: === MANUAL RETURNS TEST ===
+2025-10-07 12:19:28.465397: Manual returns calculation:
+2025-10-07 12:19:28.465580:   Returns length: 510
+2025-10-07 12:19:28.465817:   Returns mean: -inf
+2025-10-07 12:19:28.466101:   Returns std: nan
+2025-10-07 12:19:28.466357:   Contains NaN: False
+2025-10-07 12:19:28.466774:   First few returns: [         -inf -126.8138255     0.28935156    0.211013     -0.56167744]
+2025-10-07 12:19:28.467090:   Daily volatility: nan
+2025-10-07 12:19:28.467260:   Annual volatility: nan
+2025-10-07 12:19:28.467429: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 12:19:28.467593: Starting capital from config: $1,000,000.00
+2025-10-07 12:19:28.467985: Total P&L generated: $146,183.95
+2025-10-07 12:19:28.468157: Actual portfolio return: 14.62%
+2025-10-07 12:19:28.468316: Final portfolio value: $1,146,183.95
+2025-10-07 12:19:28.469040: Proper daily returns mean: 0.000270
+2025-10-07 12:19:28.469288: Proper daily returns std: 0.003870
+2025-10-07 12:19:28.469597: Proper Sharpe ratio: 1.107
+2025-10-07 12:19:28.469761: Proper annual return: 6.8%
+2025-10-07 12:19:28.469962: Using capital-adjusted returns: 520 returns
+2025-10-07 12:19:28.470124: --- Calculating performance metrics ---
+2025-10-07 12:19:28.470381: Mean daily return: 0.000270
+2025-10-07 12:19:28.470542: Daily volatility: 0.003870
+2025-10-07 12:19:28.471098: Calculated Sharpe ratio: 1.107
+2025-10-07 12:19:28.471285: Calculated annual return: 6.8%
+2025-10-07 12:19:28.810784: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 12:19:28.811063: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 12:19:28.811332: Portfolio exists: True
+2025-10-07 12:19:28.811550: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-10-07 12:19:28.811971: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-10-07 12:19:28.812141: Portfolio curve length: 521
+2025-10-07 12:19:28.812351: Curve start date: 2023-10-09 00:00:00
+2025-10-07 12:19:28.812542: Curve end date: 2025-10-06 00:00:00
+2025-10-07 12:19:28.812995: First 5 values: [0. 0. 0. 0. 0.]
+2025-10-07 12:19:28.813511: Last 5 values: [135421.25918102 138679.21178785 138702.99471299 142910.23802784
+ 146183.95302784]
+2025-10-07 12:19:28.813805: Contains NaN: False
+2025-10-07 12:19:28.814097: All zeros: False
+2025-10-07 12:19:28.814275: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 12:19:28.814684: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:28.950150: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.091861: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.225389: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.225725: === MANUAL RETURNS TEST ===
+2025-10-07 12:19:29.226683: Manual returns calculation:
+2025-10-07 12:19:29.226945:   Returns length: 510
+2025-10-07 12:19:29.227215:   Returns mean: -inf
+2025-10-07 12:19:29.227554:   Returns std: nan
+2025-10-07 12:19:29.227890:   Contains NaN: False
+2025-10-07 12:19:29.228519:   First few returns: [         -inf -126.8138255     0.28935156    0.211013     -0.56167744]
+2025-10-07 12:19:29.228915:   Daily volatility: nan
+2025-10-07 12:19:29.229209:   Annual volatility: nan
+2025-10-07 12:19:29.229511: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 12:19:29.229871: Starting capital from config: $1,000,000.00
+2025-10-07 12:19:29.230414: Total P&L generated: $146,183.95
+2025-10-07 12:19:29.230670: Actual portfolio return: 14.62%
+2025-10-07 12:19:29.230918: Final portfolio value: $1,146,183.95
+2025-10-07 12:19:29.231716: Proper daily returns mean: 0.000270
+2025-10-07 12:19:29.232007: Proper daily returns std: 0.003870
+2025-10-07 12:19:29.232363: Proper Sharpe ratio: 1.107
+2025-10-07 12:19:29.232616: Proper annual return: 6.8%
+2025-10-07 12:19:29.232911: Using capital-adjusted returns: 520 returns
+2025-10-07 12:19:29.233125: --- Calculating performance metrics ---
+2025-10-07 12:19:29.233444: Mean daily return: 0.000270
+2025-10-07 12:19:29.233662: Daily volatility: 0.003870
+2025-10-07 12:19:29.234442: Calculated Sharpe ratio: 1.107
+2025-10-07 12:19:29.234692: Calculated annual return: 6.8%
+2025-10-07 12:19:29.316067: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 12:19:29.316359: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 12:19:29.316621: Portfolio exists: True
+2025-10-07 12:19:29.316829: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-10-07 12:19:29.317351: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-10-07 12:19:29.317583: Portfolio curve length: 521
+2025-10-07 12:19:29.317891: Curve start date: 2023-10-09 00:00:00
+2025-10-07 12:19:29.318112: Curve end date: 2025-10-06 00:00:00
+2025-10-07 12:19:29.318509: First 5 values: [0. 0. 0. 0. 0.]
+2025-10-07 12:19:29.318887: Last 5 values: [135421.25918102 138679.21178785 138702.99471299 142910.23802784
+ 146183.95302784]
+2025-10-07 12:19:29.319218: Contains NaN: False
+2025-10-07 12:19:29.319562: All zeros: False
+2025-10-07 12:19:29.319815: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 12:19:29.320216: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.457364: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.598730: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.732127: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:29.732348: === MANUAL RETURNS TEST ===
+2025-10-07 12:19:29.733146: Manual returns calculation:
+2025-10-07 12:19:29.733410:   Returns length: 510
+2025-10-07 12:19:29.733720:   Returns mean: -inf
+2025-10-07 12:19:29.734131:   Returns std: nan
+2025-10-07 12:19:29.734455:   Contains NaN: False
+2025-10-07 12:19:29.734894:   First few returns: [         -inf -126.8138255     0.28935156    0.211013     -0.56167744]
+2025-10-07 12:19:29.735273:   Daily volatility: nan
+2025-10-07 12:19:29.735517:   Annual volatility: nan
+2025-10-07 12:19:29.735711: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 12:19:29.735945: Starting capital from config: $1,000,000.00
+2025-10-07 12:19:29.736383: Total P&L generated: $146,183.95
+2025-10-07 12:19:29.736600: Actual portfolio return: 14.62%
+2025-10-07 12:19:29.736814: Final portfolio value: $1,146,183.95
+2025-10-07 12:19:29.737606: Proper daily returns mean: 0.000270
+2025-10-07 12:19:29.737899: Proper daily returns std: 0.003870
+2025-10-07 12:19:29.738282: Proper Sharpe ratio: 1.107
+2025-10-07 12:19:29.738521: Proper annual return: 6.8%
+2025-10-07 12:19:29.738740: Using capital-adjusted returns: 520 returns
+2025-10-07 12:19:29.738964: --- Calculating performance metrics ---
+2025-10-07 12:19:29.739280: Mean daily return: 0.000270
+2025-10-07 12:19:29.739529: Daily volatility: 0.003870
+2025-10-07 12:19:29.740125: Calculated Sharpe ratio: 1.107
+2025-10-07 12:19:29.740345: Calculated annual return: 6.8%
+2025-10-07 12:19:49.176845: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 12:19:49.177087: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 12:19:49.177327: Portfolio exists: True
+2025-10-07 12:19:49.177537: Portfolio type: <class 'systems.accounts.curves.account_curve_group.accountCurveGroup'>
+2025-10-07 12:19:49.177962: Portfolio curve type: <class 'pandas.core.series.Series'>
+2025-10-07 12:19:49.178150: Portfolio curve length: 521
+2025-10-07 12:19:49.178469: Curve start date: 2023-10-09 00:00:00
+2025-10-07 12:19:49.178694: Curve end date: 2025-10-06 00:00:00
+2025-10-07 12:19:49.179226: First 5 values: [0. 0. 0. 0. 0.]
+2025-10-07 12:19:49.179729: Last 5 values: [135421.25918102 138679.21178785 138702.99471299 142910.23802784
+ 146183.95302784]
+2025-10-07 12:19:49.180039: Contains NaN: False
+2025-10-07 12:19:49.180346: All zeros: False
+2025-10-07 12:19:49.180537: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 12:19:49.181056: portfolio().curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:49.318957: portfolio().percent.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:49.462360: portfolio().net.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:49.605014: portfolio().gross.curve(): SUCCESS - Type: <class 'pandas.core.series.Series'>, Length: 521
+2025-10-07 12:19:49.605261: === MANUAL RETURNS TEST ===
+2025-10-07 12:19:49.606054: Manual returns calculation:
+2025-10-07 12:19:49.606237:   Returns length: 510
+2025-10-07 12:19:49.606468:   Returns mean: -inf
+2025-10-07 12:19:49.606735:   Returns std: nan
+2025-10-07 12:19:49.606984:   Contains NaN: False
+2025-10-07 12:19:49.607392:   First few returns: [         -inf -126.8138255     0.28935156    0.211013     -0.56167744]
+2025-10-07 12:19:49.607726:   Daily volatility: nan
+2025-10-07 12:19:49.607906:   Annual volatility: nan
+2025-10-07 12:19:49.608129: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 12:19:49.608303: Starting capital from config: $1,000,000.00
+2025-10-07 12:19:49.608681: Total P&L generated: $146,183.95
+2025-10-07 12:19:49.608859: Actual portfolio return: 14.62%
+2025-10-07 12:19:49.609060: Final portfolio value: $1,146,183.95
+2025-10-07 12:19:49.609786: Proper daily returns mean: 0.000270
+2025-10-07 12:19:49.610052: Proper daily returns std: 0.003870
+2025-10-07 12:19:49.610389: Proper Sharpe ratio: 1.107
+2025-10-07 12:19:49.610570: Proper annual return: 6.8%
+2025-10-07 12:19:49.610781: Using capital-adjusted returns: 520 returns
+2025-10-07 12:19:49.610957: --- Calculating performance metrics ---
+2025-10-07 12:19:49.611244: Mean daily return: 0.000270
+2025-10-07 12:19:49.611425: Daily volatility: 0.003870
+2025-10-07 12:19:49.612138: Calculated Sharpe ratio: 1.107
+2025-10-07 12:19:49.612340: Calculated annual return: 6.8%
+2025-10-07 13:30:55.890463: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 13:30:55.890877: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 13:30:55.892199: Portfolio debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.892475: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 13:30:55.893678: portfolio().curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.895245: portfolio().percent.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.896741: portfolio().net.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.898210: portfolio().gross.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.898517: === MANUAL RETURNS TEST ===
+2025-10-07 13:30:55.899744: Manual returns test failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.900029: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 13:30:55.900226: Starting capital from config: $1,000,000.00
+2025-10-07 13:30:55.901324: Capital debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.902440: Performance calculation failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:55.926487: Traceback: Traceback (most recent call last):
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\perplexity_examples\performance_calculator_v3.py", line 36, in calculate_performance
+    portfolio = system.accounts.portfolio()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_portfolio.py", line 38, in portfolio
+    self.pandl_for_instrument(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code,
+        ^^^^^^^^^^^^^^^^
+        delayfill=delayfill,
+        ^^^^^^^^^^^^^^^^^^^^
+        roundpositions=roundpositions,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_instruments.py", line 48, in pandl_for_instrument
+    positions = self.get_buffered_position(
+        instrument_code, roundpositions=roundpositions
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_buffering_system.py", line 82, in get_buffered_position
+    optimal_position = self.get_notional_position(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_inputs.py", line 210, in get_notional_position
+    return self.parent.portfolio.get_notional_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 211, in get_notional_position
+    self.get_notional_position_before_risk_scaling(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 237, in get_notional_position_before_risk_scaling
+    notional_position_without_idm = self.get_notional_position_without_idm(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 252, in get_notional_position_without_idm
+    instr_weights = self.get_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 433, in get_instrument_weights
+    self.get_unsmoothed_instrument_weights_fitted_to_position_lengths()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 453, in get_unsmoothed_instrument_weights_fitted_to_position_lengths
+    raw_instrument_weights = self.get_unsmoothed_raw_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 497, in get_unsmoothed_raw_instrument_weights
+    raw_instrument_weights = self.get_raw_fixed_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 539, in get_raw_fixed_instrument_weights
+    instrument_weights_dict = self.get_fixed_instrument_weights_from_config()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 562, in get_fixed_instrument_weights_from_config
+    instrument_weights_dict = self._add_zero_instrument_weights(
+        instrument_weights_dict
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 589, in _add_zero_instrument_weights
+    self.allocate_zero_instrument_weights_to_these_instruments()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 747, in allocate_zero_instrument_weights_to_these_instruments
+    instruments_without_data_or_weights = self.instruments_without_data_or_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 808, in instruments_without_data_or_weights
+    subsystem_positions = copy(self._get_all_subsystem_positions())
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 616, in _get_all_subsystem_positions
+    positions = self.get_subsystem_positions_for_instrument_list(instrument_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 479, in get_subsystem_positions_for_instrument_list
+    self.get_subsystem_position(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 851, in get_subsystem_position
+    return self.position_size_stage.get_subsystem_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 126, in get_subsystem_position
+    forecast = self.get_combined_forecast(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 567, in get_combined_forecast
+    return self.comb_forecast_stage.get_combined_forecast(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 93, in get_combined_forecast
+    self.get_raw_combined_forecast_before_mapping(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 114, in get_raw_combined_forecast_before_mapping
+    raw_combined_forecast = self.get_combined_forecast_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 141, in get_combined_forecast_without_multiplier
+    weighted_forecasts = self.get_weighted_forecasts_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 157, in get_weighted_forecasts_without_multiplier
+    forecasts = self.get_all_forecasts(instrument_code, rule_variation_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 321, in get_all_forecasts
+    forecasts = self.get_forecasts_given_rule_list(
+        instrument_code, rule_variation_list
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 447, in get_forecasts_given_rule_list
+    self._get_capped_individual_forecast(instrument_code, rule_variation_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 493, in _get_capped_individual_forecast
+    return self.forecast_scale_cap_stage.get_capped_forecast(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code, rule_variation_name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 65, in get_capped_forecast
+    scaled_forecast = self.get_scaled_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 98, in get_scaled_forecast
+    raw_forecast = self.get_raw_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 132, in get_raw_forecast
+    raw_forecast = self.rules_stage.get_raw_forecast(
+        instrument_code, rule_variation_name
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecasting.py", line 101, in get_raw_forecast
+    result = trading_rule.call(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 105, in call
+    list_of_data_for_call = self._get_data_from_system(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 128, in _get_data_from_system
+    list_of_data_methods = self._get_data_methods_from_list_of_data_string(
+        list_of_data_str_references=list_of_data_str_references, system=system
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 145, in _get_data_methods_from_list_of_data_string
+    resolve_data_method(system, data_string)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 89, in resolve_data_method
+    return _recursively_get_attr_within_list(some_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 99, in _recursively_get_attr_within_list
+    return _recursively_get_attr_within_list(sub_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 97, in _recursively_get_attr_within_list
+    sub_object = getattr(an_object, next_attr)
+AttributeError: 'RawData' object has no attribute 'get_dividend_yield'
+
+2025-10-07 13:30:56.276166: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 13:30:56.276437: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 13:30:56.277855: Portfolio debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.278096: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 13:30:56.279363: portfolio().curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.280564: portfolio().percent.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.281716: portfolio().net.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.282820: portfolio().gross.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.283028: === MANUAL RETURNS TEST ===
+2025-10-07 13:30:56.284263: Manual returns test failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.284475: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 13:30:56.284704: Starting capital from config: $1,000,000.00
+2025-10-07 13:30:56.285917: Capital debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.287014: Performance calculation failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:30:56.301594: Traceback: Traceback (most recent call last):
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\perplexity_examples\performance_calculator_v3.py", line 36, in calculate_performance
+    portfolio = system.accounts.portfolio()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_portfolio.py", line 38, in portfolio
+    self.pandl_for_instrument(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code,
+        ^^^^^^^^^^^^^^^^
+        delayfill=delayfill,
+        ^^^^^^^^^^^^^^^^^^^^
+        roundpositions=roundpositions,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_instruments.py", line 48, in pandl_for_instrument
+    positions = self.get_buffered_position(
+        instrument_code, roundpositions=roundpositions
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_buffering_system.py", line 82, in get_buffered_position
+    optimal_position = self.get_notional_position(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_inputs.py", line 210, in get_notional_position
+    return self.parent.portfolio.get_notional_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 211, in get_notional_position
+    self.get_notional_position_before_risk_scaling(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 237, in get_notional_position_before_risk_scaling
+    notional_position_without_idm = self.get_notional_position_without_idm(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 252, in get_notional_position_without_idm
+    instr_weights = self.get_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 433, in get_instrument_weights
+    self.get_unsmoothed_instrument_weights_fitted_to_position_lengths()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 453, in get_unsmoothed_instrument_weights_fitted_to_position_lengths
+    raw_instrument_weights = self.get_unsmoothed_raw_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 497, in get_unsmoothed_raw_instrument_weights
+    raw_instrument_weights = self.get_raw_fixed_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 539, in get_raw_fixed_instrument_weights
+    instrument_weights_dict = self.get_fixed_instrument_weights_from_config()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 562, in get_fixed_instrument_weights_from_config
+    instrument_weights_dict = self._add_zero_instrument_weights(
+        instrument_weights_dict
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 589, in _add_zero_instrument_weights
+    self.allocate_zero_instrument_weights_to_these_instruments()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 747, in allocate_zero_instrument_weights_to_these_instruments
+    instruments_without_data_or_weights = self.instruments_without_data_or_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 808, in instruments_without_data_or_weights
+    subsystem_positions = copy(self._get_all_subsystem_positions())
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 616, in _get_all_subsystem_positions
+    positions = self.get_subsystem_positions_for_instrument_list(instrument_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 479, in get_subsystem_positions_for_instrument_list
+    self.get_subsystem_position(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 851, in get_subsystem_position
+    return self.position_size_stage.get_subsystem_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 126, in get_subsystem_position
+    forecast = self.get_combined_forecast(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 567, in get_combined_forecast
+    return self.comb_forecast_stage.get_combined_forecast(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 93, in get_combined_forecast
+    self.get_raw_combined_forecast_before_mapping(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 114, in get_raw_combined_forecast_before_mapping
+    raw_combined_forecast = self.get_combined_forecast_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 141, in get_combined_forecast_without_multiplier
+    weighted_forecasts = self.get_weighted_forecasts_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 157, in get_weighted_forecasts_without_multiplier
+    forecasts = self.get_all_forecasts(instrument_code, rule_variation_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 321, in get_all_forecasts
+    forecasts = self.get_forecasts_given_rule_list(
+        instrument_code, rule_variation_list
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 447, in get_forecasts_given_rule_list
+    self._get_capped_individual_forecast(instrument_code, rule_variation_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 493, in _get_capped_individual_forecast
+    return self.forecast_scale_cap_stage.get_capped_forecast(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code, rule_variation_name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 65, in get_capped_forecast
+    scaled_forecast = self.get_scaled_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 98, in get_scaled_forecast
+    raw_forecast = self.get_raw_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 132, in get_raw_forecast
+    raw_forecast = self.rules_stage.get_raw_forecast(
+        instrument_code, rule_variation_name
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecasting.py", line 101, in get_raw_forecast
+    result = trading_rule.call(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 105, in call
+    list_of_data_for_call = self._get_data_from_system(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 128, in _get_data_from_system
+    list_of_data_methods = self._get_data_methods_from_list_of_data_string(
+        list_of_data_str_references=list_of_data_str_references, system=system
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 145, in _get_data_methods_from_list_of_data_string
+    resolve_data_method(system, data_string)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 89, in resolve_data_method
+    return _recursively_get_attr_within_list(some_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 99, in _recursively_get_attr_within_list
+    return _recursively_get_attr_within_list(sub_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 97, in _recursively_get_attr_within_list
+    sub_object = getattr(an_object, next_attr)
+AttributeError: 'RawData' object has no attribute 'get_dividend_yield'
+
+2025-10-07 13:44:31.993887: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 13:44:31.994141: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 13:44:31.995532: Portfolio debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:31.995809: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 13:44:31.997350: portfolio().curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:31.998606: portfolio().percent.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:31.999883: portfolio().net.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.001137: portfolio().gross.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.001393: === MANUAL RETURNS TEST ===
+2025-10-07 13:44:32.002510: Manual returns test failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.002741: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 13:44:32.002933: Starting capital from config: $1,000,000.00
+2025-10-07 13:44:32.004050: Capital debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.005577: Performance calculation failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.019446: Traceback: Traceback (most recent call last):
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\perplexity_examples\performance_calculator_v3.py", line 36, in calculate_performance
+    portfolio = system.accounts.portfolio()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_portfolio.py", line 38, in portfolio
+    self.pandl_for_instrument(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code,
+        ^^^^^^^^^^^^^^^^
+        delayfill=delayfill,
+        ^^^^^^^^^^^^^^^^^^^^
+        roundpositions=roundpositions,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_instruments.py", line 48, in pandl_for_instrument
+    positions = self.get_buffered_position(
+        instrument_code, roundpositions=roundpositions
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_buffering_system.py", line 82, in get_buffered_position
+    optimal_position = self.get_notional_position(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_inputs.py", line 210, in get_notional_position
+    return self.parent.portfolio.get_notional_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 211, in get_notional_position
+    self.get_notional_position_before_risk_scaling(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 237, in get_notional_position_before_risk_scaling
+    notional_position_without_idm = self.get_notional_position_without_idm(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 252, in get_notional_position_without_idm
+    instr_weights = self.get_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 433, in get_instrument_weights
+    self.get_unsmoothed_instrument_weights_fitted_to_position_lengths()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 453, in get_unsmoothed_instrument_weights_fitted_to_position_lengths
+    raw_instrument_weights = self.get_unsmoothed_raw_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 497, in get_unsmoothed_raw_instrument_weights
+    raw_instrument_weights = self.get_raw_fixed_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 539, in get_raw_fixed_instrument_weights
+    instrument_weights_dict = self.get_fixed_instrument_weights_from_config()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 562, in get_fixed_instrument_weights_from_config
+    instrument_weights_dict = self._add_zero_instrument_weights(
+        instrument_weights_dict
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 589, in _add_zero_instrument_weights
+    self.allocate_zero_instrument_weights_to_these_instruments()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 747, in allocate_zero_instrument_weights_to_these_instruments
+    instruments_without_data_or_weights = self.instruments_without_data_or_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 808, in instruments_without_data_or_weights
+    subsystem_positions = copy(self._get_all_subsystem_positions())
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 616, in _get_all_subsystem_positions
+    positions = self.get_subsystem_positions_for_instrument_list(instrument_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 479, in get_subsystem_positions_for_instrument_list
+    self.get_subsystem_position(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 851, in get_subsystem_position
+    return self.position_size_stage.get_subsystem_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 126, in get_subsystem_position
+    forecast = self.get_combined_forecast(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 567, in get_combined_forecast
+    return self.comb_forecast_stage.get_combined_forecast(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 93, in get_combined_forecast
+    self.get_raw_combined_forecast_before_mapping(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 114, in get_raw_combined_forecast_before_mapping
+    raw_combined_forecast = self.get_combined_forecast_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 141, in get_combined_forecast_without_multiplier
+    weighted_forecasts = self.get_weighted_forecasts_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 157, in get_weighted_forecasts_without_multiplier
+    forecasts = self.get_all_forecasts(instrument_code, rule_variation_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 321, in get_all_forecasts
+    forecasts = self.get_forecasts_given_rule_list(
+        instrument_code, rule_variation_list
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 447, in get_forecasts_given_rule_list
+    self._get_capped_individual_forecast(instrument_code, rule_variation_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 493, in _get_capped_individual_forecast
+    return self.forecast_scale_cap_stage.get_capped_forecast(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code, rule_variation_name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 65, in get_capped_forecast
+    scaled_forecast = self.get_scaled_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 98, in get_scaled_forecast
+    raw_forecast = self.get_raw_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 132, in get_raw_forecast
+    raw_forecast = self.rules_stage.get_raw_forecast(
+        instrument_code, rule_variation_name
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecasting.py", line 101, in get_raw_forecast
+    result = trading_rule.call(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 105, in call
+    list_of_data_for_call = self._get_data_from_system(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 128, in _get_data_from_system
+    list_of_data_methods = self._get_data_methods_from_list_of_data_string(
+        list_of_data_str_references=list_of_data_str_references, system=system
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 145, in _get_data_methods_from_list_of_data_string
+    resolve_data_method(system, data_string)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 89, in resolve_data_method
+    return _recursively_get_attr_within_list(some_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 99, in _recursively_get_attr_within_list
+    return _recursively_get_attr_within_list(sub_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 97, in _recursively_get_attr_within_list
+    sub_object = getattr(an_object, next_attr)
+AttributeError: 'RawData' object has no attribute 'get_dividend_yield'
+
+2025-10-07 13:44:32.123871: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 13:44:32.124106: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 13:44:32.125438: Portfolio debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.125715: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 13:44:32.127012: portfolio().curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.128279: portfolio().percent.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.129570: portfolio().net.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.130885: portfolio().gross.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.131208: === MANUAL RETURNS TEST ===
+2025-10-07 13:44:32.132317: Manual returns test failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.132631: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 13:44:32.132860: Starting capital from config: $1,000,000.00
+2025-10-07 13:44:32.133971: Capital debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.135103: Performance calculation failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 13:44:32.149132: Traceback: Traceback (most recent call last):
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\perplexity_examples\performance_calculator_v3.py", line 36, in calculate_performance
+    portfolio = system.accounts.portfolio()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_portfolio.py", line 38, in portfolio
+    self.pandl_for_instrument(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code,
+        ^^^^^^^^^^^^^^^^
+        delayfill=delayfill,
+        ^^^^^^^^^^^^^^^^^^^^
+        roundpositions=roundpositions,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_instruments.py", line 48, in pandl_for_instrument
+    positions = self.get_buffered_position(
+        instrument_code, roundpositions=roundpositions
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_buffering_system.py", line 82, in get_buffered_position
+    optimal_position = self.get_notional_position(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_inputs.py", line 210, in get_notional_position
+    return self.parent.portfolio.get_notional_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 211, in get_notional_position
+    self.get_notional_position_before_risk_scaling(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 237, in get_notional_position_before_risk_scaling
+    notional_position_without_idm = self.get_notional_position_without_idm(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 252, in get_notional_position_without_idm
+    instr_weights = self.get_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 433, in get_instrument_weights
+    self.get_unsmoothed_instrument_weights_fitted_to_position_lengths()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 453, in get_unsmoothed_instrument_weights_fitted_to_position_lengths
+    raw_instrument_weights = self.get_unsmoothed_raw_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 497, in get_unsmoothed_raw_instrument_weights
+    raw_instrument_weights = self.get_raw_fixed_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 539, in get_raw_fixed_instrument_weights
+    instrument_weights_dict = self.get_fixed_instrument_weights_from_config()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 562, in get_fixed_instrument_weights_from_config
+    instrument_weights_dict = self._add_zero_instrument_weights(
+        instrument_weights_dict
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 589, in _add_zero_instrument_weights
+    self.allocate_zero_instrument_weights_to_these_instruments()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 747, in allocate_zero_instrument_weights_to_these_instruments
+    instruments_without_data_or_weights = self.instruments_without_data_or_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 808, in instruments_without_data_or_weights
+    subsystem_positions = copy(self._get_all_subsystem_positions())
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 616, in _get_all_subsystem_positions
+    positions = self.get_subsystem_positions_for_instrument_list(instrument_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 479, in get_subsystem_positions_for_instrument_list
+    self.get_subsystem_position(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 851, in get_subsystem_position
+    return self.position_size_stage.get_subsystem_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 126, in get_subsystem_position
+    forecast = self.get_combined_forecast(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 567, in get_combined_forecast
+    return self.comb_forecast_stage.get_combined_forecast(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 93, in get_combined_forecast
+    self.get_raw_combined_forecast_before_mapping(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 114, in get_raw_combined_forecast_before_mapping
+    raw_combined_forecast = self.get_combined_forecast_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 141, in get_combined_forecast_without_multiplier
+    weighted_forecasts = self.get_weighted_forecasts_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 157, in get_weighted_forecasts_without_multiplier
+    forecasts = self.get_all_forecasts(instrument_code, rule_variation_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 321, in get_all_forecasts
+    forecasts = self.get_forecasts_given_rule_list(
+        instrument_code, rule_variation_list
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 447, in get_forecasts_given_rule_list
+    self._get_capped_individual_forecast(instrument_code, rule_variation_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 493, in _get_capped_individual_forecast
+    return self.forecast_scale_cap_stage.get_capped_forecast(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code, rule_variation_name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 65, in get_capped_forecast
+    scaled_forecast = self.get_scaled_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 98, in get_scaled_forecast
+    raw_forecast = self.get_raw_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 132, in get_raw_forecast
+    raw_forecast = self.rules_stage.get_raw_forecast(
+        instrument_code, rule_variation_name
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecasting.py", line 101, in get_raw_forecast
+    result = trading_rule.call(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 105, in call
+    list_of_data_for_call = self._get_data_from_system(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 128, in _get_data_from_system
+    list_of_data_methods = self._get_data_methods_from_list_of_data_string(
+        list_of_data_str_references=list_of_data_str_references, system=system
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 145, in _get_data_methods_from_list_of_data_string
+    resolve_data_method(system, data_string)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 89, in resolve_data_method
+    return _recursively_get_attr_within_list(some_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 99, in _recursively_get_attr_within_list
+    return _recursively_get_attr_within_list(sub_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 97, in _recursively_get_attr_within_list
+    sub_object = getattr(an_object, next_attr)
+AttributeError: 'RawData' object has no attribute 'get_dividend_yield'
+
+2025-10-07 17:41:24.195819: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 17:41:24.196072: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 17:41:24.197327: Portfolio debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.197538: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 17:41:24.198715: portfolio().curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.199896: portfolio().percent.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.201016: portfolio().net.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.202212: portfolio().gross.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.202458: === MANUAL RETURNS TEST ===
+2025-10-07 17:41:24.203617: Manual returns test failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.203817: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 17:41:24.203997: Starting capital from config: $1,000,000.00
+2025-10-07 17:41:24.205108: Capital debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.206489: Performance calculation failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.228142: Traceback: Traceback (most recent call last):
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\perplexity_examples\performance_calculator_v3.py", line 36, in calculate_performance
+    portfolio = system.accounts.portfolio()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_portfolio.py", line 38, in portfolio
+    self.pandl_for_instrument(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code,
+        ^^^^^^^^^^^^^^^^
+        delayfill=delayfill,
+        ^^^^^^^^^^^^^^^^^^^^
+        roundpositions=roundpositions,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_instruments.py", line 48, in pandl_for_instrument
+    positions = self.get_buffered_position(
+        instrument_code, roundpositions=roundpositions
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_buffering_system.py", line 82, in get_buffered_position
+    optimal_position = self.get_notional_position(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_inputs.py", line 210, in get_notional_position
+    return self.parent.portfolio.get_notional_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 211, in get_notional_position
+    self.get_notional_position_before_risk_scaling(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 237, in get_notional_position_before_risk_scaling
+    notional_position_without_idm = self.get_notional_position_without_idm(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 252, in get_notional_position_without_idm
+    instr_weights = self.get_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 433, in get_instrument_weights
+    self.get_unsmoothed_instrument_weights_fitted_to_position_lengths()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 453, in get_unsmoothed_instrument_weights_fitted_to_position_lengths
+    raw_instrument_weights = self.get_unsmoothed_raw_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 497, in get_unsmoothed_raw_instrument_weights
+    raw_instrument_weights = self.get_raw_fixed_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 539, in get_raw_fixed_instrument_weights
+    instrument_weights_dict = self.get_fixed_instrument_weights_from_config()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 562, in get_fixed_instrument_weights_from_config
+    instrument_weights_dict = self._add_zero_instrument_weights(
+        instrument_weights_dict
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 589, in _add_zero_instrument_weights
+    self.allocate_zero_instrument_weights_to_these_instruments()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 747, in allocate_zero_instrument_weights_to_these_instruments
+    instruments_without_data_or_weights = self.instruments_without_data_or_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 808, in instruments_without_data_or_weights
+    subsystem_positions = copy(self._get_all_subsystem_positions())
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 616, in _get_all_subsystem_positions
+    positions = self.get_subsystem_positions_for_instrument_list(instrument_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 479, in get_subsystem_positions_for_instrument_list
+    self.get_subsystem_position(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 851, in get_subsystem_position
+    return self.position_size_stage.get_subsystem_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 126, in get_subsystem_position
+    forecast = self.get_combined_forecast(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 567, in get_combined_forecast
+    return self.comb_forecast_stage.get_combined_forecast(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 93, in get_combined_forecast
+    self.get_raw_combined_forecast_before_mapping(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 114, in get_raw_combined_forecast_before_mapping
+    raw_combined_forecast = self.get_combined_forecast_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 141, in get_combined_forecast_without_multiplier
+    weighted_forecasts = self.get_weighted_forecasts_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 157, in get_weighted_forecasts_without_multiplier
+    forecasts = self.get_all_forecasts(instrument_code, rule_variation_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 321, in get_all_forecasts
+    forecasts = self.get_forecasts_given_rule_list(
+        instrument_code, rule_variation_list
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 447, in get_forecasts_given_rule_list
+    self._get_capped_individual_forecast(instrument_code, rule_variation_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 493, in _get_capped_individual_forecast
+    return self.forecast_scale_cap_stage.get_capped_forecast(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code, rule_variation_name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 65, in get_capped_forecast
+    scaled_forecast = self.get_scaled_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 98, in get_scaled_forecast
+    raw_forecast = self.get_raw_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 132, in get_raw_forecast
+    raw_forecast = self.rules_stage.get_raw_forecast(
+        instrument_code, rule_variation_name
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecasting.py", line 101, in get_raw_forecast
+    result = trading_rule.call(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 105, in call
+    list_of_data_for_call = self._get_data_from_system(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 128, in _get_data_from_system
+    list_of_data_methods = self._get_data_methods_from_list_of_data_string(
+        list_of_data_str_references=list_of_data_str_references, system=system
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 145, in _get_data_methods_from_list_of_data_string
+    resolve_data_method(system, data_string)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 89, in resolve_data_method
+    return _recursively_get_attr_within_list(some_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 99, in _recursively_get_attr_within_list
+    return _recursively_get_attr_within_list(sub_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 97, in _recursively_get_attr_within_list
+    sub_object = getattr(an_object, next_attr)
+AttributeError: 'RawData' object has no attribute 'get_dividend_yield'
+
+2025-10-07 17:41:24.328996: === DEBUGGING PERFORMANCE CALCULATION ===
+2025-10-07 17:41:24.329279: === ENHANCED PORTFOLIO DEBUG ===
+2025-10-07 17:41:24.330519: Portfolio debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.330784: === TESTING PORTFOLIO ACCESS METHODS ===
+2025-10-07 17:41:24.331991: portfolio().curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.333150: portfolio().percent.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.334286: portfolio().net.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.335433: portfolio().gross.curve(): FAILED - 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.335672: === MANUAL RETURNS TEST ===
+2025-10-07 17:41:24.336816: Manual returns test failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.337073: === CAPITAL AND RETURNS DEBUG ===
+2025-10-07 17:41:24.337344: Starting capital from config: $1,000,000.00
+2025-10-07 17:41:24.338505: Capital debug failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.339955: Performance calculation failed: 'RawData' object has no attribute 'get_dividend_yield'
+2025-10-07 17:41:24.354327: Traceback: Traceback (most recent call last):
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\perplexity_examples\performance_calculator_v3.py", line 36, in calculate_performance
+    portfolio = system.accounts.portfolio()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_portfolio.py", line 38, in portfolio
+    self.pandl_for_instrument(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code,
+        ^^^^^^^^^^^^^^^^
+        delayfill=delayfill,
+        ^^^^^^^^^^^^^^^^^^^^
+        roundpositions=roundpositions,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_instruments.py", line 48, in pandl_for_instrument
+    positions = self.get_buffered_position(
+        instrument_code, roundpositions=roundpositions
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_buffering_system.py", line 82, in get_buffered_position
+    optimal_position = self.get_notional_position(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\accounts\account_inputs.py", line 210, in get_notional_position
+    return self.parent.portfolio.get_notional_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 211, in get_notional_position
+    self.get_notional_position_before_risk_scaling(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 237, in get_notional_position_before_risk_scaling
+    notional_position_without_idm = self.get_notional_position_without_idm(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 252, in get_notional_position_without_idm
+    instr_weights = self.get_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 433, in get_instrument_weights
+    self.get_unsmoothed_instrument_weights_fitted_to_position_lengths()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 453, in get_unsmoothed_instrument_weights_fitted_to_position_lengths
+    raw_instrument_weights = self.get_unsmoothed_raw_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 497, in get_unsmoothed_raw_instrument_weights
+    raw_instrument_weights = self.get_raw_fixed_instrument_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 539, in get_raw_fixed_instrument_weights
+    instrument_weights_dict = self.get_fixed_instrument_weights_from_config()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 562, in get_fixed_instrument_weights_from_config
+    instrument_weights_dict = self._add_zero_instrument_weights(
+        instrument_weights_dict
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 589, in _add_zero_instrument_weights
+    self.allocate_zero_instrument_weights_to_these_instruments()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 747, in allocate_zero_instrument_weights_to_these_instruments
+    instruments_without_data_or_weights = self.instruments_without_data_or_weights()
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 808, in instruments_without_data_or_weights
+    subsystem_positions = copy(self._get_all_subsystem_positions())
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 616, in _get_all_subsystem_positions
+    positions = self.get_subsystem_positions_for_instrument_list(instrument_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 479, in get_subsystem_positions_for_instrument_list
+    self.get_subsystem_position(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\portfolio.py", line 851, in get_subsystem_position
+    return self.position_size_stage.get_subsystem_position(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 126, in get_subsystem_position
+    forecast = self.get_combined_forecast(instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\positionsizing.py", line 567, in get_combined_forecast
+    return self.comb_forecast_stage.get_combined_forecast(instrument_code)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 93, in get_combined_forecast
+    self.get_raw_combined_forecast_before_mapping(instrument_code)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 114, in get_raw_combined_forecast_before_mapping
+    raw_combined_forecast = self.get_combined_forecast_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 141, in get_combined_forecast_without_multiplier
+    weighted_forecasts = self.get_weighted_forecasts_without_multiplier(
+        instrument_code
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 157, in get_weighted_forecasts_without_multiplier
+    forecasts = self.get_all_forecasts(instrument_code, rule_variation_list)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 321, in get_all_forecasts
+    forecasts = self.get_forecasts_given_rule_list(
+        instrument_code, rule_variation_list
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 447, in get_forecasts_given_rule_list
+    self._get_capped_individual_forecast(instrument_code, rule_variation_name)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_combine.py", line 493, in _get_capped_individual_forecast
+    return self.forecast_scale_cap_stage.get_capped_forecast(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instrument_code, rule_variation_name
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 65, in get_capped_forecast
+    scaled_forecast = self.get_scaled_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 98, in get_scaled_forecast
+    raw_forecast = self.get_raw_forecast(instrument_code, rule_variation_name)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 703, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecast_scale_cap.py", line 132, in get_raw_forecast
+    raw_forecast = self.rules_stage.get_raw_forecast(
+        instrument_code, rule_variation_name
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 726, in wrapper
+    ans = system.cache.calc_or_cache(
+        func,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\system_cache.py", line 573, in calc_or_cache
+    value = func(this_stage, *args, **kwargs)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\forecasting.py", line 101, in get_raw_forecast
+    result = trading_rule.call(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 105, in call
+    list_of_data_for_call = self._get_data_from_system(system, instrument_code)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 128, in _get_data_from_system
+    list_of_data_methods = self._get_data_methods_from_list_of_data_string(
+        list_of_data_str_references=list_of_data_str_references, system=system
+    )
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\systems\trading_rules.py", line 145, in _get_data_methods_from_list_of_data_string
+    resolve_data_method(system, data_string)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 89, in resolve_data_method
+    return _recursively_get_attr_within_list(some_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 99, in _recursively_get_attr_within_list
+    return _recursively_get_attr_within_list(sub_object, list_to_parse)
+  File "C:\Users\Alex\PycharmProjects\PySystemTrade\pysystemtrade\syscore\objects.py", line 97, in _recursively_get_attr_within_list
+    sub_object = getattr(an_object, next_attr)
+AttributeError: 'RawData' object has no attribute 'get_dividend_yield'
+

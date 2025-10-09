@@ -11,12 +11,31 @@ from datetime import datetime, timedelta
 import warnings
 import time
 
+
 warnings.filterwarnings('ignore')
 
 from systems.provided.futures_chapter15.basesystem import futures_system
 from sysdata.config.configdata import Config
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 from performance_calculator_v3 import SimplePerformanceCalculator
+
+
+# ADD THIS CLASS before EnhancedETFSystem
+class ETFSimData(csvFuturesSimData):
+    def __init__(self, csv_data_paths, dividend_data=None):
+        super().__init__(csv_data_paths)
+        self.dividend_data = dividend_data or {}
+
+    # ADD THIS METHOD for rawdata compatibility
+    def get_dividend_yield(self, instrument):
+        """Return dividend yield for carry calculation - matches rawdata interface"""
+        if instrument in self.dividend_data:
+            return self.dividend_data[instrument]
+        else:
+            # Return zero yield series with same index as price data
+            price_data = self.get_daily_prices(instrument)
+            return pd.Series(0.0, index=price_data.index, name=f"{instrument}_dividend_yield")
+
 
 
 
@@ -191,6 +210,39 @@ class EnhancedETFSystem:
         except Exception as e:
             print(f"❌ IB download failed: {str(e)}")
             return 0
+
+    # Add this method to your EnhancedETFSystem class
+    def get_dividend_yield_data(self):
+        """Get dividend yield data for carry calculations"""
+        dividend_data = {}
+
+        for instrument in self.valid_instruments:
+            try:
+                # Get ETF distribution yield
+                etf = yf.Ticker(instrument)
+                info = etf.info
+                dividend_yield = info.get('dividendYield', info.get('yield', 0.0))
+
+                # Convert to pandas Series with same index as price data
+                price_data = self.etf_data[instrument]
+                yield_series = pd.Series(
+                    dividend_yield,
+                    index=price_data.index,
+                    name=f"{instrument}_dividend_yield"
+                )
+                dividend_data[instrument] = yield_series
+
+            except Exception as e:
+                print(f"{instrument}: Dividend yield fetch failed - {e}")
+                # Default to 0% yield
+                price_data = self.etf_data[instrument]
+                dividend_data[instrument] = pd.Series(
+                    0.0,
+                    index=price_data.index,
+                    name=f"{instrument}_dividend_yield"
+                )
+
+        return dividend_data
 
     def save_data_to_pysystemtrade(self):
         """Save ETF data in PySystemTrade CSV format"""
@@ -388,7 +440,9 @@ class EnhancedETFSystem:
                 'csvFuturesAdjustedPricesData': self.csv_dir,
                 'csvFuturesInstrumentData': self.config_dir
             }
-            data = csvFuturesSimData(csv_data_paths=data_paths)
+            # data = csvFuturesSimData(csv_data_paths=data_paths)
+            dividend_data = self.get_dividend_yield_data()
+            data = ETFSimData(csv_data_paths=data_paths, dividend_data=dividend_data)
             pst_config = Config(system_config)
             system = futures_system(config=pst_config, data=data)
 

@@ -915,41 +915,7 @@ class ETFSystemRunner:
         return self.results
 
 
-def main():
-    """Main execution function with improved error handling"""
-    try:
-        # Initialize the system runner
-        runner = ETFSystemRunner(
-            max_instruments=32,  # Adjust as needed
-            test_mode=False,  # Set to True for faster testing
-            data_source="ib"
-        )
 
-        # Run complete analysis
-        results = runner.run_complete_analysis()
-
-        if results:
-            # Store results globally for interactive access
-            globals()['system_results'] = results
-            globals()['trading_system'] = runner.get_trading_system()
-            globals()['system_runner'] = runner
-
-            print(f"\n✅ Analysis completed successfully!")
-            print(f"📊 Results stored in 'system_results' variable")
-            print(f"🔧 Trading system stored in 'trading_system' variable")
-            print(f"🏃 System runner stored in 'system_runner' variable")
-            return results
-        else:
-            print(f"\n❌ Analysis failed - check error messages above")
-            return None
-
-    except KeyboardInterrupt:
-        print(f"\n⏹️ Analysis interrupted by user")
-        return None
-    except Exception as e:
-        print(f"\n💥 CRITICAL ERROR in main execution: {e}")
-        traceback.print_exc()
-        return None
 
 
 # Utility functions for enhanced functionality
@@ -1024,7 +990,41 @@ def debug_volatility_chain_only():
 
 # To run just this debug:
 # debug_volatility_chain_only()
+def main():
+    """Main execution function with improved error handling"""
+    try:
+        # Initialize the system runner
+        runner = ETFSystemRunner(
+            max_instruments=10,  # Adjust as needed
+            test_mode=True,  # Set to True for faster testing
+            data_source="ib"
+        )
 
+        # Run complete analysis
+        results = runner.run_complete_analysis()
+
+        if results:
+            # Store results globally for interactive access
+            globals()['system_results'] = results
+            globals()['trading_system'] = runner.get_trading_system()
+            globals()['system_runner'] = runner
+
+            print(f"\n✅ Analysis completed successfully!")
+            print(f"📊 Results stored in 'system_results' variable")
+            print(f"🔧 Trading system stored in 'trading_system' variable")
+            print(f"🏃 System runner stored in 'system_runner' variable")
+            return results
+        else:
+            print(f"\n❌ Analysis failed - check error messages above")
+            return None
+
+    except KeyboardInterrupt:
+        print(f"\n⏹️ Analysis interrupted by user")
+        return None
+    except Exception as e:
+        print(f"\n💥 CRITICAL ERROR in main execution: {e}")
+        traceback.print_exc()
+        return None
 
 if __name__ == "__main__":
     # Run the complete analysis
