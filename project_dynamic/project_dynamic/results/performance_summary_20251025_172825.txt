@@ -1,0 +1,9 @@
+Dynamic Optimization Backtest Results
+Generated: 2025-10-25 17:28:25.873877
+==================================================
+
+Sharpe Ratio: 0.621
+Annual Return: 11.4%
+Annual Volatility: 18.3%
+Max Drawdown: -36.8%
+Calmar Ratio: 0.309

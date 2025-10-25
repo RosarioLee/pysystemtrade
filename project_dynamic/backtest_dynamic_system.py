@@ -228,8 +228,124 @@ class DynamicSystemBacktester:
 
             print(f"✓ Summary saved: {summary_file}")
 
+            plot_files = self.create_performance_plots(output_dir)
+            if plot_files[0]:
+                print(f"✓ Plots generated successfully")
+
         except Exception as e:
             print(f"❌ Error saving results: {str(e)}")
+
+    def create_performance_plots(self, output_dir='project_dynamic/results'):
+        """
+        Create equity curve and drawdown plots following Robert Carver's visualization style
+        """
+        if not self.results:
+            print("❌ No results to plot")
+            return
+
+        print(f"\n📈 CREATING PERFORMANCE PLOTS")
+        print(f"{'─' * 40}")
+
+        try:
+            import matplotlib.pyplot as plt
+            import matplotlib.dates as mdates
+            from matplotlib.patches import Rectangle
+
+            # Get portfolio returns data
+            portfolio_returns = self.results['portfolio_returns']
+
+            # Calculate equity curve (cumulative returns)
+            equity_curve = (1 + portfolio_returns.percent / 100).cumprod()
+
+            # Calculate drawdown series
+            rolling_max = equity_curve.cummax()
+            drawdown = (equity_curve / rolling_max - 1) * 100  # Convert to percentage
+
+            # Create timestamp for file naming
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+            # Set up the plotting style (Robert Carver prefers clean, professional charts)
+            plt.style.use('default')
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+            fig.suptitle('Robert Carver Dynamic Optimization System - Performance Analysis',
+                         fontsize=16, fontweight='bold', y=0.98)
+
+            # ======== EQUITY CURVE PLOT ========
+            ax1.plot(equity_curve.index, equity_curve.values,
+                     linewidth=1.5, color='#2E86AB', label='Dynamic Portfolio')
+            ax1.set_title('Cumulative Equity Curve', fontsize=14, fontweight='semibold', pad=20)
+            ax1.set_ylabel('Portfolio Value (Base = 1.0)', fontsize=12)
+            ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
+            ax1.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
+
+            # Format x-axis dates
+            ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax1.xaxis.set_major_locator(mdates.YearLocator(2))
+
+            # Add key statistics as text box
+            final_value = equity_curve.iloc[-1]
+            total_return = (final_value - 1) * 100
+            sharpe = portfolio_returns.sharpe()
+
+            stats_text = f'Total Return: {total_return:.1f}%\nSharpe Ratio: {sharpe:.3f}\nFinal Value: {final_value:.2f}'
+            ax1.text(0.02, 0.98, stats_text, transform=ax1.transAxes,
+                     verticalalignment='top', bbox=dict(boxstyle='round',
+                                                        facecolor='wheat', alpha=0.8), fontsize=10)
+
+            # ======== DRAWDOWN PLOT ========
+            ax2.fill_between(drawdown.index, drawdown.values, 0,
+                             color='#A23B72', alpha=0.6, label='Drawdown')
+            ax2.plot(drawdown.index, drawdown.values,
+                     linewidth=1, color='#A23B72')
+            ax2.set_title('Drawdown Analysis', fontsize=14, fontweight='semibold', pad=20)
+            ax2.set_xlabel('Year', fontsize=12)
+            ax2.set_ylabel('Drawdown (%)', fontsize=12)
+            ax2.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
+            ax2.legend(loc='lower right', frameon=True, fancybox=True, shadow=True)
+
+            # Format x-axis dates
+            ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax2.xaxis.set_major_locator(mdates.YearLocator(2))
+
+            # Add max drawdown annotation
+            max_dd = drawdown.min()
+            max_dd_date = drawdown.idxmin()
+            ax2.annotate(f'Max DD: {max_dd:.1f}%',
+                         xy=(max_dd_date, max_dd),
+                         xytext=(max_dd_date, max_dd + 5),
+                         arrowprops=dict(arrowstyle='->', color='red', lw=1.5),
+                         fontsize=10, ha='center',
+                         bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))
+
+            # Adjust layout and save
+            plt.tight_layout()
+            plt.subplots_adjust(top=0.93)
+
+            # Save the plot
+            plot_filename = f"{output_dir}/performance_analysis_{timestamp}.png"
+            plt.savefig(plot_filename, dpi=300, bbox_inches='tight',
+                        facecolor='white', edgecolor='none')
+            print(f"✓ Performance plots saved: {plot_filename}")
+
+            # Also save as PDF for publication quality
+            pdf_filename = f"{output_dir}/performance_analysis_{timestamp}.pdf"
+            plt.savefig(pdf_filename, dpi=300, bbox_inches='tight',
+                        facecolor='white', edgecolor='none')
+            print(f"✓ PDF version saved: {pdf_filename}")
+
+            # Display the plot
+            plt.show()
+
+            return plot_filename, pdf_filename
+
+        except ImportError as e:
+            print(f"❌ Matplotlib not available for plotting: {e}")
+            print("   Install with: pip install matplotlib")
+            return None, None
+
+        except Exception as e:
+            print(f"❌ Error creating plots: {e}")
+            return None, None
 
     def compare_with_static_system(self):
         """Compare dynamic optimization with traditional static system"""
@@ -286,17 +402,18 @@ def main():
     # Analyze results
     backtester.analyze_results()
 
-    # Save results
+    # Save results (includes plotting now)
     backtester.save_results()
 
-    # Compare with static system (optional - may fail due to dependencies)
+    # Compare with static system (optional)
     try:
         backtester.compare_with_static_system()
     except Exception as e:
         print(f"⚠ Static system comparison skipped: {str(e)}")
 
     print(f"\n✅ BACKTEST COMPLETED SUCCESSFULLY")
-    print(f"Check project_dynamic/results/ for output files")
+    print(f"📊 Charts saved to: project_dynamic/results/")
+    print(f"🔍 Check CSV files and performance plots for detailed analysis")
 
 
 if __name__ == "__main__":

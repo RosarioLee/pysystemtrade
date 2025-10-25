@@ -284,7 +284,7 @@ def main():
     print(f"Starting at: {datetime.now()}")
 
     # Initialize data manager
-    data_manager = SampleDataManager()
+    data_manager =  SampleDataManager()
 
     # Define test instruments (subset of Rob's portfolio)
     test_instruments = [
