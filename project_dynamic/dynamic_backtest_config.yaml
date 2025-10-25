@@ -1,0 +1,285 @@
+# YAML
+# Robert Carver's Dynamic Optimization Configuration
+# Adapted for backtesting with sample data - CORRECTED VERSION
+# Based on systems/provided/rob_system/config.yaml
+
+# ============================================================
+# SYSTEM IDENTIFICATION
+# ============================================================
+use_forecast_weight_estimates: False
+use_forecast_div_mult_estimates: False
+use_instrument_weight_estimates: False
+use_instrument_div_mult_estimates: True
+use_forecast_scale_estimates: False
+
+# Start date for backtesting
+start_date: 2000-01-19
+
+# ============================================================
+# VOLATILITY CALCULATION
+# ============================================================
+volatility_calculation:
+  func: sysquant.estimators.vol.mixed_vol_calc
+  days: 35
+  min_periods: 10
+  vol_abs_min: 0.0000000001
+  slow_vol_years: 20
+  proportion_of_slow_vol: 0.35
+  backfill: True
+
+# ============================================================
+# CORE TRADING RULES (Subset for Testing)
+# ============================================================
+trading_rules:
+  # Breakout rules
+  breakout10:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - rawdata.get_daily_prices
+    other_args:
+      lookback: 10
+  breakout40:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - rawdata.get_daily_prices
+    other_args:
+      lookback: 40
+  breakout160:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - rawdata.get_daily_prices
+    other_args:
+      lookback: 160
+
+  # Momentum rules
+  momentum16:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - rawdata.get_daily_prices
+      - rawdata.daily_returns_volatility
+    other_args:
+      Lfast: 16
+      Lslow: 64
+
+  momentum64:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - rawdata.get_daily_prices
+      - rawdata.daily_returns_volatility
+    other_args:
+      Lfast: 64
+      Lslow: 256
+
+  # Carry rule
+  carry60:
+    function: systems.provided.rules.carry.carry
+    data:
+      - rawdata.raw_carry
+    other_args:
+      smooth_days: 60
+
+# ============================================================
+# FORECAST CONFIGURATION
+# ============================================================
+forecast_cap: 20.0
+
+# Forecast scalars (from Rob's config)
+forecast_scalars:
+  breakout10: 0.603
+  breakout40: 0.704
+  breakout160: 0.739
+  momentum16: 4.104
+  momentum64: 1.909
+  carry60: 28.401
+
+# FIXED: Complete forecast weights for ALL instruments (not just 3)
+forecast_weights:
+  # Interest Rate instruments
+  US10:
+    breakout10: 0.01
+    breakout40: 0.04
+    breakout160: 0.05
+    momentum16: 0.02
+    momentum64: 0.03
+    carry60: 0.85  # Carry works well on bonds
+  US2:
+    breakout10: 0.01
+    breakout40: 0.04
+    breakout160: 0.05
+    momentum16: 0.02
+    momentum64: 0.03
+    carry60: 0.85  # Carry works well on bonds
+  SOFR:
+    breakout10: 0.01
+    breakout40: 0.04
+    breakout160: 0.05
+    momentum16: 0.02
+    momentum64: 0.03
+    carry60: 0.85  # Carry works well on short rates
+
+  # Equity instruments
+  SP500_micro:
+    breakout10: 0.15
+    breakout40: 0.20
+    breakout160: 0.25
+    momentum16: 0.15
+    momentum64: 0.20
+    carry60: 0.05  # Limited carry on equities
+  NASDAQ:
+    breakout10: 0.15
+    breakout40: 0.20
+    breakout160: 0.25
+    momentum16: 0.15
+    momentum64: 0.20
+    carry60: 0.05
+  EUROSTX:
+    breakout10: 0.15
+    breakout40: 0.20
+    breakout160: 0.25
+    momentum16: 0.15
+    momentum64: 0.20
+    carry60: 0.05
+
+  # Commodity instruments
+  CORN:
+    breakout10: 0.10
+    breakout40: 0.18
+    breakout160: 0.22
+    momentum16: 0.15
+    momentum64: 0.20
+    carry60: 0.15  # Moderate carry on agricultural
+  CRUDE_W:
+    breakout10: 0.15
+    breakout40: 0.20
+    breakout160: 0.25
+    momentum16: 0.15
+    momentum64: 0.20
+    carry60: 0.05  # Limited carry on energy
+  GOLD:
+    breakout10: 0.15
+    breakout40: 0.20
+    breakout160: 0.25
+    momentum16: 0.15
+    momentum64: 0.20
+    carry60: 0.05  # Limited carry on metals
+
+  # FX instruments (carry strategies work well)
+  EUR:
+    breakout10: 0.05
+    breakout40: 0.10
+    breakout160: 0.15
+    momentum16: 0.10
+    momentum64: 0.15
+    carry60: 0.45  # Strong carry component for FX
+  GBP:
+    breakout10: 0.05
+    breakout40: 0.10
+    breakout160: 0.15
+    momentum16: 0.10
+    momentum64: 0.15
+    carry60: 0.45
+  JPY:
+    breakout10: 0.05
+    breakout40: 0.10
+    breakout160: 0.15
+    momentum16: 0.10
+    momentum64: 0.15
+    carry60: 0.45
+
+forecast_div_multiplier: 1.75
+
+# ============================================================
+# CAPITAL AND RISK CONFIGURATION
+# ============================================================
+percentage_vol_target: 20.0  # Reduced from Rob's 25% for testing
+notional_trading_capital: 100000  # Reduced from Rob's 500k for testing
+base_currency: USD
+
+# ============================================================
+# DYNAMIC OPTIMIZATION PARAMETERS (Key Section!)
+# ============================================================
+small_system:
+  shadow_cost: 50  # Cost penalty for excessive turnover
+  cost_multiplier: 1.0  # Multiply trading costs by this factor
+  tracking_error_buffer: 0.0125  # Buffer to maintain system coherence
+  shrink_instrument_returns_correlation: 0.5  # Correlation shrinkage
+
+# ============================================================
+# INSTRUMENT CONFIGURATION (Testing Subset)
+# ============================================================
+# Diversified subset from Rob's full 114-instrument portfolio
+instruments:
+  - US10      # US 10-year treasury
+  - US2       # US 2-year treasury
+  - SOFR      # Short-term rates
+  - SP500_micro # US equities
+  - NASDAQ    # Tech equities
+  - EUROSTX   # European equities
+  - CORN      # Agricultural commodity
+  - CRUDE_W   # Energy commodity
+  - GOLD      # Precious metals
+  - EUR       # FX major
+  - GBP       # FX major
+  - JPY       # FX major
+
+# Simplified instrument weights (equal risk contribution)
+instrument_weights:
+  US10: 0.1
+  US2: 0.1
+  SOFR: 0.08
+  SP500_micro: 0.1
+  NASDAQ: 0.1
+  EUROSTX: 0.08
+  CORN: 0.08
+  CRUDE_W: 0.08
+  GOLD: 0.08
+  EUR: 0.06
+  GBP: 0.06
+  JPY: 0.06
+
+instrument_div_multiplier: 2.0  # Reduced from Rob's 2.75 for smaller portfolio
+
+# ============================================================
+# RISK MANAGEMENT
+# ============================================================
+risk_overlay:
+  max_risk_fraction_normal_risk: 1.5  # Reduced from Rob's 1.75
+  max_risk_fraction_stdev_risk: 3.0   # Reduced from Rob's 4.0
+  max_risk_limit_sum_abs_risk: 3.0    # Reduced from Rob's 4.0
+  max_risk_leverage: 15.0              # Reduced from Rob's 20.0
+
+# ============================================================
+# COST AND EXECUTION SETTINGS
+# ============================================================
+use_SR_costs: True
+vol_normalise_currency_costs: True
+multiply_roll_costs_by: 0.5
+
+# Buffer trading to reduce unnecessary turnover
+buffer_method: forecast
+buffer_size: 0.10
+buffer_trade_to_edge: True
+
+# ============================================================
+# CORRELATION AND ESTIMATION SETTINGS
+# ============================================================
+instrument_returns_correlation:
+  func: sysquant.estimators.correlation_over_time.correlation_over_time_for_returns
+  interval_frequency: W
+  frequency: 7D
+  date_method: rolling
+  using_exponent: True
+  ew_lookback: 25  # Rob's 25-week lookback for correlations
+  min_periods: 10
+  cleaning: True
+  offdiag: 0.0
+  rollyears: 5
+  floor_at_zero: False
+  forward_fill_price_index: True
+  clip: 0.99
+
+# Instrument diversification multiplier estimation
+instrument_div_mult_estimate:
+  func: sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list
+  ewma_span: 125
+  dm_max: 2.5

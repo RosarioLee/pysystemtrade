@@ -1,0 +1,413 @@
+# ============================================================================
+# DYNAMIC OPTIMIZATION SYSTEM CONFIGURATION
+# Based on Robert Carver's production-level systematic trading approach
+# Simplified for learning with 25 highly liquid, diversified instruments
+# ============================================================================
+
+# CORE SYSTEM CONFIGURATION
+# --------------------------
+# Controls whether to use estimated or fixed values for key system parameters
+
+# Fixed forecast weights and scaling (like Robert's config)
+use_forecast_weight_estimates: False      # Use manually optimized forecast weights
+use_forecast_div_mult_estimates: False    # Use fixed forecast diversification
+use_forecast_scale_estimates: False       # Use fixed forecast scaling factors
+
+# Dynamic instrument optimization (the "dynamic" part)
+use_instrument_weight_estimates: False    # Use fixed instrument weights (balanced allocation)
+use_instrument_div_mult_estimates: True   # Dynamically estimate diversification multiplier
+
+# ADVANCED VOLATILITY CALCULATION
+# --------------------------------
+# Uses Robert's sophisticated mixed volatility approach
+volatility_calculation:
+  func: "sysquant.estimators.vol.mixed_vol_calc"  # Combined short/long-term volatility
+  days: 35                    # Primary volatility calculation period (Robert's default)
+  min_periods: 10            # Minimum data points needed
+  vol_abs_min: 0.0000000001  # Floor to prevent division by zero
+  slow_vol_years: 20         # Long-term volatility component (20 years)
+  proportion_of_slow_vol: 0.35  # 35% weight on long-term, 65% on short-term
+  backfill: True            # Fill missing data backwards
+
+# COMPLETE TRADING RULES SET
+# ---------------------------
+# Robert's full 39-rule systematic trading arsenal
+trading_rules:
+
+  # === MOMENTUM/TREND FOLLOWING (EWMAC) ===
+  # Exponential Weighted Moving Average Crossovers - core momentum signals
+  momentum4:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
+    other_args:
+      Lfast: 4       # Fast average: 4 days
+      Lslow: 16      # Slow average: 16 days
+
+  momentum8:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
+    other_args:
+      Lfast: 8       # Fast average: 8 days
+      Lslow: 32      # Slow average: 32 days
+
+  momentum16:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
+    other_args:
+      Lfast: 16      # Fast average: 16 days
+      Lslow: 64      # Slow average: 64 days
+
+  momentum32:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
+    other_args:
+      Lfast: 32      # Fast average: 32 days
+      Lslow: 128     # Slow average: 128 days
+
+  momentum64:
+    function: systems.provided.rules.ewmac.ewmac
+    data:
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
+    other_args:
+      Lfast: 64      # Fast average: 64 days
+      Lslow: 256     # Slow average: 256 days
+
+  # === ASSET CLASS TREND FOLLOWING ===
+  # Uses normalized prices across asset classes for relative comparison
+  assettrend2:
+    function: systems.provided.rules.ewmac.ewmac_calc_vol
+    data:
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      Lfast: 2       # Very fast: 2 days
+      Lslow: 8       # Short: 8 days
+
+  assettrend4:
+    function: systems.provided.rules.ewmac.ewmac_calc_vol
+    data:
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      Lfast: 4       # Fast: 4 days
+      Lslow: 16      # Medium: 16 days
+
+  assettrend8:
+    function: systems.provided.rules.ewmac.ewmac_calc_vol
+    data:
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      Lfast: 8       # Medium: 8 days
+      Lslow: 32      # Longer: 32 days
+
+  assettrend16:
+    function: systems.provided.rules.ewmac.ewmac_calc_vol
+    data:
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      Lfast: 16      # Medium-long: 16 days
+      Lslow: 64      # Long: 64 days
+
+  assettrend32:
+    function: systems.provided.rules.ewmac.ewmac_calc_vol
+    data:
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      Lfast: 32      # Long: 32 days
+      Lslow: 128     # Very long: 128 days
+
+  # === BREAKOUT RULES ===
+  # Price channel breakout signals
+  breakout10:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - "rawdata.get_daily_prices"
+    other_args:
+      lookback: 10   # 10-day price high/low breakout
+
+  breakout20:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - "rawdata.get_daily_prices"
+    other_args:
+      lookback: 20   # 20-day price high/low breakout
+
+  breakout40:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - "rawdata.get_daily_prices"
+    other_args:
+      lookback: 40   # 40-day price high/low breakout
+
+  breakout80:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - "rawdata.get_daily_prices"
+    other_args:
+      lookback: 80   # 80-day price high/low breakout
+
+  breakout160:
+    function: systems.provided.rules.breakout.breakout
+    data:
+      - "rawdata.get_daily_prices"
+    other_args:
+      lookback: 160  # 160-day price high/low breakout
+
+  # === CARRY RULES ===
+  # Interest rate and roll yield based signals (mainly for bonds/FX/commodities)
+  carry10:
+    function: systems.provided.rules.carry.carry
+    data:
+      - "rawdata.raw_carry"
+    other_args:
+      smooth_days: 10   # 10-day smoothed carry
+
+  carry30:
+    function: systems.provided.rules.carry.carry
+    data:
+      - "rawdata.raw_carry"
+    other_args:
+      smooth_days: 30   # 30-day smoothed carry
+
+  carry60:
+    function: systems.provided.rules.carry.carry
+    data:
+      - "rawdata.raw_carry"
+    other_args:
+      smooth_days: 60   # 60-day smoothed carry
+
+  # === RELATIVE MOMENTUM ===
+  # Momentum relative to asset class peers
+  relmomentum10:
+    function: systems.provided.rules.rel_mom.relative_momentum
+    data:
+      - "rawdata.get_cumulative_daily_vol_normalised_returns"
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      horizon: 10    # 10-day relative momentum
+
+  relmomentum20:
+    function: systems.provided.rules.rel_mom.relative_momentum
+    data:
+      - "rawdata.get_cumulative_daily_vol_normalised_returns"
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      horizon: 20    # 20-day relative momentum
+
+  relmomentum40:
+    function: systems.provided.rules.rel_mom.relative_momentum
+    data:
+      - "rawdata.get_cumulative_daily_vol_normalised_returns"
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      horizon: 40    # 40-day relative momentum
+
+  # === MEAN REVERSION ===
+  # Cross-sectional mean reversion within asset classes
+  mrinasset1000:
+    function: systems.provided.rules.cs_mr.cross_sectional_mean_reversion
+    data:
+      - "rawdata.get_cumulative_daily_vol_normalised_returns"
+      - "rawdata.normalised_price_for_asset_class"
+    other_args:
+      horizon: 1000  # Very long-term mean reversion (about 4 years)
+
+# FORECAST SCALING AND COMBINATION
+# ---------------------------------
+forecast_cap: 20.0              # Maximum forecast magnitude (±20)
+
+# Fixed forecast scalars (Robert's optimized values)
+forecast_scalars:
+  momentum4: 8.54              # Scale factor for 4/16 momentum
+  momentum8: 5.95              # Scale factor for 8/32 momentum
+  momentum16: 4.10             # Scale factor for 16/64 momentum
+  momentum32: 2.79             # Scale factor for 32/128 momentum
+  momentum64: 1.91             # Scale factor for 64/256 momentum
+  assettrend2: 10.85           # Scale factor for 2/8 asset trend
+  assettrend4: 7.57            # Scale factor for 4/16 asset trend
+  assettrend8: 5.19            # Scale factor for 8/32 asset trend
+  assettrend16: 3.55           # Scale factor for 16/64 asset trend
+  assettrend32: 2.34           # Scale factor for 32/128 asset trend
+  breakout10: 0.60             # Scale factor for 10-day breakout
+  breakout20: 0.67             # Scale factor for 20-day breakout
+  breakout40: 0.70             # Scale factor for 40-day breakout
+  breakout80: 0.73             # Scale factor for 80-day breakout
+  breakout160: 0.74            # Scale factor for 160-day breakout
+  carry10: 27.82               # Scale factor for 10-day carry
+  carry30: 28.38               # Scale factor for 30-day carry
+  carry60: 28.40               # Scale factor for 60-day carry
+  relmomentum10: 61.24         # Scale factor for 10-day relative momentum
+  relmomentum20: 86.51         # Scale factor for 20-day relative momentum
+  relmomentum40: 117.78        # Scale factor for 40-day relative momentum
+  mrinasset1000: 653.25        # Scale factor for cross-sectional mean reversion
+
+# RISK AND POSITION SIZING
+# -------------------------
+percentage_vol_target: 25.0     # 25% annual volatility target (Robert's institutional level)
+notional_trading_capital: 500000  # Starting capital: $500,000
+base_currency: "USD"            # Base currency for calculations
+
+# INSTRUMENT UNIVERSE AND WEIGHTS
+# --------------------------------
+# Carefully balanced 25-instrument universe across major asset classes
+instrument_weights:
+  # EQUITY INDICES (0.35 total allocation)
+  DOW: 0.0124        # US large cap
+  AEX: 0.0067        # Netherlands
+  CAC: 0.0067        # France
+  DAX: 0.0067        # Germany
+  EUROSTX: 0.0067    # European stocks
+  FTSE: 0.0067       # UK
+  NIKKEI: 0.0036     # Japan
+
+  # BONDS (0.25 total allocation)
+  BUND: 0.0035       # German 10Y
+  GILT: 0.0035       # UK 10Y
+  US10: 0.0035       # US 10Y
+  US2: 0.0051        # US 2Y
+  US5: 0.0051        # US 5Y
+  US20: 0.0051       # US 20Y
+  US30: 0.0051       # US 30Y
+  OAT: 0.0067        # French 10Y
+  BTP: 0.0049        # Italian 10Y
+
+  # COMMODITIES (0.25 total allocation)
+  GOLD: 0.0114       # Precious metals
+  SILVER: 0.0114     # Precious metals
+  COPPER: 0.0114     # Industrial metals
+  CRUDE_W: 0.0183    # Energy
+  GAS_US: 0.0122     # Energy
+  CORN: 0.0112       # Agriculture
+  WHEAT: 0.0057      # Agriculture
+
+  # CURRENCIES (0.15 total allocation)
+  AUD: 0.0051        # Australian Dollar
+  EUR: 0.0051        # Euro
+  GBP: 0.0051        # British Pound
+  JPY: 0.0051        # Japanese Yen
+  CHF: 0.0051        # Swiss Franc
+
+# DEFAULT FORECAST WEIGHTS
+# ------------------------
+# Balanced allocation across rule types for each instrument
+forecast_weights:
+  # Standard allocation for major liquid instruments
+  _default_weights:
+    # Momentum rules (40% total)
+    momentum4: 0.05          # 5% to fast momentum
+    momentum8: 0.08          # 8% to medium momentum
+    momentum16: 0.10         # 10% to medium-long momentum
+    momentum32: 0.12         # 12% to long momentum
+    momentum64: 0.05         # 5% to very long momentum
+
+    # Asset trend rules (25% total)
+    assettrend2: 0.03        # 3% to very fast trend
+    assettrend4: 0.05        # 5% to fast trend
+    assettrend8: 0.07        # 7% to medium trend
+    assettrend16: 0.10       # 10% to long trend
+
+    # Breakout rules (20% total)
+    breakout10: 0.03         # 3% to fast breakout
+    breakout20: 0.04         # 4% to medium breakout
+    breakout40: 0.05         # 5% to medium-long breakout
+    breakout80: 0.04         # 4% to long breakout
+    breakout160: 0.04        # 4% to very long breakout
+
+    # Carry rules (10% total)
+    carry10: 0.03            # 3% to fast carry
+    carry30: 0.04            # 4% to medium carry
+    carry60: 0.03            # 3% to long carry
+
+    # Relative momentum rules (3% total)
+    relmomentum10: 0.01      # 1% to fast relative momentum
+    relmomentum20: 0.01      # 1% to medium relative momentum
+    relmomentum40: 0.01      # 1% to long relative momentum
+
+    # Mean reversion (2% total)
+    mrinasset1000: 0.02      # 2% to cross-sectional mean reversion
+
+# DYNAMIC OPTIMIZATION SETTINGS
+# ------------------------------
+# Controls how the system adapts to changing market conditions
+
+# Instrument diversification multiplier (dynamically estimated)
+instrument_div_multiplier: 2.75  # Base diversification multiplier
+
+# Risk overlay for extreme market conditions
+risk_overlay:
+  max_risk_fraction_normal_risk: 1.75   # Maximum risk in normal conditions
+  max_risk_fraction_stdev_risk: 4.0     # Maximum risk in stressed conditions
+  max_risk_limit_sum_abs_risk: 4.0      # Maximum total absolute risk
+  max_risk_leverage: 20.0               # Maximum leverage allowed
+
+# Position management and buffering
+buffer_settings:
+  buffer_size: 0.10            # Only trade if position changes by 10%
+  max_vs_average_forecast: 2.0 # Don't let forecasts get too extreme
+
+# ATTENUATION (Volatility Scaling)
+# ---------------------------------
+# Rules that get volatility-adjusted position sizing during high volatility periods
+use_attenuation:
+  - 'breakout10'      # Scale down breakout rules in high volatility
+  - 'breakout20'
+  - 'breakout40'
+  - 'breakout80'
+  - 'breakout160'
+  - 'momentum4'       # Scale down fast momentum in high volatility
+  - 'momentum8'
+  - 'relmomentum10'   # Scale down relative momentum
+  - 'relmomentum20'
+  - 'relmomentum40'
+
+# BACKTESTING CONFIGURATION
+# --------------------------
+backtest:
+  start_date: "2010-01-01"      # Start when sufficient data available
+  end_date: "2025-12-31"        # Run through current period
+
+  # Out-of-sample testing
+  out_of_sample_start: "2020-01-01"   # Reserve recent years for final validation
+
+  # Data requirements
+  min_data_in_backtest: 250     # Need at least 250 days per instrument
+
+# TRANSACTION COSTS (Realistic Estimates)
+# ----------------------------------------
+# Costs based on typical futures/ETF trading
+costs:
+  # Futures
+  SP500micro: 0.005        # 0.5 basis points (very liquid)
+  NASDAQmicro: 0.005       # 0.5 basis points
+  DOW: 0.008               # 0.8 basis points
+  US10: 0.003              # 0.3 basis points (bonds are cheaper)
+  US2: 0.003               # 0.3 basis points
+  US30: 0.004              # 0.4 basis points
+  BUND: 0.004              # 0.4 basis points
+  EUROSTX: 0.008           # 0.8 basis points
+  NIKKEI: 0.010            # 1.0 basis points
+  FTSE: 0.008              # 0.8 basis points
+  GILT: 0.005              # 0.5 basis points
+  GOLDmicro: 0.008         # 0.8 basis points
+  CRUDEW: 0.010            # 1.0 basis points (commodities more expensive)
+  SILVER: 0.012            # 1.2 basis points
+  COPPER: 0.015            # 1.5 basis points
+
+  # FX (spot or forwards)
+  EURUSD: 0.002            # 0.2 basis points (major pairs very liquid)
+  GBPUSD: 0.003            # 0.3 basis points
+  JPYUSD: 0.003            # 0.3 basis points
+  AUDUSD: 0.004            # 0.4 basis points
+
+# DEBUGGING AND LOGGING
+# ----------------------
+logging_level: "INFO"        # Set to DEBUG for detailed output
+cache_results: True          # Cache intermediate calculations
+save_backtest_data: True     # Save detailed backtest results for analysis
