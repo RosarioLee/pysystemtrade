@@ -228,9 +228,15 @@ class DynamicSystemBacktester:
 
             print(f"✓ Summary saved: {summary_file}")
 
+            # Generate performance plots
             plot_files = self.create_performance_plots(output_dir)
             if plot_files[0]:
                 print(f"✓ Plots generated successfully")
+
+            # Generate advanced position and risk analysis
+            advanced_plots = self.create_position_and_risk_plots(output_dir)
+            if advanced_plots[0]:
+                print(f"✓ Advanced position & risk analysis generated")
 
         except Exception as e:
             print(f"❌ Error saving results: {str(e)}")
@@ -347,6 +353,233 @@ class DynamicSystemBacktester:
             print(f"❌ Error creating plots: {e}")
             return None, None
 
+    def create_position_and_risk_plots(self, output_dir='project_dynamic/results'):
+        """
+        Create advanced position evolution and risk metrics plots
+        Following Robert Carver's systematic trading analysis methodology
+        """
+        if not self.results:
+            print("❌ No results to plot")
+            return
+
+        print(f"\n📊 CREATING POSITION & RISK ANALYSIS PLOTS")
+        print(f"{'─' * 50}")
+
+        try:
+            import matplotlib.pyplot as plt
+            import matplotlib.dates as mdates
+            from matplotlib.colors import ListedColormap
+            import numpy as np
+
+            # Get data
+            positions = self.results['optimized_positions']
+            weights = self.results['optimized_weights']
+            portfolio_returns = self.results['portfolio_returns']
+
+            # Create timestamp for file naming
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+            # Set up professional styling
+            plt.style.use('default')
+            fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
+            fig.suptitle('Robert Carver Dynamic System - Position Evolution & Risk Analysis',
+                         fontsize=16, fontweight='bold', y=0.98)
+
+            # ======== 1. POSITION EVOLUTION HEATMAP ========
+            # Sample positions every 30 days for visibility
+            positions_sampled = positions.iloc[::30, :]
+
+            # Create heatmap of positions over time
+            im1 = ax1.imshow(positions_sampled.T, aspect='auto', cmap='RdBu_r',
+                             interpolation='nearest', alpha=0.8)
+
+            ax1.set_title('Position Evolution Over Time (Contract Sizes)',
+                          fontsize=12, fontweight='semibold', pad=15)
+            ax1.set_xlabel('Time (sampled every 30 days)', fontsize=10)
+            ax1.set_ylabel('Instruments', fontsize=10)
+
+            # Set y-axis labels to instrument names
+            ax1.set_yticks(range(len(positions.columns)))
+            ax1.set_yticklabels(positions.columns, fontsize=9)
+
+            # Set x-axis labels to dates (every 2 years)
+            date_indices = range(0, len(positions_sampled), len(positions_sampled) // 8)
+            ax1.set_xticks(date_indices)
+            ax1.set_xticklabels([positions_sampled.index[i].strftime('%Y')
+                                 for i in date_indices], rotation=45, fontsize=9)
+
+            # Add colorbar
+            cbar1 = plt.colorbar(im1, ax=ax1, shrink=0.8)
+            cbar1.set_label('Position Size (Contracts)', fontsize=9)
+
+            # ======== 2. PORTFOLIO CONCENTRATION OVER TIME ========
+            # Calculate concentration metrics
+            abs_weights = weights.abs()
+            concentration = (abs_weights ** 2).sum(axis=1)  # Herfindahl concentration index
+            num_positions = (abs_weights > 0.01).sum(axis=1)  # Number of significant positions
+
+            # Plot concentration over time
+            ax2.plot(concentration.index, concentration.values,
+                     linewidth=1.5, color='#E74C3C', label='Concentration Index')
+            ax2_twin = ax2.twinx()
+            ax2_twin.plot(num_positions.index, num_positions.values,
+                          linewidth=1.5, color='#3498DB', label='Active Positions', linestyle='--')
+
+            ax2.set_title('Portfolio Concentration Evolution', fontsize=12, fontweight='semibold', pad=15)
+            ax2.set_xlabel('Year', fontsize=10)
+            ax2.set_ylabel('Concentration Index', color='#E74C3C', fontsize=10)
+            ax2_twin.set_ylabel('Number of Active Positions', color='#3498DB', fontsize=10)
+
+            ax2.grid(True, alpha=0.3)
+            ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax2.xaxis.set_major_locator(mdates.YearLocator(3))
+
+            # Combined legend
+            lines1, labels1 = ax2.get_legend_handles_labels()
+            lines2, labels2 = ax2_twin.get_legend_handles_labels()
+            ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+
+            # ======== 3. ROLLING VOLATILITY & RISK METRICS ========
+            # Calculate rolling metrics (quarterly windows)
+            rolling_vol = portfolio_returns.percent.rolling(window=63).std() * np.sqrt(256)  # 63 = ~3 months
+            rolling_sharpe = portfolio_returns.percent.rolling(window=252).mean() * 256 / (
+                    portfolio_returns.percent.rolling(window=252).std() * np.sqrt(256))
+
+            # Plot volatility over time
+            ax3.plot(rolling_vol.index, rolling_vol.values,
+                     linewidth=1.5, color='#9B59B6', label='Rolling Volatility (3M)')
+
+            # Add target volatility line
+            target_vol = 20.0  # From your config
+            ax3.axhline(y=target_vol, color='#F39C12', linestyle='--', linewidth=2,
+                        label=f'Target Vol ({target_vol}%)', alpha=0.8)
+
+            ax3.set_title('Rolling Risk Metrics', fontsize=12, fontweight='semibold', pad=15)
+            ax3.set_xlabel('Year', fontsize=10)
+            ax3.set_ylabel('Annualized Volatility (%)', fontsize=10)
+            ax3.grid(True, alpha=0.3)
+            ax3.legend(loc='upper right')
+            ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax3.xaxis.set_major_locator(mdates.YearLocator(3))
+
+            # ======== 4. ASSET CLASS ALLOCATION OVER TIME ========
+            # Group instruments by asset class for allocation analysis
+            asset_classes = {
+                'Interest_Rates': ['US10', 'US2', 'SOFR'],
+                'Equities': ['SP500_micro', 'NASDAQ', 'EUROSTX'],
+                'Commodities': ['CORN', 'CRUDE_W', 'GOLD'],
+                'FX': ['EUR', 'GBP', 'JPY']
+            }
+
+            # Calculate asset class weights over time
+            asset_class_weights = {}
+            for asset_class, instruments in asset_classes.items():
+                available_instruments = [inst for inst in instruments if inst in weights.columns]
+                if available_instruments:
+                    asset_class_weights[asset_class] = weights[available_instruments].abs().sum(axis=1)
+
+            # Create stacked area plot
+            asset_df = pd.DataFrame(asset_class_weights)
+            asset_df = asset_df.fillna(0)
+
+            # Sample every 60 days for cleaner visualization
+            asset_df_sampled = asset_df.iloc[::60, :]
+
+            colors = ['#3498DB', '#E74C3C', '#F39C12', '#27AE60']
+            ax4.stackplot(asset_df_sampled.index,
+                          asset_df_sampled['Interest_Rates'],
+                          asset_df_sampled['Equities'],
+                          asset_df_sampled['Commodities'],
+                          asset_df_sampled['FX'],
+                          labels=['Interest Rates', 'Equities', 'Commodities', 'FX'],
+                          colors=colors, alpha=0.8)
+
+            ax4.set_title('Dynamic Asset Class Allocation', fontsize=12, fontweight='semibold', pad=15)
+            ax4.set_xlabel('Year', fontsize=10)
+            ax4.set_ylabel('Total Weight by Asset Class', fontsize=10)
+            ax4.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+            ax4.grid(True, alpha=0.3)
+            ax4.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax4.xaxis.set_major_locator(mdates.YearLocator(3))
+
+            # Adjust layout
+            plt.tight_layout()
+            plt.subplots_adjust(top=0.94, hspace=0.3, wspace=0.3)
+
+            # Save the comprehensive analysis
+            analysis_filename = f"{output_dir}/position_risk_analysis_{timestamp}.png"
+            plt.savefig(analysis_filename, dpi=300, bbox_inches='tight',
+                        facecolor='white', edgecolor='none')
+            print(f"✓ Position & Risk analysis saved: {analysis_filename}")
+
+            # Also save as PDF
+            analysis_pdf = f"{output_dir}/position_risk_analysis_{timestamp}.pdf"
+            plt.savefig(analysis_pdf, dpi=300, bbox_inches='tight',
+                        facecolor='white', edgecolor='none')
+            print(f"✓ PDF version saved: {analysis_pdf}")
+
+            # Display the plot
+            plt.show()
+
+            return analysis_filename, analysis_pdf
+
+        except ImportError as e:
+            print(f"❌ Required libraries not available: {e}")
+            print("   Install with: pip install matplotlib numpy")
+            return None, None
+
+        except Exception as e:
+            print(f"❌ Error creating position/risk plots: {e}")
+            return None, None
+
+    def print_advanced_risk_analysis(self):
+        """
+        Print detailed risk analysis following Robert Carver's risk-first approach
+        """
+        if not self.results:
+            return
+
+        print(f"\n🔍 ADVANCED RISK ANALYSIS")
+        print(f"{'─' * 50}")
+
+        try:
+            positions = self.results['optimized_positions']
+            weights = self.results['optimized_weights']
+            portfolio_returns = self.results['portfolio_returns'].percent
+
+            # Position concentration analysis
+            daily_total_positions = positions.abs().sum(axis=1)
+            avg_daily_exposure = daily_total_positions.mean()
+            max_daily_exposure = daily_total_positions.max()
+
+            print(f"📍 POSITION METRICS")
+            print(f"   Average daily positions: {avg_daily_exposure:.1f} contracts")
+            print(f"   Maximum daily positions: {max_daily_exposure:.0f} contracts")
+            print(f"   Position concentration:  {(positions != 0).sum(axis=1).mean():.1f} instruments/day")
+
+            # Volatility analysis
+            rolling_vol_quarterly = portfolio_returns.rolling(63).std() * np.sqrt(256)
+            vol_of_vol = rolling_vol_quarterly.std()
+
+            print(f"\n⚡ VOLATILITY ANALYSIS")
+            print(f"   Target volatility:       20.0%")
+            print(f"   Achieved volatility:     {portfolio_returns.std() * np.sqrt(256):.1f}%")
+            print(f"   Volatility consistency:  {vol_of_vol:.1f}% (vol of vol)")
+            print(f"   Vol control efficiency:  {20.0 / (portfolio_returns.std() * np.sqrt(256)):.2f}x")
+
+            # Dynamic rebalancing frequency
+            position_changes = positions.diff().abs().sum(axis=1)
+            rebalance_days = (position_changes > 0).sum()
+            rebalance_frequency = rebalance_days / len(positions) * 100
+
+            print(f"\n🔄 DYNAMIC REBALANCING")
+            print(f"   Rebalancing frequency:   {rebalance_frequency:.1f}% of trading days")
+            print(f"   Total rebalance days:    {rebalance_days} out of {len(positions)}")
+            print(f"   Avg changes per rebal:   {position_changes[position_changes > 0].mean():.1f} contracts")
+
+        except Exception as e:
+            print(f"⚠ Risk analysis calculation error: {e}")
+
     def compare_with_static_system(self):
         """Compare dynamic optimization with traditional static system"""
         print(f"\n🔍 DYNAMIC vs STATIC COMPARISON")
@@ -401,6 +634,9 @@ def main():
 
     # Analyze results
     backtester.analyze_results()
+
+    # Print advanced risk metrics
+    backtester.print_advanced_risk_analysis()
 
     # Save results (includes plotting now)
     backtester.save_results()
