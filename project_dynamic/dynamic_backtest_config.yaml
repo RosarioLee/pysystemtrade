@@ -7,13 +7,40 @@
 # SYSTEM IDENTIFICATION
 # ============================================================
 use_forecast_weight_estimates: False
-use_forecast_div_mult_estimates: False
+use_forecast_div_mult_estimates: True
 use_instrument_weight_estimates: False
 use_instrument_div_mult_estimates: True
 use_forecast_scale_estimates: False
 
 # Start date for backtesting
 start_date: 2000-01-19
+
+# ============================================================
+# FORECAST DIVERSIFICATION MULTIPLIER ESTIMATION - CORRECTED
+# ============================================================
+forecast_div_mult_estimate:
+  func: sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list
+  ewma_span: 125                         # 125-day correlation span
+  dm_max: 2.5                           # Maximum multiplier (safety cap)
+
+# ============================================================
+# FORECAST CORRELATION ESTIMATION - WORKING CONFIGURATION
+# ============================================================
+forecast_correlation_estimate:
+  pool_instruments: True
+  func: sysquant.estimators.pooled_correlation.pooled_correlation_estimator
+  frequency: "W"
+  date_method: "expanding"
+  using_exponent: True
+  ew_lookback: 250
+  min_periods: 20
+  cleaning: True
+  rollyears: 20
+  floor_at_zero: True
+  forward_fill_data: True
+
+
+
 
 # ============================================================
 # VOLATILITY CALCULATION
@@ -23,8 +50,8 @@ volatility_calculation:
   days: 35
   min_periods: 10
   vol_abs_min: 0.0000000001
-  slow_vol_years: 20
-  proportion_of_slow_vol: 0.35
+  slow_vol_years: 10
+  proportion_of_slow_vol: 0.3
   backfill: True
 
 # ============================================================
@@ -98,775 +125,13 @@ forecast_scalars:
 # Following Robert Carver's Asset-Class Specific Approach
 # ============================================================
 forecast_weights:
-  # === BONDS & RATES (16 instruments) ===
-  US10:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  US2:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  US20:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  US30:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  US5:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  SOFR:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  FED:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  BUND:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  BOBL:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  SHATZ:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  BUXL:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  BTP:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  BTP3:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  OAT:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  EURIBOR:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-  JGB-SGX-mini:
-    breakout10: 0.01
-    breakout40: 0.04
-    breakout160: 0.05
-    momentum16: 0.02
-    momentum64: 0.03
-    carry60: 0.85
-
-  # === EQUITIES (29 instruments) ===
-  SP500_micro:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  NASDAQ_micro:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  RUSSELL:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  R1000:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  DOW:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  EUROSTX:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  EUROSTX-LARGE:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  EURO600:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  CAC:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  DAX:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  AEX:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  SMI:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  MIB:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  IBEX_mini:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  FTSE100:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  NIKKEI:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  TOPIX:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  KOSPI_mini:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  HANG_mini:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  FTSECHINAA:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  FTSECHINAH:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  MSCIASIA:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  MSCIWORLD:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  BOVESPA:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  SP400:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  RUSSELL_mini:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  DOW_mini:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  NASDAQ:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  SP500:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-
-  # === FX (12 instruments) ===
-  EUR:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  GBP:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  JPY:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  AUD:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  CAD:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  CHF:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  NOK:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  SEK:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  NZD:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  MXP:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  SGD:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-  INR:
-    breakout10: 0.05
-    breakout40: 0.10
-    breakout160: 0.15
-    momentum16: 0.10
-    momentum64: 0.15
-    carry60: 0.45
-
-  # === ENERGY COMMODITIES (6 instruments) ===
-  CRUDE_W:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  BRENT-LAST:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  GAS_US:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  HEATOIL:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  GASOILINE:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  ETHANOL:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-
-  # === PRECIOUS METALS (4 instruments) ===
-  GOLD:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  SILVER:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  PLAT:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  PALLAD:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-
-  # === INDUSTRIAL METALS (3 instruments) ===
-  COPPER:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  ALUMINIUM:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  IRON:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-
-  # === AGRICULTURAL - GRAINS (5 instruments) ===
-  CORN:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-  WHEAT:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-  SOYBEAN:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-  OATIES:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-  RICE:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-
-  # === AGRICULTURAL - SOFTS (5 instruments) ===
-  COTTON:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  SUGAR11:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  COFFEE:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  COCOA:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  OJ:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-
-  # === AGRICULTURAL - LIVESTOCK (3 instruments) ===
-  LEANHOG:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  LIVECOW:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  FEEDCOW:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-
-  # === AGRICULTURAL - OTHER (10 instruments) ===
-  LUMBER-new:
-    breakout10: 0.20
-    breakout40: 0.25
-    breakout160: 0.30
-    momentum16: 0.10
-    momentum64: 0.10
-    carry60: 0.05
-  BBCOMM:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  SOYMEAL:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  SOYOIL:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  REDWHEAT:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-  MILLWHEAT:
-    breakout10: 0.10
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.15
-  ROBUSTA:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  SUGAR11:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-  CANOLA:
-    breakout10: 0.12
-    breakout40: 0.18
-    breakout160: 0.22
-    momentum16: 0.16
-    momentum64: 0.22
-    carry60: 0.10
-
-  # === VOLATILITY (3 instruments) ===
-  VIX:
-    breakout10: 0.20
-    breakout40: 0.25
-    breakout160: 0.30
-    momentum16: 0.12
-    momentum64: 0.13
-    carry60: 0.00
-  V2X:
-    breakout10: 0.20
-    breakout40: 0.25
-    breakout160: 0.30
-    momentum16: 0.12
-    momentum64: 0.13
-    carry60: 0.00
-
-  # === CRYPTO (2 instruments) ===
-  BITCOIN:
-    breakout10: 0.20
-    breakout40: 0.25
-    breakout160: 0.30
-    momentum16: 0.12
-    momentum64: 0.13
-    carry60: 0.00
-  ETHEREUM:
-    breakout10: 0.20
-    breakout40: 0.25
-    breakout160: 0.30
-    momentum16: 0.12
-    momentum64: 0.13
-    carry60: 0.00
-
-  # === US SECTORS (10 instruments) ===
-  US-TECH:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-HEALTH:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-FINANCE:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-ENERGY:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-DISCRETE:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-STAPLES:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-INDUSTRY:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-MATERIAL:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-UTILS:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-  US-PROPERTY:
-    breakout10: 0.15
-    breakout40: 0.20
-    breakout160: 0.25
-    momentum16: 0.15
-    momentum64: 0.20
-    carry60: 0.05
-
-
+  # Apply these weights to ALL instruments
+  breakout10: 0.10
+  breakout40: 0.15
+  breakout160: 0.20
+  momentum16: 0.20
+  momentum64: 0.25
+  carry60: 0.10
 
 forecast_div_multiplier: 1.75
 
@@ -878,13 +143,24 @@ notional_trading_capital: 150000  # Reduced from Rob's 500k for testing
 base_currency: USD
 
 # ============================================================
-# DYNAMIC OPTIMIZATION PARAMETERS (Key Section!)
+# DYNAMIC OPTIMIZATION PARAMETERS - CORRECTED VALUES
 # ============================================================
 small_system:
-  shadow_cost: 50  # Cost penalty for excessive turnover
-  cost_multiplier: 1.0  # Multiply trading costs by this factor
-  tracking_error_buffer: 0.0125  # Buffer to maintain system coherence
-  shrink_instrument_returns_correlation: 0.5  # Correlation shrinkage
+  shadow_cost: 50                    # Correct value from latest pysystemtrade
+  cost_multiplier: 1.0              # Standard cost multiplier
+  tracking_error_buffer: 0.0125     # Tracking error buffer (NOT shadow cost)
+  shrink_instrument_returns_correlation: 0.5  # Correlation shrinkage factor
+  max_risk_fraction_normal_risk: 0.999999     # Risk control parameters
+  max_risk_fraction_stdev_risk: 5.0
+
+# ============================================================
+# POSITION BUFFERING - CORRECTED FROM DEFAULTS
+# ============================================================
+buffer_method: forecast
+buffer_size: 0.10
+buffer_trade_to_edge: True
+
+
 
 # ============================================================
 # INSTRUMENT CONFIGURATION (Robert's Full 114-instrument Portfolio)
@@ -1002,7 +278,6 @@ instruments:
   - REDWHEAT
   - MILLWHEAT
   - ROBUSTA
-  - SUGAR11
   - CANOLA
 
   # === VOLATILITY (3 instruments) ===
@@ -1125,7 +400,6 @@ instrument_weights:
   REDWHEAT: 0.0040
   MILLWHEAT: 0.0040
   ROBUSTA: 0.0050
-  SUGAR11: 0.0050
   CANOLA: 0.0050
 
   # === VOLATILITY (3 instruments) ===
@@ -1156,33 +430,46 @@ instrument_div_multiplier: 2.75  # Rob's full IDM
 # RISK MANAGEMENT
 # ============================================================
 risk_overlay:
-  max_risk_fraction_normal_risk: 1.75  # Rob's full values
-  max_risk_fraction_stdev_risk: 4.0
-  max_risk_limit_sum_abs_risk: 4.0
-  max_risk_leverage: 20.0
+  max_risk_fraction_normal_risk: 1.0     # Normal risk fraction limit
+  max_risk_fraction_stdev_risk: 2.0      # Stress risk fraction limit
+  max_risk_limit_sum_abs_risk: 3.0       # Absolute risk sum limit
+  max_risk_leverage: 8.0                 # Maximum system leverage
+
+  # NEW: Dynamic risk scaling parameters
+  risk_scaling_method: "dynamic"          # Use dynamic vs static scaling
+  risk_lookback_days: 125                # Risk estimation lookback
+  risk_target_correlation: 0.2           # Target correlation for risk scaling
+
+# Optimization constraints for small system
+optimization_constraints:
+  max_position_size_risk_fraction: 0.15  # No single position > 15% risk
+  min_position_size_threshold: 0.01      # Minimum meaningful position size
+  integer_position_rounding: True        # Enforce integer contract positions
+
+  # Speed limits (prevent overtrading)
+  max_portfolio_turnover_per_day: 0.5    # Max 50% portfolio turnover/day
+  position_change_speed_limit: 10.0      # Max 10 contract changes per instrument
 
 # ============================================================
 # COST AND EXECUTION SETTINGS
 # ============================================================
-use_SR_costs: True
+use_SR_costs: False
 vol_normalise_currency_costs: True
 multiply_roll_costs_by: 0.5
 
-# Buffer trading to reduce unnecessary turnover
-buffer_method: forecast
-buffer_size: 0.10
-buffer_trade_to_edge: True
+# Simple uniform cost to prevent "Trade costs are zero" error
+percentage_cost_per_trade: 0.01  # 1 basis point per trade
 
 # ============================================================
 # CORRELATION AND ESTIMATION SETTINGS
 # ============================================================
 instrument_returns_correlation:
   func: sysquant.estimators.correlation_over_time.correlation_over_time_for_returns
-  interval_frequency: W
-  frequency: 7D
-  date_method: rolling
+  interval_frequency: "W"
+  frequency: "7D"
+  date_method: "rolling"
   using_exponent: True
-  ew_lookback: 25  # Rob's 25-week lookback for correlations
+  ew_lookback: 75
   min_periods: 10
   cleaning: True
   offdiag: 0.0
@@ -1191,8 +478,39 @@ instrument_returns_correlation:
   forward_fill_price_index: True
   clip: 0.99
 
+
 # Instrument diversification multiplier estimation
 instrument_div_mult_estimate:
   func: sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list
   ewma_span: 125
   dm_max: 2.5
+
+# ============================================================
+# PART 3: PORTFOLIO OPTIMIZATION ENGINE CONFIGURATION
+# ============================================================
+
+# Advanced portfolio optimization (Robert's latest approach)
+instrument_weight_estimate:
+  func: sysquant.optimisation.generic_optimiser.genericOptimiser
+  frequency: "W"                        # Weekly reoptimization
+  date_method: "rolling"                # Rolling window optimization
+  rollyears: 3                          # 3-year optimization window
+  method: "handcraft"                   # Robert's preferred method
+
+  # Optimization parameters
+  cleaning: True                        # Clean outliers from data
+  equalise_gross: False                 # Don't force equal gross exposure
+  equalise_SR: True                     # Equalize Sharpe ratios
+  equalise_vols: True                   # Equalize volatilities
+
+  # Risk targeting
+  ann_target_SR: 0.5                    # Target 0.5 annual Sharpe ratio
+  ceiling_cost_SR: 0.13                # Speed limit: max cost 0.13 SR units
+
+  # Shrinkage parameters (crucial for stability)
+  shrinkage_SR: 0.9                     # Heavy shrinkage toward average SR
+  shrinkage_corr: 0.5                   # Correlation shrinkage
+
+  # Cost integration
+  apply_cost_weight: True               # Include costs in optimization
+  cost_multiplier: 1.0                  # Cost penalty multiplier
