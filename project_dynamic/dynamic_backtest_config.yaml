@@ -8,7 +8,7 @@
 # ============================================================
 use_forecast_weight_estimates: False
 use_forecast_div_mult_estimates: True
-use_instrument_weight_estimates: False
+use_instrument_weight_estimates: True
 use_instrument_div_mult_estimates: True
 use_forecast_scale_estimates: False
 
@@ -442,13 +442,9 @@ risk_overlay:
 
 # Optimization constraints for small system
 optimization_constraints:
-  max_position_size_risk_fraction: 0.15  # No single position > 15% risk
-  min_position_size_threshold: 0.01      # Minimum meaningful position size
-  integer_position_rounding: True        # Enforce integer contract positions
-
-  # Speed limits (prevent overtrading)
-  max_portfolio_turnover_per_day: 0.5    # Max 50% portfolio turnover/day
-  position_change_speed_limit: 10.0      # Max 10 contract changes per instrument
+  max_position_size_risk_fraction: 0.10
+  integer_position_rounding: True
+  max_portfolio_turnover_per_day: 0.15
 
 # ============================================================
 # COST AND EXECUTION SETTINGS
@@ -492,25 +488,12 @@ instrument_div_mult_estimate:
 # Advanced portfolio optimization (Robert's latest approach)
 instrument_weight_estimate:
   func: sysquant.optimisation.generic_optimiser.genericOptimiser
-  frequency: "W"                        # Weekly reoptimization
-  date_method: "rolling"                # Rolling window optimization
-  rollyears: 3                          # 3-year optimization window
-  method: "handcraft"                   # Robert's preferred method
-
-  # Optimization parameters
-  cleaning: True                        # Clean outliers from data
-  equalise_gross: False                 # Don't force equal gross exposure
-  equalise_SR: True                     # Equalize Sharpe ratios
-  equalise_vols: True                   # Equalize volatilities
-
-  # Risk targeting
-  ann_target_SR: 0.5                    # Target 0.5 annual Sharpe ratio
-  ceiling_cost_SR: 0.13                # Speed limit: max cost 0.13 SR units
-
-  # Shrinkage parameters (crucial for stability)
-  shrinkage_SR: 0.9                     # Heavy shrinkage toward average SR
-  shrinkage_corr: 0.5                   # Correlation shrinkage
-
-  # Cost integration
-  apply_cost_weight: True               # Include costs in optimization
-  cost_multiplier: 1.0                  # Cost penalty multiplier
+  frequency: "W"
+  date_method: "rolling"
+  rollyears: 3
+  method: "handcraft"
+  ann_target_SR: 0.5
+  shrinkage_SR: 0.9
+  shrinkage_corr: 0.5
+  apply_cost_weight: True
+  ceiling_cost_SR: 0.13
