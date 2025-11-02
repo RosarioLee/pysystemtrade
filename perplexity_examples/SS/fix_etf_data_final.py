@@ -10,20 +10,24 @@ def create_complete_etf_data_final(symbol, start_date="2020-01-01"):
 
     # Create formatted data with ALL required columns in EXACT order as futures
     formatted_data = pd.DataFrame()
-    formatted_data['CARRY'] = data['Adj Close']  # Same as price for ETFs
-    formatted_data['CARRY_CONTRACT'] = 20991200  # Dummy far future contract
-    formatted_data['PRICE'] = data['Adj Close']  # Main price column
-    formatted_data['PRICE_CONTRACT'] = 20991200  # Same dummy contract
-    formatted_data['FORWARD'] = data['Adj Close']  # MISSING COLUMN - same as price for ETFs
-    formatted_data['FORWARD_CONTRACT'] = 20991200  # Same dummy contract
+    formatted_data["CARRY"] = data["Adj Close"]  # Same as price for ETFs
+    formatted_data["CARRY_CONTRACT"] = 20991200  # Dummy far future contract
+    formatted_data["PRICE"] = data["Adj Close"]  # Main price column
+    formatted_data["PRICE_CONTRACT"] = 20991200  # Same dummy contract
+    formatted_data["FORWARD"] = data[
+        "Adj Close"
+    ]  # MISSING COLUMN - same as price for ETFs
+    formatted_data["FORWARD_CONTRACT"] = 20991200  # Same dummy contract
 
-    formatted_data.index.name = 'DATETIME'
+    formatted_data.index.name = "DATETIME"
     return formatted_data
 
 
 # Find correct data path
 pysystemtrade_root = os.path.dirname(os.getcwd())
-correct_data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+correct_data_path = os.path.join(
+    pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+)
 
 print("=== Creating Final Complete ETF Data ===")
 
@@ -34,7 +38,8 @@ hyd_data = create_complete_etf_data_final("HYD")
 print(f"IVV data columns: {list(ivv_data.columns)}")
 print(f"HYD data columns: {list(hyd_data.columns)}")
 print(
-    f"Column order matches futures: {list(ivv_data.columns) == ['CARRY', 'CARRY_CONTRACT', 'PRICE', 'PRICE_CONTRACT', 'FORWARD', 'FORWARD_CONTRACT']}")
+    f"Column order matches futures: {list(ivv_data.columns) == ['CARRY', 'CARRY_CONTRACT', 'PRICE', 'PRICE_CONTRACT', 'FORWARD', 'FORWARD_CONTRACT']}"
+)
 
 # Save to correct location
 ivv_path = os.path.join(correct_data_path, "IVV.csv")

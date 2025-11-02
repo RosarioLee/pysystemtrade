@@ -11,7 +11,9 @@ def download_and_format_etf_data(symbols, start_date="2020-01-01"):
     current_dir = os.getcwd()
     # Go up from perplexity_examples to pysystemtrade root
     pysystemtrade_root = os.path.dirname(current_dir)
-    data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+    data_path = os.path.join(
+        pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+    )
 
     print(f"Creating data directory: {data_path}")
     os.makedirs(data_path, exist_ok=True)
@@ -22,16 +24,18 @@ def download_and_format_etf_data(symbols, start_date="2020-01-01"):
 
         # Format with all required columns in correct order
         formatted_data = pd.DataFrame()
-        formatted_data['CARRY'] = data['Adj Close']
-        formatted_data['CARRY_CONTRACT'] = 20991200
-        formatted_data['PRICE'] = data['Adj Close']
-        formatted_data['PRICE_CONTRACT'] = 20991200
-        formatted_data['FORWARD'] = data['Adj Close']
-        formatted_data['FORWARD_CONTRACT'] = 20991200
+        formatted_data["CARRY"] = data["Adj Close"]
+        formatted_data["CARRY_CONTRACT"] = 20991200
+        formatted_data["PRICE"] = data["Adj Close"]
+        formatted_data["PRICE_CONTRACT"] = 20991200
+        formatted_data["FORWARD"] = data["Adj Close"]
+        formatted_data["FORWARD_CONTRACT"] = 20991200
 
         # Add time component for PySystemTrade compatibility
-        formatted_data.index = pd.to_datetime(formatted_data.index.strftime('%Y-%m-%d') + ' 23:00:00')
-        formatted_data.index.name = 'DATETIME'
+        formatted_data.index = pd.to_datetime(
+            formatted_data.index.strftime("%Y-%m-%d") + " 23:00:00"
+        )
+        formatted_data.index.name = "DATETIME"
 
         # Save to PySystemTrade directory
         file_path = os.path.join(data_path, f"{symbol}.csv")

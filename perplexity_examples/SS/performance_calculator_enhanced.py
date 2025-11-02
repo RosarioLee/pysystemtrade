@@ -9,7 +9,7 @@ import warnings
 from typing import Dict, Any, Optional, List, Tuple
 import logging
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 class AdvancedPerformanceCalculator:
@@ -17,8 +17,12 @@ class AdvancedPerformanceCalculator:
     Advanced ETF-compatible performance calculator with enhanced analytics
     """
 
-    def __init__(self, target_vol: float = 0.12, warm_up_days: Optional[int] = None,
-                 risk_free_rate: float = 0.02):
+    def __init__(
+        self,
+        target_vol: float = 0.12,
+        warm_up_days: Optional[int] = None,
+        risk_free_rate: float = 0.02,
+    ):
         self.target_vol = target_vol
         self.warm_up_days = warm_up_days
         self.risk_free_rate = risk_free_rate
@@ -28,7 +32,9 @@ class AdvancedPerformanceCalculator:
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
-    def calculate_comprehensive_performance(self, system, timeout_seconds: int = 300) -> Optional[Dict[str, Any]]:
+    def calculate_comprehensive_performance(
+        self, system, timeout_seconds: int = 300
+    ) -> Optional[Dict[str, Any]]:
         """Calculate comprehensive performance analysis with enhanced metrics"""
 
         print("=== Advanced ETF Performance Analysis v5.0 ===")
@@ -44,7 +50,9 @@ class AdvancedPerformanceCalculator:
             rule_performance = self._analyze_rule_performance_advanced(system)
 
             # Advanced instrument analysis with correlation metrics
-            instrument_performance = self._analyze_instrument_performance_advanced(system)
+            instrument_performance = self._analyze_instrument_performance_advanced(
+                system
+            )
 
             # Comprehensive risk analysis
             risk_analysis = self._calculate_comprehensive_risk_metrics(system)
@@ -63,17 +71,17 @@ class AdvancedPerformanceCalculator:
 
             # Combine all analyses
             comprehensive_report = {
-                'portfolio_metrics': portfolio_metrics,
-                'rule_performance': rule_performance,
-                'instrument_performance': instrument_performance,
-                'risk_analysis': risk_analysis,
-                'regime_analysis': regime_analysis,
-                'attribution_analysis': attribution_analysis,
-                'cost_analysis': cost_analysis,
-                'advanced_statistics': advanced_stats,
-                'calculation_time': (datetime.now() - start_time).total_seconds(),
-                'timestamp': datetime.now(),
-                'system_info': self._get_system_info(system)
+                "portfolio_metrics": portfolio_metrics,
+                "rule_performance": rule_performance,
+                "instrument_performance": instrument_performance,
+                "risk_analysis": risk_analysis,
+                "regime_analysis": regime_analysis,
+                "attribution_analysis": attribution_analysis,
+                "cost_analysis": cost_analysis,
+                "advanced_statistics": advanced_stats,
+                "calculation_time": (datetime.now() - start_time).total_seconds(),
+                "timestamp": datetime.now(),
+                "system_info": self._get_system_info(system),
             }
 
             self._display_comprehensive_report(comprehensive_report)
@@ -82,6 +90,7 @@ class AdvancedPerformanceCalculator:
         except Exception as e:
             self.logger.error(f"Comprehensive performance calculation failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -103,7 +112,7 @@ class AdvancedPerformanceCalculator:
 
             # Apply warm-up if specified
             if self.warm_up_days and len(daily_returns) > self.warm_up_days:
-                daily_returns = daily_returns.iloc[self.warm_up_days:]
+                daily_returns = daily_returns.iloc[self.warm_up_days :]
                 print(f"🔧 Applied {self.warm_up_days}-day warm-up buffer")
 
             # Calculate comprehensive metrics
@@ -129,7 +138,7 @@ class AdvancedPerformanceCalculator:
         methods = [
             self._get_returns_percent_method,
             self._get_returns_pnl_method,
-            self._get_returns_curve_method
+            self._get_returns_curve_method,
         ]
 
         for i, method in enumerate(methods):
@@ -160,13 +169,14 @@ class AdvancedPerformanceCalculator:
             if len(pnl_curve) >= 2:
                 pnl_clean = pnl_curve.dropna()
                 if len(pnl_clean) >= 2:
-
                     # Check the scale and range of values
                     max_val = pnl_clean.max()
                     min_val = pnl_clean.min()
                     value_range = max_val - min_val
 
-                    print(f"🔍 PnL curve analysis: min={min_val:.2f}, max={max_val:.2f}, range={value_range:.2f}")
+                    print(
+                        f"🔍 PnL curve analysis: min={min_val:.2f}, max={max_val:.2f}, range={value_range:.2f}"
+                    )
 
                     # Method 1: If values look like cumulative P&L (starting near 0)
                     if abs(pnl_clean.iloc[0]) < 1.0 and value_range < 100:
@@ -177,8 +187,11 @@ class AdvancedPerformanceCalculator:
                     # Method 2: If values are large (absolute dollar amounts)
                     elif max_val > 1000 or abs(min_val) > 1000:
                         # Convert to percentage returns
-                        initial_value = abs(pnl_clean.iloc[0]) if pnl_clean.iloc[
-                                                                      0] != 0 else 1000000  # Assume $1M starting
+                        initial_value = (
+                            abs(pnl_clean.iloc[0])
+                            if pnl_clean.iloc[0] != 0
+                            else 1000000
+                        )  # Assume $1M starting
                         returns = pnl_clean.pct_change().dropna()
                         print("✅ Using pct_change() method for large values")
 
@@ -196,7 +209,9 @@ class AdvancedPerformanceCalculator:
                     # Additional validation
                     if len(returns) > 0:
                         daily_vol = returns.std()
-                        if daily_vol > 0.1:  # More than 10% daily volatility is suspicious
+                        if (
+                            daily_vol > 0.1
+                        ):  # More than 10% daily volatility is suspicious
                             print(f"⚠️ High daily volatility detected: {daily_vol:.1%}")
                             # Scale down if necessary
                             if daily_vol > 0.5:  # Extremely high volatility
@@ -242,11 +257,19 @@ class AdvancedPerformanceCalculator:
 
         # Advanced risk metrics
         downside_returns = returns[returns < 0]
-        downside_deviation = downside_returns.std() * np.sqrt(self.trading_days_per_year)
-        sortino_ratio = excess_return / downside_deviation if downside_deviation > 0 else float('inf')
+        downside_deviation = downside_returns.std() * np.sqrt(
+            self.trading_days_per_year
+        )
+        sortino_ratio = (
+            excess_return / downside_deviation
+            if downside_deviation > 0
+            else float("inf")
+        )
 
         # Calmar ratio
-        calmar_ratio = abs(annual_return / max_drawdown) if max_drawdown != 0 else float('inf')
+        calmar_ratio = (
+            abs(annual_return / max_drawdown) if max_drawdown != 0 else float("inf")
+        )
 
         # Win/loss analysis
         positive_returns = returns[returns > 0]
@@ -254,8 +277,11 @@ class AdvancedPerformanceCalculator:
         win_rate = len(positive_returns) / len(returns)
         avg_win = positive_returns.mean() if len(positive_returns) > 0 else 0
         avg_loss = negative_returns.mean() if len(negative_returns) > 0 else 0
-        profit_factor = abs(avg_win * len(positive_returns)) / abs(avg_loss * len(negative_returns)) if len(
-            negative_returns) > 0 and avg_loss != 0 else float('inf')
+        profit_factor = (
+            abs(avg_win * len(positive_returns)) / abs(avg_loss * len(negative_returns))
+            if len(negative_returns) > 0 and avg_loss != 0
+            else float("inf")
+        )
 
         # Statistical measures
         skewness = returns.skew()
@@ -274,27 +300,27 @@ class AdvancedPerformanceCalculator:
         tail_ratio = returns.quantile(0.95) / abs(returns.quantile(0.05))
 
         return {
-            'sharpe_ratio': float(sharpe_ratio),
-            'sortino_ratio': float(sortino_ratio),
-            'calmar_ratio': float(calmar_ratio),
-            'annual_return': float(annual_return),
-            'annual_volatility': float(annual_vol),
-            'max_drawdown': float(max_drawdown),
-            'downside_deviation': float(downside_deviation),
-            'win_rate': float(win_rate),
-            'profit_factor': float(profit_factor),
-            'skewness': float(skewness),
-            'kurtosis': float(kurtosis),
-            'var_95': float(var_95),
-            'var_99': float(var_99),
-            'cvar_95': float(cvar_95),
-            'cvar_99': float(cvar_99),
-            'tail_ratio': float(tail_ratio),
-            'max_consecutive_losses': consecutive_losses,
-            'trading_days': len(returns),
-            'years_analyzed': len(returns) / self.trading_days_per_year,
-            'avg_daily_return': float(mean_return),
-            'daily_volatility': float(daily_std)
+            "sharpe_ratio": float(sharpe_ratio),
+            "sortino_ratio": float(sortino_ratio),
+            "calmar_ratio": float(calmar_ratio),
+            "annual_return": float(annual_return),
+            "annual_volatility": float(annual_vol),
+            "max_drawdown": float(max_drawdown),
+            "downside_deviation": float(downside_deviation),
+            "win_rate": float(win_rate),
+            "profit_factor": float(profit_factor),
+            "skewness": float(skewness),
+            "kurtosis": float(kurtosis),
+            "var_95": float(var_95),
+            "var_99": float(var_99),
+            "cvar_95": float(cvar_95),
+            "cvar_99": float(cvar_99),
+            "tail_ratio": float(tail_ratio),
+            "max_consecutive_losses": consecutive_losses,
+            "trading_days": len(returns),
+            "years_analyzed": len(returns) / self.trading_days_per_year,
+            "avg_daily_return": float(mean_return),
+            "daily_volatility": float(daily_std),
         }
 
     def _calculate_rolling_metrics(self, returns: pd.Series) -> Dict[str, Any]:
@@ -306,17 +332,21 @@ class AdvancedPerformanceCalculator:
         for window in windows:
             if len(returns) > window:
                 rolling_returns = returns.rolling(window)
-                rolling_sharpe = (rolling_returns.mean() / rolling_returns.std()) * np.sqrt(self.trading_days_per_year)
+                rolling_sharpe = (
+                    rolling_returns.mean() / rolling_returns.std()
+                ) * np.sqrt(self.trading_days_per_year)
 
-                rolling_metrics[f'rolling_sharpe_{window}d'] = {
-                    'current': float(rolling_sharpe.iloc[-1]) if not np.isnan(rolling_sharpe.iloc[-1]) else 0,
-                    'mean': float(rolling_sharpe.mean()),
-                    'std': float(rolling_sharpe.std()),
-                    'min': float(rolling_sharpe.min()),
-                    'max': float(rolling_sharpe.max())
+                rolling_metrics[f"rolling_sharpe_{window}d"] = {
+                    "current": float(rolling_sharpe.iloc[-1])
+                    if not np.isnan(rolling_sharpe.iloc[-1])
+                    else 0,
+                    "mean": float(rolling_sharpe.mean()),
+                    "std": float(rolling_sharpe.std()),
+                    "min": float(rolling_sharpe.min()),
+                    "max": float(rolling_sharpe.max()),
                 }
 
-        return {'rolling_metrics': rolling_metrics}
+        return {"rolling_metrics": rolling_metrics}
 
     def _calculate_regime_performance(self, returns: pd.Series) -> Dict[str, Any]:
         """Calculate performance in different market regimes"""
@@ -330,17 +360,28 @@ class AdvancedPerformanceCalculator:
 
         regime_metrics = {}
 
-        for regime_name, regime_returns in [('low_volatility', low_vol_regime), ('high_volatility', high_vol_regime)]:
+        for regime_name, regime_returns in [
+            ("low_volatility", low_vol_regime),
+            ("high_volatility", high_vol_regime),
+        ]:
             if len(regime_returns) > 10:
-                regime_sharpe = (regime_returns.mean() / regime_returns.std()) * np.sqrt(self.trading_days_per_year)
-                regime_metrics[f'{regime_name}_regime'] = {
-                    'sharpe': float(regime_sharpe) if not np.isnan(regime_sharpe) else 0,
-                    'annual_return': float(regime_returns.mean() * self.trading_days_per_year),
-                    'annual_vol': float(regime_returns.std() * np.sqrt(self.trading_days_per_year)),
-                    'observations': len(regime_returns)
+                regime_sharpe = (
+                    regime_returns.mean() / regime_returns.std()
+                ) * np.sqrt(self.trading_days_per_year)
+                regime_metrics[f"{regime_name}_regime"] = {
+                    "sharpe": float(regime_sharpe)
+                    if not np.isnan(regime_sharpe)
+                    else 0,
+                    "annual_return": float(
+                        regime_returns.mean() * self.trading_days_per_year
+                    ),
+                    "annual_vol": float(
+                        regime_returns.std() * np.sqrt(self.trading_days_per_year)
+                    ),
+                    "observations": len(regime_returns),
                 }
 
-        return {'regime_performance': regime_metrics}
+        return {"regime_performance": regime_metrics}
 
     def _calculate_consecutive_losses(self, returns: pd.Series) -> int:
         """Calculate maximum consecutive losses"""
@@ -370,16 +411,20 @@ class AdvancedPerformanceCalculator:
         rule_performance = {}
 
         try:
-            if not hasattr(system, 'rules') or not hasattr(system.rules, 'trading_rules'):
+            if not hasattr(system, "rules") or not hasattr(
+                system.rules, "trading_rules"
+            ):
                 return {}
 
             rules = system.rules.trading_rules()
             instruments = system.get_instrument_list()
-            sample_instruments = instruments[:min(10, len(instruments))]
+            sample_instruments = instruments[: min(10, len(instruments))]
 
             for rule_name in rules.keys():
                 try:
-                    rule_data = self._analyze_single_rule_advanced(system, rule_name, sample_instruments)
+                    rule_data = self._analyze_single_rule_advanced(
+                        system, rule_name, sample_instruments
+                    )
                     if rule_data:
                         rule_performance[rule_name] = rule_data
 
@@ -393,7 +438,9 @@ class AdvancedPerformanceCalculator:
             self.logger.error(f"Rule performance analysis failed: {e}")
             return {}
 
-    def _analyze_single_rule_advanced(self, system, rule_name: str, instruments: List[str]) -> Optional[Dict[str, Any]]:
+    def _analyze_single_rule_advanced(
+        self, system, rule_name: str, instruments: List[str]
+    ) -> Optional[Dict[str, Any]]:
         """Analyze single rule with advanced metrics"""
 
         rule_forecasts = []
@@ -408,13 +455,15 @@ class AdvancedPerformanceCalculator:
                         returns = prices.pct_change().dropna()
 
                         # Align data
-                        aligned_data = pd.concat([forecast, returns], axis=1, join='inner')
-                        aligned_data.columns = ['forecast', 'returns']
+                        aligned_data = pd.concat(
+                            [forecast, returns], axis=1, join="inner"
+                        )
+                        aligned_data.columns = ["forecast", "returns"]
                         aligned_data = aligned_data.dropna()
 
                         if len(aligned_data) > 50:
-                            rule_forecasts.extend(aligned_data['forecast'].values)
-                            rule_returns.extend(aligned_data['returns'].values)
+                            rule_forecasts.extend(aligned_data["forecast"].values)
+                            rule_returns.extend(aligned_data["returns"].values)
 
             except Exception as e:
                 continue
@@ -456,25 +505,29 @@ class AdvancedPerformanceCalculator:
 
         # Consistency (% of rolling periods with positive Sharpe)
         if len(rule_specific_returns) > 252:
-            rolling_sharpe = pd.Series(rule_specific_returns).rolling(63).apply(
-                lambda x: (x.mean() / x.std()) * np.sqrt(252) if x.std() > 0 else 0
+            rolling_sharpe = (
+                pd.Series(rule_specific_returns)
+                .rolling(63)
+                .apply(
+                    lambda x: (x.mean() / x.std()) * np.sqrt(252) if x.std() > 0 else 0
+                )
             )
             consistency = np.mean(rolling_sharpe > 0)
         else:
             consistency = 0.5
 
         return {
-            'sharpe': float(sharpe),
-            'information_ratio': float(information_ratio),
-            'annual_return': float(mean_return * 252),
-            'annual_volatility': float(vol * np.sqrt(252)),
-            'hit_rate': float(hit_rate),
-            'consistency': float(consistency),
-            't_statistic': float(t_stat),
-            'p_value': float(p_value),
-            'is_significant': bool(p_value < 0.05),
-            'data_points': len(rule_specific_returns),
-            'instruments_used': len(instruments)
+            "sharpe": float(sharpe),
+            "information_ratio": float(information_ratio),
+            "annual_return": float(mean_return * 252),
+            "annual_volatility": float(vol * np.sqrt(252)),
+            "hit_rate": float(hit_rate),
+            "consistency": float(consistency),
+            "t_statistic": float(t_stat),
+            "p_value": float(p_value),
+            "is_significant": bool(p_value < 0.05),
+            "data_points": len(rule_specific_returns),
+            "instruments_used": len(instruments),
         }
 
     def _analyze_instrument_performance_advanced(self, system) -> Dict[str, Any]:
@@ -499,7 +552,9 @@ class AdvancedPerformanceCalculator:
                         valid_instruments.append(instrument)
 
                         # Individual instrument metrics
-                        instrument_performance[instrument] = self._calculate_instrument_metrics(returns)
+                        instrument_performance[
+                            instrument
+                        ] = self._calculate_instrument_metrics(returns)
 
             except Exception as e:
                 self.logger.warning(f"Could not analyze instrument {instrument}: {e}")
@@ -508,35 +563,43 @@ class AdvancedPerformanceCalculator:
         # Calculate correlation matrix
         if len(returns_matrix) > 1:
             # Align all return series
-            aligned_returns = pd.concat(returns_matrix, axis=1, join='inner')
+            aligned_returns = pd.concat(returns_matrix, axis=1, join="inner")
             aligned_returns.columns = valid_instruments
 
             correlation_matrix = aligned_returns.corr()
 
             # Portfolio diversification metrics
-            avg_correlation = correlation_matrix.values[np.triu_indices_from(correlation_matrix.values, k=1)].mean()
-            max_correlation = correlation_matrix.values[np.triu_indices_from(correlation_matrix.values, k=1)].max()
-            min_correlation = correlation_matrix.values[np.triu_indices_from(correlation_matrix.values, k=1)].min()
+            avg_correlation = correlation_matrix.values[
+                np.triu_indices_from(correlation_matrix.values, k=1)
+            ].mean()
+            max_correlation = correlation_matrix.values[
+                np.triu_indices_from(correlation_matrix.values, k=1)
+            ].max()
+            min_correlation = correlation_matrix.values[
+                np.triu_indices_from(correlation_matrix.values, k=1)
+            ].min()
 
             diversification_metrics = {
-                'average_correlation': float(avg_correlation),
-                'max_correlation': float(max_correlation),
-                'min_correlation': float(min_correlation),
-                'correlation_matrix': correlation_matrix.to_dict()
+                "average_correlation": float(avg_correlation),
+                "max_correlation": float(max_correlation),
+                "min_correlation": float(min_correlation),
+                "correlation_matrix": correlation_matrix.to_dict(),
             }
 
             return {
-                'individual_performance': instrument_performance,
-                'diversification_metrics': diversification_metrics,
-                'valid_instruments': len(valid_instruments)
+                "individual_performance": instrument_performance,
+                "diversification_metrics": diversification_metrics,
+                "valid_instruments": len(valid_instruments),
             }
 
-        return {'individual_performance': instrument_performance}
+        return {"individual_performance": instrument_performance}
 
     def _calculate_instrument_metrics(self, returns: pd.Series) -> Dict[str, Any]:
         """Calculate comprehensive metrics for individual instrument"""
 
-        sharpe = (returns.mean() / returns.std()) * np.sqrt(252) if returns.std() > 0 else 0
+        sharpe = (
+            (returns.mean() / returns.std()) * np.sqrt(252) if returns.std() > 0 else 0
+        )
         annual_return = returns.mean() * 252
         annual_vol = returns.std() * np.sqrt(252)
 
@@ -550,12 +613,12 @@ class AdvancedPerformanceCalculator:
         var_95 = returns.quantile(0.05)
 
         return {
-            'sharpe': float(sharpe),
-            'annual_return': float(annual_return),
-            'annual_volatility': float(annual_vol),
-            'max_drawdown': float(max_drawdown),
-            'var_95': float(var_95),
-            'data_points': len(returns)
+            "sharpe": float(sharpe),
+            "annual_return": float(annual_return),
+            "annual_volatility": float(annual_vol),
+            "max_drawdown": float(max_drawdown),
+            "var_95": float(var_95),
+            "data_points": len(returns),
         }
 
     def _calculate_comprehensive_risk_metrics(self, system) -> Dict[str, Any]:
@@ -574,10 +637,10 @@ class AdvancedPerformanceCalculator:
 
             # Risk decomposition
             risk_metrics = {
-                'volatility_analysis': self._analyze_volatility_patterns(returns),
-                'tail_risk_analysis': self._analyze_tail_risk(returns),
-                'drawdown_analysis': self._analyze_drawdown_patterns(returns),
-                'correlation_risk': self._analyze_correlation_risk(system)
+                "volatility_analysis": self._analyze_volatility_patterns(returns),
+                "tail_risk_analysis": self._analyze_tail_risk(returns),
+                "drawdown_analysis": self._analyze_drawdown_patterns(returns),
+                "correlation_risk": self._analyze_correlation_risk(system),
             }
 
             return risk_metrics
@@ -593,14 +656,18 @@ class AdvancedPerformanceCalculator:
         rolling_vol = returns.rolling(30).std() * np.sqrt(252)
 
         # Volatility clustering (ARCH effects)
-        squared_returns = returns ** 2
+        squared_returns = returns**2
         vol_autocorr = squared_returns.autocorr(lag=1)
 
         return {
-            'current_volatility': float(rolling_vol.iloc[-1]) if len(rolling_vol) > 0 else 0,
-            'average_volatility': float(rolling_vol.mean()),
-            'volatility_std': float(rolling_vol.std()),
-            'volatility_clustering': float(vol_autocorr) if not np.isnan(vol_autocorr) else 0
+            "current_volatility": float(rolling_vol.iloc[-1])
+            if len(rolling_vol) > 0
+            else 0,
+            "average_volatility": float(rolling_vol.mean()),
+            "volatility_std": float(rolling_vol.std()),
+            "volatility_clustering": float(vol_autocorr)
+            if not np.isnan(vol_autocorr)
+            else 0,
         }
 
     def _analyze_tail_risk(self, returns: pd.Series) -> Dict[str, Any]:
@@ -611,11 +678,13 @@ class AdvancedPerformanceCalculator:
         tail_returns = returns[returns <= tail_threshold]
 
         return {
-            'var_95': float(returns.quantile(0.05)),
-            'var_99': float(returns.quantile(0.01)),
-            'expected_shortfall_95': float(tail_returns.mean()) if len(tail_returns) > 0 else 0,
-            'tail_events_count': len(tail_returns),
-            'tail_frequency': float(len(tail_returns) / len(returns))
+            "var_95": float(returns.quantile(0.05)),
+            "var_99": float(returns.quantile(0.01)),
+            "expected_shortfall_95": float(tail_returns.mean())
+            if len(tail_returns) > 0
+            else 0,
+            "tail_events_count": len(tail_returns),
+            "tail_frequency": float(len(tail_returns) / len(returns)),
         }
 
     def _analyze_drawdown_patterns(self, returns: pd.Series) -> Dict[str, Any]:
@@ -642,11 +711,15 @@ class AdvancedPerformanceCalculator:
             drawdown_periods.append(current_period)
 
         return {
-            'max_drawdown': float(drawdown.min()),
-            'average_drawdown_duration': float(np.mean(drawdown_periods)) if drawdown_periods else 0,
-            'max_drawdown_duration': int(max(drawdown_periods)) if drawdown_periods else 0,
-            'time_underwater': float(in_drawdown.mean()),
-            'drawdown_periods_count': len(drawdown_periods)
+            "max_drawdown": float(drawdown.min()),
+            "average_drawdown_duration": float(np.mean(drawdown_periods))
+            if drawdown_periods
+            else 0,
+            "max_drawdown_duration": int(max(drawdown_periods))
+            if drawdown_periods
+            else 0,
+            "time_underwater": float(in_drawdown.mean()),
+            "drawdown_periods_count": len(drawdown_periods),
         }
 
     def _analyze_correlation_risk(self, system) -> Dict[str, Any]:
@@ -655,8 +728,8 @@ class AdvancedPerformanceCalculator:
         # This would analyze correlation breakdown during stress periods
         # Simplified implementation for now
         return {
-            'correlation_breakdown_risk': 'Medium',  # Placeholder
-            'stress_correlation': 0.7  # Placeholder
+            "correlation_breakdown_risk": "Medium",  # Placeholder
+            "stress_correlation": 0.7,  # Placeholder
         }
 
     def _analyze_market_regimes(self, system) -> Dict[str, Any]:
@@ -681,12 +754,16 @@ class AdvancedPerformanceCalculator:
                 regime_returns = returns[regime_mask]
                 if len(regime_returns) > 10:
                     regime_performance[regime_name] = {
-                        'sharpe': float((regime_returns.mean() / regime_returns.std()) * np.sqrt(
-                            252)) if regime_returns.std() > 0 else 0,
-                        'annual_return': float(regime_returns.mean() * 252),
-                        'hit_rate': float((regime_returns > 0).mean()),
-                        'observations': len(regime_returns),
-                        'frequency': float(len(regime_returns) / len(returns))
+                        "sharpe": float(
+                            (regime_returns.mean() / regime_returns.std())
+                            * np.sqrt(252)
+                        )
+                        if regime_returns.std() > 0
+                        else 0,
+                        "annual_return": float(regime_returns.mean() * 252),
+                        "hit_rate": float((regime_returns > 0).mean()),
+                        "observations": len(regime_returns),
+                        "frequency": float(len(regime_returns) / len(returns)),
                     }
 
             return regime_performance
@@ -706,10 +783,14 @@ class AdvancedPerformanceCalculator:
         return_median = rolling_return.median()
 
         regimes = {
-            'bull_low_vol': (rolling_return > return_median) & (rolling_vol <= vol_median),
-            'bull_high_vol': (rolling_return > return_median) & (rolling_vol > vol_median),
-            'bear_low_vol': (rolling_return <= return_median) & (rolling_vol <= vol_median),
-            'bear_high_vol': (rolling_return <= return_median) & (rolling_vol > vol_median)
+            "bull_low_vol": (rolling_return > return_median)
+            & (rolling_vol <= vol_median),
+            "bull_high_vol": (rolling_return > return_median)
+            & (rolling_vol > vol_median),
+            "bear_low_vol": (rolling_return <= return_median)
+            & (rolling_vol <= vol_median),
+            "bear_high_vol": (rolling_return <= return_median)
+            & (rolling_vol > vol_median),
         }
 
         return regimes
@@ -727,9 +808,9 @@ class AdvancedPerformanceCalculator:
         # - Interaction effects
 
         return {
-            'asset_allocation_effect': 'TBD',  # Placeholder
-            'security_selection_effect': 'TBD',  # Placeholder
-            'trading_rules_contribution': 'TBD'  # Placeholder
+            "asset_allocation_effect": "TBD",  # Placeholder
+            "security_selection_effect": "TBD",  # Placeholder
+            "trading_rules_contribution": "TBD",  # Placeholder
         }
 
     def _analyze_comprehensive_costs(self, system) -> Dict[str, Any]:
@@ -744,10 +825,10 @@ class AdvancedPerformanceCalculator:
         # - Financing costs
 
         return {
-            'estimated_transaction_costs': 0.001,  # 10 bps estimate for ETFs
-            'market_impact_costs': 0.0005,  # 5 bps estimate
-            'total_estimated_costs': 0.0015,
-            'cost_efficiency_score': 'High'  # ETFs are generally cost-efficient
+            "estimated_transaction_costs": 0.001,  # 10 bps estimate for ETFs
+            "market_impact_costs": 0.0005,  # 5 bps estimate
+            "total_estimated_costs": 0.0015,
+            "cost_efficiency_score": "High",  # ETFs are generally cost-efficient
         }
 
     def _calculate_advanced_statistics(self, system) -> Dict[str, Any]:
@@ -776,17 +857,17 @@ class AdvancedPerformanceCalculator:
             autocorr_5 = returns.autocorr(lag=5)
 
             return {
-                'normality_tests': {
-                    'jarque_bera_stat': float(jb_stat),
-                    'jarque_bera_pvalue': float(jb_pvalue),
-                    'normal_test_stat': float(normal_stat),
-                    'normal_test_pvalue': float(normal_pvalue),
-                    'is_normal': bool(jb_pvalue > 0.05)
+                "normality_tests": {
+                    "jarque_bera_stat": float(jb_stat),
+                    "jarque_bera_pvalue": float(jb_pvalue),
+                    "normal_test_stat": float(normal_stat),
+                    "normal_test_pvalue": float(normal_pvalue),
+                    "is_normal": bool(jb_pvalue > 0.05),
                 },
-                'autocorrelation': {
-                    'lag_1': float(autocorr_1) if not np.isnan(autocorr_1) else 0,
-                    'lag_5': float(autocorr_5) if not np.isnan(autocorr_5) else 0
-                }
+                "autocorrelation": {
+                    "lag_1": float(autocorr_1) if not np.isnan(autocorr_1) else 0,
+                    "lag_5": float(autocorr_5) if not np.isnan(autocorr_5) else 0,
+                },
             }
 
         except Exception as e:
@@ -797,10 +878,12 @@ class AdvancedPerformanceCalculator:
         """Get system information"""
 
         return {
-            'instruments_count': len(system.get_instrument_list()),
-            'rules_count': len(system.rules.trading_rules()) if hasattr(system, 'rules') else 0,
-            'system_type': 'Enhanced_ETF_System',
-            'target_volatility': self.target_vol
+            "instruments_count": len(system.get_instrument_list()),
+            "rules_count": len(system.rules.trading_rules())
+            if hasattr(system, "rules")
+            else 0,
+            "system_type": "Enhanced_ETF_System",
+            "target_volatility": self.target_vol,
         }
 
     def _display_comprehensive_report(self, report: Dict[str, Any]):
@@ -810,8 +893,8 @@ class AdvancedPerformanceCalculator:
         print(f"📊 ENHANCED ETF SYSTEM COMPREHENSIVE PERFORMANCE REPORT v5.0")
         print(f"=" * 100)
 
-        if 'portfolio_metrics' in report and report['portfolio_metrics']:
-            metrics = report['portfolio_metrics']
+        if "portfolio_metrics" in report and report["portfolio_metrics"]:
+            metrics = report["portfolio_metrics"]
             print(f"\n📈 PORTFOLIO PERFORMANCE:")
             print(f" • Sharpe Ratio: {metrics.get('sharpe_ratio', 0):.3f}")
             print(f" • Sortino Ratio: {metrics.get('sortino_ratio', 0):.3f}")
@@ -824,32 +907,46 @@ class AdvancedPerformanceCalculator:
             print(f" • VaR (95%): {metrics.get('var_95', 0):.2%}")
             print(f" • Tail Ratio: {metrics.get('tail_ratio', 0):.2f}")
 
-        if 'rule_performance' in report and report['rule_performance']:
+        if "rule_performance" in report and report["rule_performance"]:
             print(f"\n🎯 TRADING RULE PERFORMANCE:")
             significant_rules = 0
-            for rule_name, perf in report['rule_performance'].items():
-                significance = "***" if perf.get('is_significant', False) else ""
-                print(f" • {rule_name}: Sharpe {perf.get('sharpe', 0):.3f} "
-                      f"(p={perf.get('p_value', 1):.3f}){significance}")
-                if perf.get('is_significant', False):
+            for rule_name, perf in report["rule_performance"].items():
+                significance = "***" if perf.get("is_significant", False) else ""
+                print(
+                    f" • {rule_name}: Sharpe {perf.get('sharpe', 0):.3f} "
+                    f"(p={perf.get('p_value', 1):.3f}){significance}"
+                )
+                if perf.get("is_significant", False):
                     significant_rules += 1
-            print(f" • Statistically Significant Rules: {significant_rules}/{len(report['rule_performance'])}")
+            print(
+                f" • Statistically Significant Rules: {significant_rules}/{len(report['rule_performance'])}"
+            )
 
-        if 'risk_analysis' in report and report['risk_analysis']:
+        if "risk_analysis" in report and report["risk_analysis"]:
             print(f"\n⚠️ RISK ANALYSIS:")
-            risk = report['risk_analysis']
-            if 'volatility_analysis' in risk:
-                vol_analysis = risk['volatility_analysis']
-                print(f" • Current Volatility: {vol_analysis.get('current_volatility', 0):.1%}")
-                print(f" • Volatility Clustering: {vol_analysis.get('volatility_clustering', 0):.3f}")
+            risk = report["risk_analysis"]
+            if "volatility_analysis" in risk:
+                vol_analysis = risk["volatility_analysis"]
+                print(
+                    f" • Current Volatility: {vol_analysis.get('current_volatility', 0):.1%}"
+                )
+                print(
+                    f" • Volatility Clustering: {vol_analysis.get('volatility_clustering', 0):.3f}"
+                )
 
-            if 'tail_risk_analysis' in risk:
-                tail_risk = risk['tail_risk_analysis']
+            if "tail_risk_analysis" in risk:
+                tail_risk = risk["tail_risk_analysis"]
                 print(f" • VaR (99%): {tail_risk.get('var_99', 0):.2%}")
-                print(f" • Expected Shortfall: {tail_risk.get('expected_shortfall_95', 0):.2%}")
+                print(
+                    f" • Expected Shortfall: {tail_risk.get('expected_shortfall_95', 0):.2%}"
+                )
 
-        print(f"\n⏱️ Analysis completed in {report.get('calculation_time', 0):.1f} seconds")
-        print(f"📅 Report generated: {report.get('timestamp', datetime.now()).strftime('%Y-%m-%d %H:%M:%S')}")
+        print(
+            f"\n⏱️ Analysis completed in {report.get('calculation_time', 0):.1f} seconds"
+        )
+        print(
+            f"📅 Report generated: {report.get('timestamp', datetime.now()).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         print(f"=" * 100)
 
     def diagnose_portfolio_data(self, system):
@@ -865,8 +962,10 @@ class AdvancedPerformanceCalculator:
 
             # Check different curve methods
             methods = {
-                'curve()': portfolio.curve(),
-                'percent.curve()': portfolio.percent.curve() if hasattr(portfolio, 'percent') else None
+                "curve()": portfolio.curve(),
+                "percent.curve()": portfolio.percent.curve()
+                if hasattr(portfolio, "percent")
+                else None,
             }
 
             for method_name, data in methods.items():
@@ -880,7 +979,9 @@ class AdvancedPerformanceCalculator:
                     # Calculate returns
                     returns = data.pct_change().dropna()
                     if len(returns) > 0:
-                        print(f"   Daily vol: {returns.std():.4f} ({returns.std() * np.sqrt(252):.1%} annual)")
+                        print(
+                            f"   Daily vol: {returns.std():.4f} ({returns.std() * np.sqrt(252):.1%} annual)"
+                        )
                         print(f"   Daily mean: {returns.mean():.6f}")
                 else:
                     print(f"\n❌ {method_name}: Not available")
@@ -890,4 +991,4 @@ class AdvancedPerformanceCalculator:
 
 
 # Export the class
-__all__ = ['AdvancedPerformanceCalculator']
+__all__ = ["AdvancedPerformanceCalculator"]

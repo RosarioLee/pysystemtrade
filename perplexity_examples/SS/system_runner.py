@@ -4,7 +4,7 @@ import os
 import sys
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -27,13 +27,15 @@ def main(development_mode=True, test_mode=False, max_instruments=10):
     try:
         config_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "private", "etf_system", "config_v1.1.yaml"
+            "private",
+            "etf_system",
+            "config_v1.1.yaml",
         )
 
         etf_system = EnhancedETFSystem(
             config_path=config_path,
             test_mode=False,  # Use full historical data
-            max_instruments=max_instruments  # But limit instruments
+            max_instruments=max_instruments,  # But limit instruments
         )
 
         # Rest of your existing code...
@@ -48,11 +50,14 @@ def main(development_mode=True, test_mode=False, max_instruments=10):
         print("\n4️⃣ VERIFYING CARVER COMPLIANCE")
         compliance_report = etf_system.verify_carver_compliance(system)
 
-        if compliance_report['scalar_compliance'] and compliance_report['weight_compliance']:
+        if (
+            compliance_report["scalar_compliance"]
+            and compliance_report["weight_compliance"]
+        ):
             print("🎉 FULL CARVER COMPLIANCE ACHIEVED")
         else:
             print("⚠️ COMPLIANCE ISSUES - Review before production")
-            for issue in compliance_report['issues']:
+            for issue in compliance_report["issues"]:
                 print(f"   • {issue}")
 
         # FIXED: Use standard performance calculation for smaller systems
@@ -67,12 +72,13 @@ def main(development_mode=True, test_mode=False, max_instruments=10):
         return {
             "system": system,
             "compliance_report": compliance_report,
-            "performance_metrics": perf
+            "performance_metrics": perf,
         }
 
     except Exception as e:
         print(f"❌ Critical error: {e}")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -82,44 +88,44 @@ def monitor_system_health(system):
     print("=== SYSTEM HEALTH MONITORING ===")
 
     health_report = {
-        'instruments': len(system.get_instrument_list()),
-        'rules': len(system.rules.trading_rules()),
-        'data_quality': {},
-        'rule_activity': {},
-        'alerts': []
+        "instruments": len(system.get_instrument_list()),
+        "rules": len(system.rules.trading_rules()),
+        "data_quality": {},
+        "rule_activity": {},
+        "alerts": [],
     }
 
     # Check data quality
     for instrument in system.get_instrument_list()[:5]:  # Sample check
         try:
             prices = system.rawdata.get_daily_prices(instrument)
-            health_report['data_quality'][instrument] = {
-                'length': len(prices),
-                'last_date': prices.index[-1],
-                'null_count': prices.isnull().sum()
+            health_report["data_quality"][instrument] = {
+                "length": len(prices),
+                "last_date": prices.index[-1],
+                "null_count": prices.isnull().sum(),
             }
         except Exception as e:
-            health_report['alerts'].append(f"Data issue for {instrument}: {e}")
+            health_report["alerts"].append(f"Data issue for {instrument}: {e}")
 
     # Check rule activity
     for rule_name in list(system.rules.trading_rules().keys())[:3]:  # Sample check
         try:
-            forecast = system.forecastScaleCap.get_scaled_forecast('IVV', rule_name)
-            health_report['rule_activity'][rule_name] = {
-                'mean_forecast': forecast.tail(252).mean(),
-                'forecast_std': forecast.tail(252).std(),
-                'last_forecast': forecast.iloc[-1]
+            forecast = system.forecastScaleCap.get_scaled_forecast("IVV", rule_name)
+            health_report["rule_activity"][rule_name] = {
+                "mean_forecast": forecast.tail(252).mean(),
+                "forecast_std": forecast.tail(252).std(),
+                "last_forecast": forecast.iloc[-1],
             }
         except Exception as e:
-            health_report['alerts'].append(f"Rule issue for {rule_name}: {e}")
+            health_report["alerts"].append(f"Rule issue for {rule_name}: {e}")
 
     # Display health summary
     print(f"📊 Instruments: {health_report['instruments']}")
     print(f"🎯 Trading Rules: {health_report['rules']}")
     print(f"🚨 Alerts: {len(health_report['alerts'])}")
 
-    if health_report['alerts']:
-        for alert in health_report['alerts']:
+    if health_report["alerts"]:
+        for alert in health_report["alerts"]:
             print(f"   ⚠️ {alert}")
     else:
         print("✅ All systems healthy")

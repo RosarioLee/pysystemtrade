@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 class ProductionMonitor:
@@ -20,14 +20,16 @@ class ProductionMonitor:
         self.rules = system.rules.trading_rules()
 
         # Alert thresholds
-        self.sharpe_threshold = self.config.get('min_sharpe_ratio', 0.3)
-        self.drawdown_threshold = self.config.get('max_drawdown', 0.15)
-        self.vol_tolerance = self.config.get('vol_tolerance', 0.02)
+        self.sharpe_threshold = self.config.get("min_sharpe_ratio", 0.3)
+        self.drawdown_threshold = self.config.get("max_drawdown", 0.15)
+        self.vol_tolerance = self.config.get("vol_tolerance", 0.02)
 
         # Dashboard settings
         self.warm_up_days = 365
 
-        print(f"âœ… Production Monitor v2.1 initialized for {len(self.instruments)} instruments")
+        print(
+            f"âœ… Production Monitor v2.1 initialized for {len(self.instruments)} instruments"
+        )
 
     def run_enhanced_performance_analysis_separated(self, comprehensive_performance):
         """Enhanced performance analysis with 3 separate dashboard outputs - FIXED"""
@@ -44,7 +46,9 @@ class ProductionMonitor:
             self._create_main_dashboard_standalone(comprehensive_performance)
 
             print("ðŸ“Š Creating Dashboard 2/3 - Advanced Metrics...")
-            self._create_advanced_metrics_dashboard_standalone(comprehensive_performance)
+            self._create_advanced_metrics_dashboard_standalone(
+                comprehensive_performance
+            )
 
             print("ðŸ“Š Creating Dashboard 3/3 - System Summary...")
             self._create_system_summary_dashboard_standalone(comprehensive_performance)
@@ -55,6 +59,7 @@ class ProductionMonitor:
         except Exception as e:
             print(f"âŒ Enhanced performance analysis failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -66,10 +71,15 @@ class ProductionMonitor:
             self._create_portfolio_plot(axes[0, 0])
             self._create_volatility_plot(axes[0, 1])
             self._create_drawdown_plot(axes[1, 0])
-            self._create_rule_performance_plot_enhanced(axes[1, 1], comprehensive_report)
+            self._create_rule_performance_plot_enhanced(
+                axes[1, 1], comprehensive_report
+            )
 
-            fig.suptitle('Dashboard 1/3: Main Performance Metrics',
-                         fontsize=16, fontweight='bold')
+            fig.suptitle(
+                "Dashboard 1/3: Main Performance Metrics",
+                fontsize=16,
+                fontweight="bold",
+            )
 
             plt.tight_layout()
             plt.subplots_adjust(top=0.93, hspace=0.3, wspace=0.3)
@@ -91,8 +101,11 @@ class ProductionMonitor:
         try:
             self._create_advanced_metrics_panel_standalone(ax, comprehensive_report)
 
-            fig.suptitle('Dashboard 2/3: Advanced Performance Metrics',
-                         fontsize=16, fontweight='bold')
+            fig.suptitle(
+                "Dashboard 2/3: Advanced Performance Metrics",
+                fontsize=16,
+                fontweight="bold",
+            )
 
             plt.tight_layout()
             plt.subplots_adjust(top=0.95)
@@ -114,8 +127,11 @@ class ProductionMonitor:
         try:
             self._create_enhanced_summary_panel_standalone(ax, comprehensive_report)
 
-            fig.suptitle('Dashboard 3/3: System Summary & Analysis',
-                         fontsize=16, fontweight='bold')
+            fig.suptitle(
+                "Dashboard 3/3: System Summary & Analysis",
+                fontsize=16,
+                fontweight="bold",
+            )
 
             plt.tight_layout()
             plt.subplots_adjust(top=0.95)
@@ -133,12 +149,14 @@ class ProductionMonitor:
     def _create_advanced_metrics_panel_standalone(self, ax, comprehensive_report):
         """Create standalone advanced metrics panel"""
         ax.clear()
-        ax.axis('off')
+        ax.axis("off")
 
         try:
-            portfolio_metrics = comprehensive_report.get('portfolio_metrics', {})
-            rule_count = len(comprehensive_report.get('rule_performance', {}))
-            instrument_count = len(comprehensive_report.get('instrument_performance', {}))
+            portfolio_metrics = comprehensive_report.get("portfolio_metrics", {})
+            rule_count = len(comprehensive_report.get("rule_performance", {}))
+            instrument_count = len(
+                comprehensive_report.get("instrument_performance", {})
+            )
 
             if portfolio_metrics:
                 advanced_text = f"""COMPREHENSIVE PERFORMANCE ANALYSIS - ENHANCED v2.1
@@ -191,43 +209,83 @@ class ProductionMonitor:
 â€¢ Mean Return: {portfolio_metrics.get('debug_mean_return', 0):.6f}
 â€¢ Daily Std: {portfolio_metrics.get('debug_daily_std', 0):.6f}"""
 
-                ax.text(0.02, 0.98, advanced_text, transform=ax.transAxes,
-                        fontsize=10, verticalalignment='top', fontfamily='monospace',
-                        bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgreen', alpha=0.95))
+                ax.text(
+                    0.02,
+                    0.98,
+                    advanced_text,
+                    transform=ax.transAxes,
+                    fontsize=10,
+                    verticalalignment="top",
+                    fontfamily="monospace",
+                    bbox=dict(
+                        boxstyle="round,pad=0.5", facecolor="lightgreen", alpha=0.95
+                    ),
+                )
             else:
-                ax.text(0.5, 0.5, 'Advanced metrics calculation in progress...',
-                        ha='center', va='center', transform=ax.transAxes, fontsize=14)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Advanced metrics calculation in progress...",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
+                    fontsize=14,
+                )
         except Exception as e:
-            ax.text(0.5, 0.5, f'Advanced metrics error:\n{str(e)[:50]}',
-                    ha='center', va='center', transform=ax.transAxes, color='red', fontsize=12)
+            ax.text(
+                0.5,
+                0.5,
+                f"Advanced metrics error:\n{str(e)[:50]}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+                color="red",
+                fontsize=12,
+            )
 
     def _create_enhanced_summary_panel_standalone(self, ax, comprehensive_report):
         """Create standalone enhanced summary panel"""
         ax.clear()
-        ax.axis('off')
+        ax.axis("off")
 
         try:
-            portfolio_metrics = comprehensive_report.get('portfolio_metrics', {})
-            rule_perf = comprehensive_report.get('rule_performance', {})
-            instrument_perf = comprehensive_report.get('instrument_performance', {})
+            portfolio_metrics = comprehensive_report.get("portfolio_metrics", {})
+            rule_perf = comprehensive_report.get("rule_performance", {})
+            instrument_perf = comprehensive_report.get("instrument_performance", {})
 
             # Calculate summary statistics
             if rule_perf:
-                avg_rule_sharpe = np.mean([perf.get('sharpe', 0) for perf in rule_perf.values()])
-                best_rule = max(rule_perf.items(), key=lambda x: x[1].get('sharpe', 0))[0]
-                forecast_based_rules = sum(1 for perf in rule_perf.values() if perf.get('method') == 'forecast_based')
+                avg_rule_sharpe = np.mean(
+                    [perf.get("sharpe", 0) for perf in rule_perf.values()]
+                )
+                best_rule = max(rule_perf.items(), key=lambda x: x[1].get("sharpe", 0))[
+                    0
+                ]
+                forecast_based_rules = sum(
+                    1
+                    for perf in rule_perf.values()
+                    if perf.get("method") == "forecast_based"
+                )
             else:
                 avg_rule_sharpe = 0
-                best_rule = 'N/A'
+                best_rule = "N/A"
                 forecast_based_rules = 0
 
             if instrument_perf:
-                avg_etf_sharpe = np.mean([perf.get('sharpe', 0) for perf in instrument_perf.values()])
-                best_etf = max(instrument_perf.items(), key=lambda x: x[1].get('sharpe', 0))[0]
-                top_etfs = sorted(instrument_perf.items(), key=lambda x: x[1].get('sharpe', 0), reverse=True)[:3]
+                avg_etf_sharpe = np.mean(
+                    [perf.get("sharpe", 0) for perf in instrument_perf.values()]
+                )
+                best_etf = max(
+                    instrument_perf.items(), key=lambda x: x[1].get("sharpe", 0)
+                )[0]
+                top_etfs = sorted(
+                    instrument_perf.items(),
+                    key=lambda x: x[1].get("sharpe", 0),
+                    reverse=True,
+                )[:3]
             else:
                 avg_etf_sharpe = 0
-                best_etf = 'N/A'
+                best_etf = "N/A"
                 top_etfs = []
 
             summary_text = f"""ENHANCED SYSTEM PERFORMANCE SUMMARY v2.1
@@ -289,13 +347,30 @@ class ProductionMonitor:
 â€¢ Data Quality: {'Good' if portfolio_metrics.get('debug_data_points', 0) > 1000 else 'Moderate'}
 â€¢ Sharpe Calculation: {'Valid' if not np.isnan(portfolio_metrics.get('sharpe_ratio', 0)) else 'Invalid'}"""
 
-            ax.text(0.02, 0.98, summary_text, transform=ax.transAxes,
-                    fontsize=9, verticalalignment='top', fontfamily='monospace',
-                    bbox=dict(boxstyle='round,pad=0.5', facecolor='lightyellow', alpha=0.95))
+            ax.text(
+                0.02,
+                0.98,
+                summary_text,
+                transform=ax.transAxes,
+                fontsize=9,
+                verticalalignment="top",
+                fontfamily="monospace",
+                bbox=dict(
+                    boxstyle="round,pad=0.5", facecolor="lightyellow", alpha=0.95
+                ),
+            )
 
         except Exception as e:
-            ax.text(0.5, 0.5, f'Summary panel error:\n{str(e)[:50]}',
-                    ha='center', va='center', transform=ax.transAxes, color='red', fontsize=12)
+            ax.text(
+                0.5,
+                0.5,
+                f"Summary panel error:\n{str(e)[:50]}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+                color="red",
+                fontsize=12,
+            )
 
     # Keep all existing methods for basic dashboard functionality...
     def _create_portfolio_plot(self, ax):
@@ -305,28 +380,54 @@ class ProductionMonitor:
             if portfolio is not None:
                 curve = portfolio.curve()
                 if len(curve) > self.warm_up_days:
-                    curve_filtered = curve.iloc[self.warm_up_days:]
-                    curve_filtered.plot(ax=ax,
-                                        title=f"Portfolio Performance (After {self.warm_up_days}-Day Warm-Up)",
-                                        color='blue', linewidth=2)
+                    curve_filtered = curve.iloc[self.warm_up_days :]
+                    curve_filtered.plot(
+                        ax=ax,
+                        title=f"Portfolio Performance (After {self.warm_up_days}-Day Warm-Up)",
+                        color="blue",
+                        linewidth=2,
+                    )
                     ax.set_ylabel("P&L", fontsize=11)
                     ax.grid(True, alpha=0.3)
-                    ax.text(0.02, 0.98, f'âœ… {self.warm_up_days}-day buffer applied',
-                            transform=ax.transAxes, verticalalignment='top',
-                            bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
-                            fontsize=9)
+                    ax.text(
+                        0.02,
+                        0.98,
+                        f"âœ… {self.warm_up_days}-day buffer applied",
+                        transform=ax.transAxes,
+                        verticalalignment="top",
+                        bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.8),
+                        fontsize=9,
+                    )
                 else:
-                    curve.plot(ax=ax, title="Portfolio Performance (Insufficient Data for Buffer)",
-                               color='orange', linewidth=2)
+                    curve.plot(
+                        ax=ax,
+                        title="Portfolio Performance (Insufficient Data for Buffer)",
+                        color="orange",
+                        linewidth=2,
+                    )
                     ax.set_ylabel("P&L", fontsize=11)
                     ax.grid(True, alpha=0.3)
             else:
-                ax.text(0.5, 0.5, 'Portfolio data\nnot available',
-                        ha='center', va='center', transform=ax.transAxes, fontsize=12)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Portfolio data\nnot available",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
+                    fontsize=12,
+                )
                 ax.set_title("Portfolio Performance (No Data)")
         except Exception as e:
-            ax.text(0.5, 0.5, f'Portfolio error:\n{str(e)[:40]}',
-                    ha='center', va='center', transform=ax.transAxes, color='red')
+            ax.text(
+                0.5,
+                0.5,
+                f"Portfolio error:\n{str(e)[:40]}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+                color="red",
+            )
             ax.set_title("Portfolio Performance (Error)")
 
     def _create_volatility_plot(self, ax):
@@ -336,42 +437,85 @@ class ProductionMonitor:
             if portfolio is not None:
                 curve = portfolio.curve()
                 if len(curve) > self.warm_up_days:
-                    curve_filtered = curve.iloc[self.warm_up_days:]
+                    curve_filtered = curve.iloc[self.warm_up_days :]
                     if len(curve_filtered) > 60:
                         returns = curve_filtered.pct_change().dropna()
                         rolling_vol = returns.rolling(60).std() * np.sqrt(252)
-                        rolling_vol.plot(ax=ax,
-                                         title=f"Rolling 60-Day Volatility (After {self.warm_up_days}-Day Warm-Up)",
-                                         color='orange', linewidth=2)
-                        ax.axhline(y=0.12, color='red', linestyle='--', label='Target 12%', linewidth=2)
+                        rolling_vol.plot(
+                            ax=ax,
+                            title=f"Rolling 60-Day Volatility (After {self.warm_up_days}-Day Warm-Up)",
+                            color="orange",
+                            linewidth=2,
+                        )
+                        ax.axhline(
+                            y=0.12,
+                            color="red",
+                            linestyle="--",
+                            label="Target 12%",
+                            linewidth=2,
+                        )
                         ax.set_ylabel("Annualized Volatility", fontsize=11)
                         ax.legend()
                         ax.grid(True, alpha=0.3)
-                        ax.text(0.02, 0.98, f'âœ… {self.warm_up_days}-day buffer applied',
-                                transform=ax.transAxes, verticalalignment='top',
-                                bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8),
-                                fontsize=9)
+                        ax.text(
+                            0.02,
+                            0.98,
+                            f"âœ… {self.warm_up_days}-day buffer applied",
+                            transform=ax.transAxes,
+                            verticalalignment="top",
+                            bbox=dict(
+                                boxstyle="round", facecolor="lightgreen", alpha=0.8
+                            ),
+                            fontsize=9,
+                        )
                     else:
-                        ax.text(0.5, 0.5, 'Insufficient data\nfor volatility after buffer',
-                                ha='center', va='center', transform=ax.transAxes, fontsize=12)
+                        ax.text(
+                            0.5,
+                            0.5,
+                            "Insufficient data\nfor volatility after buffer",
+                            ha="center",
+                            va="center",
+                            transform=ax.transAxes,
+                            fontsize=12,
+                        )
                         ax.set_title("Rolling Volatility (Insufficient Data)")
                 else:
                     returns = curve.pct_change().dropna()
                     if len(returns) > 60:
                         rolling_vol = returns.rolling(60).std() * np.sqrt(252)
-                        rolling_vol.plot(ax=ax, title="Rolling 60-Day Volatility (No Buffer)",
-                                         color='red', linewidth=2)
-                        ax.axhline(y=0.12, color='red', linestyle='--', label='Target 12%')
+                        rolling_vol.plot(
+                            ax=ax,
+                            title="Rolling 60-Day Volatility (No Buffer)",
+                            color="red",
+                            linewidth=2,
+                        )
+                        ax.axhline(
+                            y=0.12, color="red", linestyle="--", label="Target 12%"
+                        )
                         ax.set_ylabel("Annualized Volatility", fontsize=11)
                         ax.legend()
                         ax.grid(True, alpha=0.3)
                     else:
-                        ax.text(0.5, 0.5, 'Volatility data\nnot available',
-                                ha='center', va='center', transform=ax.transAxes, fontsize=12)
+                        ax.text(
+                            0.5,
+                            0.5,
+                            "Volatility data\nnot available",
+                            ha="center",
+                            va="center",
+                            transform=ax.transAxes,
+                            fontsize=12,
+                        )
                         ax.set_title("Rolling Volatility (No Data)")
         except Exception as e:
-            ax.text(0.5, 0.5, f'Volatility error:\n{str(e)[:40]}',
-                    ha='center', va='center', transform=ax.transAxes, color='red')
+            ax.text(
+                0.5,
+                0.5,
+                f"Volatility error:\n{str(e)[:40]}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+                color="red",
+            )
             ax.set_title("Rolling Volatility (Error)")
 
     def _create_drawdown_plot(self, ax):
@@ -381,7 +525,7 @@ class ProductionMonitor:
             if portfolio is not None:
                 curve = portfolio.curve()
                 if len(curve) > self.warm_up_days:
-                    curve_filtered = curve.iloc[self.warm_up_days:]
+                    curve_filtered = curve.iloc[self.warm_up_days :]
                     title_suffix = f" (After {self.warm_up_days}-Day Warm-Up)"
                 else:
                     curve_filtered = curve
@@ -394,99 +538,160 @@ class ProductionMonitor:
                     rolling_max = curve_filtered.expanding().max()
                     drawdown = ((curve_filtered - rolling_max) / rolling_max) * 100
 
-                    drawdown.plot(ax=ax, color='red', linewidth=2)
-                    ax.fill_between(drawdown.index, drawdown.values, 0,
-                                    where=(drawdown <= 0), color='red', alpha=0.2)
-                    ax.set_title(f"Portfolio Drawdown{title_suffix}", fontsize=12, fontweight='bold')
+                    drawdown.plot(ax=ax, color="red", linewidth=2)
+                    ax.fill_between(
+                        drawdown.index,
+                        drawdown.values,
+                        0,
+                        where=(drawdown <= 0),
+                        color="red",
+                        alpha=0.2,
+                    )
+                    ax.set_title(
+                        f"Portfolio Drawdown{title_suffix}",
+                        fontsize=12,
+                        fontweight="bold",
+                    )
                     ax.set_ylabel("Drawdown (%)", fontsize=11)
                     ax.grid(True, alpha=0.3)
 
                     max_dd = drawdown.min()
                     current_dd = drawdown.iloc[-1]
-                    ax.text(0.02, 0.98, f'Max DD: {max_dd:.1f}%\nCurrent: {current_dd:.1f}%',
-                            transform=ax.transAxes, verticalalignment='top',
-                            bbox=dict(boxstyle='round', facecolor='white', alpha=0.9),
-                            fontsize=10, fontweight='bold')
+                    ax.text(
+                        0.02,
+                        0.98,
+                        f"Max DD: {max_dd:.1f}%\nCurrent: {current_dd:.1f}%",
+                        transform=ax.transAxes,
+                        verticalalignment="top",
+                        bbox=dict(boxstyle="round", facecolor="white", alpha=0.9),
+                        fontsize=10,
+                        fontweight="bold",
+                    )
 
                     ax.set_ylim(min(drawdown.min() * 1.1, -1), 1)
-                    ax.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+                    ax.axhline(y=0, color="black", linestyle="-", alpha=0.5)
                 else:
-                    ax.bar([1], [-5], color='red', alpha=0.3, width=0.5)
-                    ax.text(0.5, 0.5, f'Drawdown Analysis\n\nNeed more data\n({len(curve_filtered)} points)',
-                            ha='center', va='center', transform=ax.transAxes,
-                            bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8),
-                            fontsize=12)
+                    ax.bar([1], [-5], color="red", alpha=0.3, width=0.5)
+                    ax.text(
+                        0.5,
+                        0.5,
+                        f"Drawdown Analysis\n\nNeed more data\n({len(curve_filtered)} points)",
+                        ha="center",
+                        va="center",
+                        transform=ax.transAxes,
+                        bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8),
+                        fontsize=12,
+                    )
                     ax.set_title("Drawdown (Insufficient Data)")
                     ax.set_ylim(-10, 0)
             else:
-                ax.bar([1], [-10], color='gray', alpha=0.3, width=0.5)
-                ax.text(0.5, 0.5, 'Drawdown Analysis\n\nâ³ Portfolio calculation\nin progress...',
-                        ha='center', va='center', transform=ax.transAxes,
-                        bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8),
-                        fontsize=12)
+                ax.bar([1], [-10], color="gray", alpha=0.3, width=0.5)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Drawdown Analysis\n\nâ³ Portfolio calculation\nin progress...",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
+                    bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.8),
+                    fontsize=12,
+                )
                 ax.set_title("Drawdown (Pending)")
                 ax.set_ylim(-10, 0)
         except Exception as e:
-            ax.text(0.5, 0.5, f'Drawdown Error:\n{str(e)[:30]}',
-                    ha='center', va='center', transform=ax.transAxes, color='red', fontsize=12)
+            ax.text(
+                0.5,
+                0.5,
+                f"Drawdown Error:\n{str(e)[:30]}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+                color="red",
+                fontsize=12,
+            )
             ax.set_title("Drawdown (Error)")
 
     def _create_rule_performance_plot_enhanced(self, ax, comprehensive_report):
         """Create enhanced trading rule performance comparison"""
         try:
-            rule_perf = comprehensive_report.get('rule_performance', {})
+            rule_perf = comprehensive_report.get("rule_performance", {})
             if rule_perf and len(rule_perf) > 0:
                 rules = list(rule_perf.keys())
-                sharpes = [perf.get('sharpe', 0) for perf in rule_perf.values()]
-                methods = [perf.get('method', 'unknown') for perf in rule_perf.values()]
+                sharpes = [perf.get("sharpe", 0) for perf in rule_perf.values()]
+                methods = [perf.get("method", "unknown") for perf in rule_perf.values()]
 
                 # Create color coding based on method
                 colors = []
                 for method in methods:
-                    if method == 'forecast_based':
-                        colors.append('steelblue')
-                    elif method == 'portfolio_estimated':
-                        colors.append('lightblue')
+                    if method == "forecast_based":
+                        colors.append("steelblue")
+                    elif method == "portfolio_estimated":
+                        colors.append("lightblue")
                     else:
-                        colors.append('gray')
+                        colors.append("gray")
 
                 bars = ax.bar(range(len(rules)), sharpes, color=colors, alpha=0.8)
-                ax.set_xlabel('Trading Rules', fontsize=12)
-                ax.set_ylabel('Sharpe Ratio', fontsize=12)
-                ax.set_title('Trading Rule Performance Analysis\n(Blue=Forecast-based, Light Blue=Estimated)',
-                             fontsize=12, fontweight='bold')
+                ax.set_xlabel("Trading Rules", fontsize=12)
+                ax.set_ylabel("Sharpe Ratio", fontsize=12)
+                ax.set_title(
+                    "Trading Rule Performance Analysis\n(Blue=Forecast-based, Light Blue=Estimated)",
+                    fontsize=12,
+                    fontweight="bold",
+                )
 
                 ax.set_xticks(range(len(rules)))
-                ax.set_xticklabels(rules, rotation=45, ha='right', fontsize=10)
+                ax.set_xticklabels(rules, rotation=45, ha="right", fontsize=10)
                 ax.grid(True, alpha=0.3)
-                ax.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+                ax.axhline(y=0, color="black", linestyle="-", alpha=0.5)
 
                 # Add value labels on bars
                 for bar, sharpe, method in zip(bars, sharpes, methods):
                     height = bar.get_height()
-                    label = f'{sharpe:.2f}'
-                    if method == 'forecast_based':
-                        label += '*'
-                    ax.text(bar.get_x() + bar.get_width() / 2,
-                            height + (0.01 if height >= 0 else -0.03),
-                            label, ha='center',
-                            va='bottom' if height >= 0 else 'top', fontsize=9, fontweight='bold')
+                    label = f"{sharpe:.2f}"
+                    if method == "forecast_based":
+                        label += "*"
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        height + (0.01 if height >= 0 else -0.03),
+                        label,
+                        ha="center",
+                        va="bottom" if height >= 0 else "top",
+                        fontsize=9,
+                        fontweight="bold",
+                    )
 
                 # Add legend
-                ax.text(0.02, 0.98, '*Forecast-based analysis\nOthers are estimated',
-                        transform=ax.transAxes, verticalalignment='top',
-                        bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8),
-                        fontsize=9)
+                ax.text(
+                    0.02,
+                    0.98,
+                    "*Forecast-based analysis\nOthers are estimated",
+                    transform=ax.transAxes,
+                    verticalalignment="top",
+                    bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8),
+                    fontsize=9,
+                )
             else:
-                ax.text(0.5, 0.5,
-                        'Rule Performance Analysis\n\nâš™ï¸ Enhanced analysis in progress\n\nCheck console for detailed rule analysis',
-                        ha='center', va='center', transform=ax.transAxes,
-                        bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8),
-                        fontsize=12)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Rule Performance Analysis\n\nâš™ï¸ Enhanced analysis in progress\n\nCheck console for detailed rule analysis",
+                    ha="center",
+                    va="center",
+                    transform=ax.transAxes,
+                    bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.8),
+                    fontsize=12,
+                )
                 ax.set_title("Trading Rule Performance")
         except Exception as e:
-            ax.text(0.5, 0.5, f'Rule Performance Error:\n{str(e)[:50]}',
-                    ha='center', va='center', transform=ax.transAxes, color='red')
+            ax.text(
+                0.5,
+                0.5,
+                f"Rule Performance Error:\n{str(e)[:50]}",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+                color="red",
+            )
             ax.set_title("Rule Performance (Error)")
 
     # Keep all existing health check methods unchanged...
@@ -496,25 +701,25 @@ class ProductionMonitor:
         print("=" * 50)
 
         health_report = {
-            'timestamp': datetime.now(),
-            'overall_status': 'HEALTHY',
-            'alerts': [],
-            'warnings': [],
-            'system_metrics': {},
-            'recommendations': []
+            "timestamp": datetime.now(),
+            "overall_status": "HEALTHY",
+            "alerts": [],
+            "warnings": [],
+            "system_metrics": {},
+            "recommendations": [],
         }
 
         data_status = self._check_data_quality()
-        health_report['data_quality'] = data_status
+        health_report["data_quality"] = data_status
 
         rule_status = self._check_rule_performance()
-        health_report['rule_performance'] = rule_status
+        health_report["rule_performance"] = rule_status
 
         risk_status = self._check_risk_metrics()
-        health_report['risk_metrics'] = risk_status
+        health_report["risk_metrics"] = risk_status
 
         perf_status = self._check_system_performance_fixed()
-        health_report['system_performance'] = perf_status
+        health_report["system_performance"] = perf_status
 
         self._generate_alerts(health_report)
         self._display_health_dashboard(health_report)
@@ -537,11 +742,11 @@ class ProductionMonitor:
                 vol = returns.std() * np.sqrt(252)
 
                 data_metrics[instrument] = {
-                    'last_date': last_date,
-                    'days_stale': days_stale,
-                    'price_gaps': price_gaps,
-                    'annual_vol': vol,
-                    'data_points': len(prices)
+                    "last_date": last_date,
+                    "days_stale": days_stale,
+                    "price_gaps": price_gaps,
+                    "annual_vol": vol,
+                    "data_points": len(prices),
                 }
 
                 if days_stale > 2:
@@ -558,9 +763,9 @@ class ProductionMonitor:
         print(f" âš ï¸ Found {len(data_issues)} data issues")
 
         return {
-            'status': 'PASS' if len(data_issues) < 3 else 'WARN',
-            'issues': data_issues,
-            'metrics': data_metrics
+            "status": "PASS" if len(data_issues) < 3 else "WARN",
+            "issues": data_issues,
+            "metrics": data_metrics,
         }
 
     def _check_rule_performance(self):
@@ -574,7 +779,9 @@ class ProductionMonitor:
                 rule_sharpes = []
                 for instrument in self.instruments[:5]:
                     try:
-                        rule_pandl = self.system.accounts.pandl_for_trading_rule(instrument, rule_name)
+                        rule_pandl = self.system.accounts.pandl_for_trading_rule(
+                            instrument, rule_name
+                        )
                         if rule_pandl is not None:
                             sharpe = rule_pandl.sharpe()
                             rule_sharpes.append(sharpe)
@@ -586,15 +793,19 @@ class ProductionMonitor:
                     std_sharpe = np.std(rule_sharpes)
 
                     rule_metrics[rule_name] = {
-                        'avg_sharpe': avg_sharpe,
-                        'std_sharpe': std_sharpe,
-                        'instruments_tested': len(rule_sharpes)
+                        "avg_sharpe": avg_sharpe,
+                        "std_sharpe": std_sharpe,
+                        "instruments_tested": len(rule_sharpes),
                     }
 
                     if avg_sharpe < 0.1:
-                        rule_issues.append(f"{rule_name}: Low Sharpe ratio ({avg_sharpe:.2f})")
+                        rule_issues.append(
+                            f"{rule_name}: Low Sharpe ratio ({avg_sharpe:.2f})"
+                        )
                     if std_sharpe > 0.5:
-                        rule_issues.append(f"{rule_name}: High Sharpe volatility ({std_sharpe:.2f})")
+                        rule_issues.append(
+                            f"{rule_name}: High Sharpe volatility ({std_sharpe:.2f})"
+                        )
 
             except Exception as e:
                 rule_issues.append(f"{rule_name}: Performance check failed - {e}")
@@ -603,9 +814,9 @@ class ProductionMonitor:
         print(f" âš ï¸ Found {len(rule_issues)} rule issues")
 
         return {
-            'status': 'PASS' if len(rule_issues) == 0 else 'WARN',
-            'issues': rule_issues,
-            'metrics': rule_metrics
+            "status": "PASS" if len(rule_issues) == 0 else "WARN",
+            "issues": rule_issues,
+            "metrics": rule_metrics,
         }
 
     def _check_risk_metrics(self):
@@ -621,16 +832,20 @@ class ProductionMonitor:
                 actual_vol = returns.std() * np.sqrt(252)
                 target_vol = 0.12
 
-                risk_metrics['actual_volatility'] = actual_vol
-                risk_metrics['target_volatility'] = target_vol
-                risk_metrics['vol_deviation'] = abs(actual_vol - target_vol)
+                risk_metrics["actual_volatility"] = actual_vol
+                risk_metrics["target_volatility"] = target_vol
+                risk_metrics["vol_deviation"] = abs(actual_vol - target_vol)
 
                 if abs(actual_vol - target_vol) > self.vol_tolerance:
-                    risk_issues.append(f"Volatility off target: {actual_vol:.1%} vs {target_vol:.1%}")
+                    risk_issues.append(
+                        f"Volatility off target: {actual_vol:.1%} vs {target_vol:.1%}"
+                    )
 
                 extreme_moves = abs(returns) > 0.05
                 if extreme_moves.sum() > len(returns) * 0.05:
-                    risk_issues.append(f"High frequency of extreme moves: {extreme_moves.sum()} days")
+                    risk_issues.append(
+                        f"High frequency of extreme moves: {extreme_moves.sum()} days"
+                    )
 
         except Exception as e:
             risk_issues.append(f"Risk metrics calculation failed: {e}")
@@ -639,9 +854,9 @@ class ProductionMonitor:
         print(f" âš ï¸ Found {len(risk_issues)} risk issues")
 
         return {
-            'status': 'PASS' if len(risk_issues) == 0 else 'WARN',
-            'issues': risk_issues,
-            'metrics': risk_metrics
+            "status": "PASS" if len(risk_issues) == 0 else "WARN",
+            "issues": risk_issues,
+            "metrics": risk_metrics,
         }
 
     def _check_system_performance_fixed(self):
@@ -651,22 +866,33 @@ class ProductionMonitor:
         perf_metrics = {}
 
         try:
-            from perplexity_examples.SS.performance_calculator import EnhancedPerformanceCalculator
-            calculator = EnhancedPerformanceCalculator()
-            comprehensive_metrics = calculator.calculate_comprehensive_performance(self.system)
+            from perplexity_examples.SS.performance_calculator import (
+                EnhancedPerformanceCalculator,
+            )
 
-            if comprehensive_metrics and comprehensive_metrics.get('portfolio_metrics'):
-                pm = comprehensive_metrics['portfolio_metrics']
+            calculator = EnhancedPerformanceCalculator()
+            comprehensive_metrics = calculator.calculate_comprehensive_performance(
+                self.system
+            )
+
+            if comprehensive_metrics and comprehensive_metrics.get("portfolio_metrics"):
+                pm = comprehensive_metrics["portfolio_metrics"]
                 perf_metrics = comprehensive_metrics
 
-                if pm.get('sharpe_ratio', 0) < self.sharpe_threshold:
-                    perf_issues.append(f"Low Sharpe ratio: {pm.get('sharpe_ratio', 0):.2f}")
+                if pm.get("sharpe_ratio", 0) < self.sharpe_threshold:
+                    perf_issues.append(
+                        f"Low Sharpe ratio: {pm.get('sharpe_ratio', 0):.2f}"
+                    )
 
-                if pm.get('max_drawdown', 0) < -self.drawdown_threshold:
-                    perf_issues.append(f"High drawdown: {pm.get('max_drawdown', 0):.1%}")
+                if pm.get("max_drawdown", 0) < -self.drawdown_threshold:
+                    perf_issues.append(
+                        f"High drawdown: {pm.get('max_drawdown', 0):.1%}"
+                    )
 
-                if pm.get('annual_volatility', 0) > 0.20:
-                    perf_issues.append(f"High volatility: {pm.get('annual_volatility', 0):.1%}")
+                if pm.get("annual_volatility", 0) > 0.20:
+                    perf_issues.append(
+                        f"High volatility: {pm.get('annual_volatility', 0):.1%}"
+                    )
             else:
                 perf_issues.append("Performance calculation failed or returned no data")
 
@@ -677,31 +903,40 @@ class ProductionMonitor:
         print(f" âš ï¸ Found {len(perf_issues)} performance issues")
 
         return {
-            'status': 'PASS' if len(perf_issues) == 0 else 'WARN',
-            'issues': perf_issues,
-            'metrics': perf_metrics
+            "status": "PASS" if len(perf_issues) == 0 else "WARN",
+            "issues": perf_issues,
+            "metrics": perf_metrics,
         }
 
     def _generate_alerts(self, health_report):
         """Generate alerts and recommendations based on health check"""
-        for section in ['data_quality', 'rule_performance', 'risk_metrics', 'system_performance']:
-            if health_report[section]['status'] == 'WARN':
-                health_report['overall_status'] = 'WARNING'
-                for issue in health_report[section]['issues']:
-                    health_report['alerts'].append(f"{section.upper()}: {issue}")
+        for section in [
+            "data_quality",
+            "rule_performance",
+            "risk_metrics",
+            "system_performance",
+        ]:
+            if health_report[section]["status"] == "WARN":
+                health_report["overall_status"] = "WARNING"
+                for issue in health_report[section]["issues"]:
+                    health_report["alerts"].append(f"{section.upper()}: {issue}")
 
-        if health_report['overall_status'] == 'WARNING':
-            health_report['recommendations'].extend([
-                "Review flagged issues before live trading",
-                "Consider reducing position sizes until issues resolved",
-                "Implement additional monitoring during issue resolution"
-            ])
+        if health_report["overall_status"] == "WARNING":
+            health_report["recommendations"].extend(
+                [
+                    "Review flagged issues before live trading",
+                    "Consider reducing position sizes until issues resolved",
+                    "Implement additional monitoring during issue resolution",
+                ]
+            )
         else:
-            health_report['recommendations'].extend([
-                "System appears healthy for production deployment",
-                "Continue regular monitoring",
-                "Consider scaling to additional instruments"
-            ])
+            health_report["recommendations"].extend(
+                [
+                    "System appears healthy for production deployment",
+                    "Continue regular monitoring",
+                    "Consider scaling to additional instruments",
+                ]
+            )
 
     def _display_health_dashboard(self, health_report):
         """Display comprehensive health dashboard"""
@@ -709,28 +944,34 @@ class ProductionMonitor:
         print("ðŸ¥ PRODUCTION HEALTH DASHBOARD v2.1")
         print("=" * 60)
 
-        status_icon = "âœ…" if health_report['overall_status'] == 'HEALTHY' else "âš ï¸"
+        status_icon = (
+            "âœ…" if health_report["overall_status"] == "HEALTHY" else "âš ï¸"
+        )
         print(f"{status_icon} OVERALL STATUS: {health_report['overall_status']}")
-        print(f"ðŸ“… Check Time: {health_report['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+        print(
+            f"ðŸ“… Check Time: {health_report['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"
+        )
 
-        if health_report['alerts']:
+        if health_report["alerts"]:
             print(f"\nðŸš¨ ALERTS ({len(health_report['alerts'])}):")
-            for alert in health_report['alerts'][:10]:
+            for alert in health_report["alerts"][:10]:
                 print(f" â€¢ {alert}")
 
-        if ('system_performance' in health_report and
-                health_report['system_performance']['metrics'] and
-                health_report['system_performance']['metrics'].get('portfolio_metrics')):
-            pm = health_report['system_performance']['metrics']['portfolio_metrics']
+        if (
+            "system_performance" in health_report
+            and health_report["system_performance"]["metrics"]
+            and health_report["system_performance"]["metrics"].get("portfolio_metrics")
+        ):
+            pm = health_report["system_performance"]["metrics"]["portfolio_metrics"]
             print(f"\nðŸ“Š KEY METRICS:")
             print(f" â€¢ Sharpe Ratio: {pm.get('sharpe_ratio', 0):.3f}")
             print(f" â€¢ Annual Return: {pm.get('annual_return', 0):.1%}")
             print(f" â€¢ Max Drawdown: {pm.get('max_drawdown', 0):.1%}")
             print(f" â€¢ Win Rate: {pm.get('win_rate', 0):.1%}")
 
-        if health_report['recommendations']:
+        if health_report["recommendations"]:
             print(f"\nðŸ’¡ RECOMMENDATIONS:")
-            for rec in health_report['recommendations']:
+            for rec in health_report["recommendations"]:
                 print(f" â€¢ {rec}")
 
         print("=" * 60)

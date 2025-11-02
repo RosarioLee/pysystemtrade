@@ -15,7 +15,9 @@ def create_etf_csv_files():
     # Find PySystemTrade's data directory
     current_dir = os.getcwd()
     pysystemtrade_root = os.path.dirname(current_dir)
-    data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+    data_path = os.path.join(
+        pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+    )
 
     print("=== Creating ETF CSV Files ===")
     os.makedirs(data_path, exist_ok=True)
@@ -29,28 +31,36 @@ def create_etf_csv_files():
 
         # Create PySystemTrade-compatible CSV with exact column order from search results
         formatted_data = pd.DataFrame()
-        formatted_data['CARRY'] = etf_data['Adj Close']
-        formatted_data['CARRY_CONTRACT'] = 20991200  # Far future contract date
-        formatted_data['PRICE'] = etf_data['Adj Close']
-        formatted_data['PRICE_CONTRACT'] = 20991200
-        formatted_data['FORWARD'] = etf_data['Adj Close']
-        formatted_data['FORWARD_CONTRACT'] = 20991200
+        formatted_data["CARRY"] = etf_data["Adj Close"]
+        formatted_data["CARRY_CONTRACT"] = 20991200  # Far future contract date
+        formatted_data["PRICE"] = etf_data["Adj Close"]
+        formatted_data["PRICE_CONTRACT"] = 20991200
+        formatted_data["FORWARD"] = etf_data["Adj Close"]
+        formatted_data["FORWARD_CONTRACT"] = 20991200
 
         # Add time component to dates (required by PySystemTrade)
-        formatted_data.index = pd.to_datetime(formatted_data.index.strftime('%Y-%m-%d') + ' 23:00:00')
-        formatted_data.index.name = 'DATETIME'
+        formatted_data.index = pd.to_datetime(
+            formatted_data.index.strftime("%Y-%m-%d") + " 23:00:00"
+        )
+        formatted_data.index.name = "DATETIME"
 
         # Ensure exact data types
-        formatted_data['CARRY'] = formatted_data['CARRY'].astype('float64')
-        formatted_data['PRICE'] = formatted_data['PRICE'].astype('float64')
-        formatted_data['FORWARD'] = formatted_data['FORWARD'].astype('float64')
-        formatted_data['CARRY_CONTRACT'] = formatted_data['CARRY_CONTRACT'].astype('int64')
-        formatted_data['PRICE_CONTRACT'] = formatted_data['PRICE_CONTRACT'].astype('int64')
-        formatted_data['FORWARD_CONTRACT'] = formatted_data['FORWARD_CONTRACT'].astype('int64')
+        formatted_data["CARRY"] = formatted_data["CARRY"].astype("float64")
+        formatted_data["PRICE"] = formatted_data["PRICE"].astype("float64")
+        formatted_data["FORWARD"] = formatted_data["FORWARD"].astype("float64")
+        formatted_data["CARRY_CONTRACT"] = formatted_data["CARRY_CONTRACT"].astype(
+            "int64"
+        )
+        formatted_data["PRICE_CONTRACT"] = formatted_data["PRICE_CONTRACT"].astype(
+            "int64"
+        )
+        formatted_data["FORWARD_CONTRACT"] = formatted_data["FORWARD_CONTRACT"].astype(
+            "int64"
+        )
 
         # Save in PySystemTrade's expected location
         file_path = os.path.join(data_path, f"{symbol}.csv")
-        formatted_data.to_csv(file_path, date_format='%Y-%m-%d %H:%M:%S')
+        formatted_data.to_csv(file_path, date_format="%Y-%m-%d %H:%M:%S")
 
         print(f"✅ {symbol} saved: {len(formatted_data)} rows")
 
@@ -72,7 +82,9 @@ def create_etf_trading_system():
 
     for etf in etf_symbols:
         if etf not in available_instruments:
-            raise Exception(f"{etf} not found in PySystemTrade data. Available: {available_instruments[:10]}...")
+            raise Exception(
+                f"{etf} not found in PySystemTrade data. Available: {available_instruments[:10]}..."
+            )
         else:
             print(f"✅ {etf} found in PySystemTrade")
 
@@ -80,7 +92,7 @@ def create_etf_trading_system():
     ewmac_rule = TradingRule(
         ewmac,
         ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-        dict(Lfast=8, Lslow=32)
+        dict(Lfast=8, Lslow=32),
     )
 
     # System configuration (following search results [7] pattern)
@@ -88,7 +100,7 @@ def create_etf_trading_system():
         "trading_rules": {"ewmac_momentum": ewmac_rule},
         "instruments": etf_symbols,
         "forecast_weights": {"ewmac_momentum": 1.0},
-        "instrument_weights": {etf: 0.5 for etf in etf_symbols}  # Equal weights
+        "instrument_weights": {etf: 0.5 for etf in etf_symbols},  # Equal weights
     }
 
     # Create system using PySystemTrade's standard approach
@@ -122,13 +134,16 @@ def run_etf_analysis():
             signal = "BUY" if forecast.iloc[-1] > 0 else "SELL"
             print(f"{etf}: {forecast.iloc[-1]:.2f} ({signal})")
 
-        print(f"\n🎉 Your ETF systematic trading system is working using PySystemTrade's native approach!")
+        print(
+            f"\n🎉 Your ETF systematic trading system is working using PySystemTrade's native approach!"
+        )
 
         return system
 
     except Exception as e:
         print(f"Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

@@ -10,15 +10,15 @@ data_source = csvFuturesSimData()
 
 # Find the correct data path attribute
 print("Available attributes:")
-data_attrs = [attr for attr in dir(data_source) if not attr.startswith('_')]
+data_attrs = [attr for attr in dir(data_source) if not attr.startswith("_")]
 print(data_attrs[:10])  # Show first 10 attributes
 
 # Try to get the data path using different methods
 try:
     # Method 1: Check if there's a data directory attribute
-    if hasattr(data_source, 'data_directory'):
+    if hasattr(data_source, "data_directory"):
         print(f"Data directory: {data_source.data_directory}")
-    elif hasattr(data_source, '_datapath'):
+    elif hasattr(data_source, "_datapath"):
         print(f"Data path: {data_source._datapath}")
     else:
         print("No obvious data path attribute found")
@@ -48,7 +48,7 @@ print(f"\nCurrent working directory: {os.getcwd()}")
 # Check if your data files exist
 data_files = [
     "data/futures/multiple_prices_csv/IVV.csv",
-    "data/futures/multiple_prices_csv/HYD.csv"
+    "data/futures/multiple_prices_csv/HYD.csv",
 ]
 
 for file_path in data_files:

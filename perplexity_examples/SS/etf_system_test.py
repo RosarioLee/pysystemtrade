@@ -11,16 +11,20 @@ def download_etf_data(symbol, start_date="2020-01-01"):
 
     # PySystemTrade expects 'PRICE' column in simple format
     formatted_data = pd.DataFrame()
-    formatted_data['PRICE'] = data['Adj Close']
-    formatted_data.index.name = 'DATETIME'  # PySystemTrade expects this index name
+    formatted_data["PRICE"] = data["Adj Close"]
+    formatted_data.index.name = "DATETIME"  # PySystemTrade expects this index name
 
     return formatted_data
 
 
 # Find the correct PySystemTrade data directory
 # Go up from perplexity_examples to pysystemtrade root, then to data directory
-pysystemtrade_root = os.path.dirname(os.getcwd())  # Go up one level from perplexity_examples
-correct_data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+pysystemtrade_root = os.path.dirname(
+    os.getcwd()
+)  # Go up one level from perplexity_examples
+correct_data_path = os.path.join(
+    pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+)
 
 print(f"Saving to PySystemTrade data directory: {correct_data_path}")
 

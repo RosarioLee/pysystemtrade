@@ -4,7 +4,7 @@ import os
 import sys
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -24,13 +24,15 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
         print("Initializing system...")
         config_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "private", "etf_system", "config_v1.1.yaml"
+            "private",
+            "etf_system",
+            "config_v1.1.yaml",
         )
 
         etf_system = EnhancedETFSystem(
             config_path=config_path,
             test_mode=test_mode,
-            max_instruments=max_instruments
+            max_instruments=max_instruments,
         )
 
         # Step 2: Data acquisition and system creation
@@ -52,7 +54,9 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
         # Use the NEW comprehensive performance calculator with FIXED error handling
         try:
             calculator = EnhancedPerformanceCalculator(target_vol=0.12)
-            comprehensive_performance = calculator.calculate_comprehensive_performance(system)
+            comprehensive_performance = calculator.calculate_comprehensive_performance(
+                system
+            )
 
             if comprehensive_performance is None:
                 print("âš ï¸ Using fallback performance calculation")
@@ -61,11 +65,11 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
                 if basic_performance:
                     # Convert basic performance to comprehensive format
                     comprehensive_performance = {
-                        'portfolio_metrics': basic_performance,
-                        'rule_performance': {},
-                        'instrument_performance': {},
-                        'cost_analysis': {},
-                        'etf_statistics': {}
+                        "portfolio_metrics": basic_performance,
+                        "rule_performance": {},
+                        "instrument_performance": {},
+                        "cost_analysis": {},
+                        "etf_statistics": {},
                     }
                 else:
                     comprehensive_performance = None
@@ -81,11 +85,17 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
         enhanced_analysis = None
         try:
             if comprehensive_performance is not None:
-                enhanced_analysis = monitor.run_enhanced_performance_analysis_separated(comprehensive_performance)
+                enhanced_analysis = monitor.run_enhanced_performance_analysis_separated(
+                    comprehensive_performance
+                )
             else:
-                print("âš ï¸ Skipping enhanced analysis due to performance calculation failure")
+                print(
+                    "âš ï¸ Skipping enhanced analysis due to performance calculation failure"
+                )
         except Exception as e:
-            print(f"âš ï¸ Enhanced analysis failed, continuing with basic analysis: {e}")
+            print(
+                f"âš ï¸ Enhanced analysis failed, continuing with basic analysis: {e}"
+            )
 
         # Step 4: FIXED Dashboard (avoid duplication)
         print("Creating dashboard...")
@@ -102,13 +112,13 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
         )
 
         results = {
-            'system': system,
-            'compliance_report': compliance_report,
-            'performance_metrics': comprehensive_performance,  # This is the comprehensive report
-            'health_report': health_report,
-            'deployment_status': deployment_status,
-            'monitor': monitor,
-            'calculator': calculator
+            "system": system,
+            "compliance_report": compliance_report,
+            "performance_metrics": comprehensive_performance,  # This is the comprehensive report
+            "health_report": health_report,
+            "deployment_status": deployment_status,
+            "monitor": monitor,
+            "calculator": calculator,
         }
 
         print_summary_fixed(results)
@@ -117,6 +127,7 @@ def main_v2(development_mode=True, test_mode=False, max_instruments=32):
     except Exception as e:
         print(f"âŒ Error: {e}")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -128,29 +139,29 @@ def generate_deployment_report_fixed(system, compliance, performance, health):
     issues = []
 
     # Carver compliance (25 points)
-    if compliance['scalar_compliance'] and compliance['weight_compliance']:
+    if compliance["scalar_compliance"] and compliance["weight_compliance"]:
         deployment_score += 25
     else:
         issues.append("Carver methodology compliance issues")
 
     # Performance metrics (25 points) - FIXED ACCESS
-    if performance and performance.get('portfolio_metrics'):
-        pm = performance['portfolio_metrics']  # Access nested metrics
-        if pm.get('sharpe_ratio', 0) > 0.3:
+    if performance and performance.get("portfolio_metrics"):
+        pm = performance["portfolio_metrics"]  # Access nested metrics
+        if pm.get("sharpe_ratio", 0) > 0.3:
             deployment_score += 15
-        if pm.get('max_drawdown', 0) > -0.2:
+        if pm.get("max_drawdown", 0) > -0.2:
             deployment_score += 10
     else:
         issues.append("Performance metrics below threshold")
 
     # System health (25 points)
-    if health['overall_status'] == 'HEALTHY':
+    if health["overall_status"] == "HEALTHY":
         deployment_score += 25
     else:
         issues.append("System health warnings detected")
 
     # Data quality (25 points)
-    if health['data_quality']['status'] == 'PASS':
+    if health["data_quality"]["status"] == "PASS":
         deployment_score += 25
     else:
         issues.append("Data quality issues detected")
@@ -167,33 +178,40 @@ def generate_deployment_report_fixed(system, compliance, performance, health):
         recommendation = "Significant issues must be resolved"
 
     return {
-        'status': status,
-        'score': deployment_score,
-        'max_score': max_score,
-        'issues': issues,
-        'recommendation': recommendation
+        "status": status,
+        "score": deployment_score,
+        "max_score": max_score,
+        "issues": issues,
+        "recommendation": recommendation,
     }
 
 
 def print_summary_fixed(results):
     """Print concise summary - FIXED VERSION"""
-    print(f"\nâœ… Analysis Complete - {len(results['system'].get_instrument_list())} instruments")
+    print(
+        f"\nâœ… Analysis Complete - {len(results['system'].get_instrument_list())} instruments"
+    )
 
-    if results['performance_metrics'] and results['performance_metrics'].get('portfolio_metrics'):
-        pm = results['performance_metrics']['portfolio_metrics']  # Access nested metrics
+    if results["performance_metrics"] and results["performance_metrics"].get(
+        "portfolio_metrics"
+    ):
+        pm = results["performance_metrics"][
+            "portfolio_metrics"
+        ]  # Access nested metrics
         print(
-            f"ðŸ“ˆ Sharpe: {pm.get('sharpe_ratio', 0):.3f} | Return: {pm.get('annual_return', 0):.1%} | DD: {pm.get('max_drawdown', 0):.1%}")
+            f"ðŸ“ˆ Sharpe: {pm.get('sharpe_ratio', 0):.3f} | Return: {pm.get('annual_return', 0):.1%} | DD: {pm.get('max_drawdown', 0):.1%}"
+        )
     else:
         print("ðŸ“ˆ Performance metrics not available")
 
-    deployment = results['deployment_status']
+    deployment = results["deployment_status"]
     print(f"ðŸš€ Status: {deployment['status']} ({deployment['score']}/100)")
 
-    if deployment['issues']:
-        print("âš ï¸ Issues:", ", ".join(deployment['issues']))
+    if deployment["issues"]:
+        print("âš ï¸ Issues:", ", ".join(deployment["issues"]))
 
 
 if __name__ == "__main__":
     results = main_v2(development_mode=True, test_mode=False, max_instruments=32)
     if results:
-        globals().update({'final_results': results})
+        globals().update({"final_results": results})

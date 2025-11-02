@@ -28,13 +28,13 @@ class DirectETFData(base_data):  # INHERIT FROM baseData
     def get_raw_price(self, instrument):  # Changed from daily_prices to get_raw_price
         """Get raw prices for instrument - required by base class"""
         if instrument == "IVV":
-            prices = self.ivv_data['Adj Close']
+            prices = self.ivv_data["Adj Close"]
         elif instrument == "HYD":
-            prices = self.hyd_data['Adj Close']
+            prices = self.hyd_data["Adj Close"]
         else:
             raise Exception(f"Unknown instrument: {instrument}")
 
-        prices.name = 'price'
+        prices.name = "price"
         return prices
 
     def daily_prices(self, instrument):
@@ -45,8 +45,8 @@ class DirectETFData(base_data):  # INHERIT FROM baseData
         """Calculate daily returns volatility"""
         prices = self.daily_prices(instrument)
         returns = prices.pct_change().dropna()
-        vol = returns.rolling(30).std() * (252 ** 0.5)
-        vol.name = 'volatility'
+        vol = returns.rolling(30).std() * (252**0.5)
+        vol.name = "volatility"
         return vol
 
     def get_instrument_raw_carry_data(self, instrument):
@@ -59,12 +59,12 @@ class DirectETFData(base_data):  # INHERIT FROM baseData
             raise Exception(f"Unknown instrument: {instrument}")
 
         carry_data = pd.DataFrame()
-        carry_data['PRICE'] = etf_data['Adj Close']
-        carry_data['CARRY'] = etf_data['Adj Close']
-        carry_data['PRICE_CONTRACT'] = 20991200
-        carry_data['CARRY_CONTRACT'] = 20991200
-        carry_data['FORWARD'] = etf_data['Adj Close']
-        carry_data['FORWARD_CONTRACT'] = 20991200
+        carry_data["PRICE"] = etf_data["Adj Close"]
+        carry_data["CARRY"] = etf_data["Adj Close"]
+        carry_data["PRICE_CONTRACT"] = 20991200
+        carry_data["CARRY_CONTRACT"] = 20991200
+        carry_data["FORWARD"] = etf_data["Adj Close"]
+        carry_data["FORWARD_CONTRACT"] = 20991200
 
         return carry_data
 
@@ -73,10 +73,12 @@ class DirectETFData(base_data):  # INHERIT FROM baseData
         # Both ETFs are USD-denominated, so for USD/USD pairs return 1.0
         if currency1 == "USD" and currency2 == "USD":
             # Create a time series of 1.0 (no FX conversion needed)
-            fx_rates = pd.Series(1.0, index=self.ivv_data.index, name='fx_rate')
+            fx_rates = pd.Series(1.0, index=self.ivv_data.index, name="fx_rate")
             return fx_rates
         else:
-            raise Exception(f"FX pair {currency1}/{currency2} not supported - only USD ETFs available")
+            raise Exception(
+                f"FX pair {currency1}/{currency2} not supported - only USD ETFs available"
+            )
 
     def get_instrument_list(self):
         """Return list of available instruments"""
@@ -88,7 +90,11 @@ class DirectETFData(base_data):  # INHERIT FROM baseData
 
     def get_raw_cost_data(self, instrument):
         """Get cost data - simple cost structure for ETFs"""
-        return {'price_slippage': 0.01, 'value_of_block_price_move': 1.0, 'block_trade_size': 1.0}
+        return {
+            "price_slippage": 0.01,
+            "value_of_block_price_move": 1.0,
+            "block_trade_size": 1.0,
+        }
 
     def get_instrument_currency(self, instrument):
         """Get instrument currency - both ETFs are USD"""
@@ -110,7 +116,7 @@ class ETFTradingSystemDirect:
         ewmac_rule = TradingRule(
             ewmac,
             ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-            dict(Lfast=self.ewmac_fast, Lslow=self.ewmac_slow)
+            dict(Lfast=self.ewmac_fast, Lslow=self.ewmac_slow),
         )
 
         # System configuration
@@ -118,7 +124,9 @@ class ETFTradingSystemDirect:
             "trading_rules": {"ewmac_momentum": ewmac_rule},
             "instruments": self.etf_symbols,
             "forecast_weights": {"ewmac_momentum": 1.0},
-            "instrument_weights": {etf: 1.0 / len(self.etf_symbols) for etf in self.etf_symbols}
+            "instrument_weights": {
+                etf: 1.0 / len(self.etf_symbols) for etf in self.etf_symbols
+            },
         }
 
         # Create system with our custom data source
@@ -144,7 +152,7 @@ class ETFTradingSystemDirect:
 
             results[etf] = {
                 "latest_price": float(latest_price),
-                "latest_volatility": float(latest_vol)
+                "latest_volatility": float(latest_vol),
             }
 
         return results
@@ -155,10 +163,7 @@ class ETFTradingSystemDirect:
             self.create_system()
 
         portfolio = self.system.accounts.portfolio()
-        results = {
-            "portfolio_sharpe": portfolio.sharpe(),
-            "individual_performance": {}
-        }
+        results = {"portfolio_sharpe": portfolio.sharpe(), "individual_performance": {}}
 
         # Individual ETF performance
         for etf in self.etf_symbols:
@@ -190,7 +195,9 @@ if __name__ == "__main__":
     print("\n=== Latest Market Data ===")
     latest_data = etf_system.get_latest_data()
     for etf, data in latest_data.items():
-        print(f"{etf}: ${data['latest_price']:.2f}, Vol: {data['latest_volatility']:.1%}")
+        print(
+            f"{etf}: ${data['latest_price']:.2f}, Vol: {data['latest_volatility']:.1%}"
+        )
 
     # Run trading system
     try:
@@ -199,7 +206,7 @@ if __name__ == "__main__":
 
         print(f"Portfolio Sharpe Ratio: {performance['portfolio_sharpe']:.2f}")
 
-        for etf, sharpe in performance['individual_performance'].items():
+        for etf, sharpe in performance["individual_performance"].items():
             print(f"{etf} Sharpe: {sharpe:.2f}")
 
         print("\n=== Latest Trading Signals ===")

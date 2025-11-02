@@ -10,24 +10,28 @@ def create_etf_data_with_correct_datetime(symbol, start_date="2020-01-01"):
 
     # Create formatted data with ALL required columns
     formatted_data = pd.DataFrame()
-    formatted_data['CARRY'] = data['Adj Close']
-    formatted_data['CARRY_CONTRACT'] = 20991200
-    formatted_data['PRICE'] = data['Adj Close']
-    formatted_data['PRICE_CONTRACT'] = 20991200
-    formatted_data['FORWARD'] = data['Adj Close']
-    formatted_data['FORWARD_CONTRACT'] = 20991200
+    formatted_data["CARRY"] = data["Adj Close"]
+    formatted_data["CARRY_CONTRACT"] = 20991200
+    formatted_data["PRICE"] = data["Adj Close"]
+    formatted_data["PRICE_CONTRACT"] = 20991200
+    formatted_data["FORWARD"] = data["Adj Close"]
+    formatted_data["FORWARD_CONTRACT"] = 20991200
 
     # CRITICAL FIX: Add time component to match futures format
     # Convert date-only index to datetime with time (23:00:00 like futures)
-    formatted_data.index = pd.to_datetime(formatted_data.index.strftime('%Y-%m-%d') + ' 23:00:00')
-    formatted_data.index.name = 'DATETIME'
+    formatted_data.index = pd.to_datetime(
+        formatted_data.index.strftime("%Y-%m-%d") + " 23:00:00"
+    )
+    formatted_data.index.name = "DATETIME"
 
     return formatted_data
 
 
 # Find correct data path
 pysystemtrade_root = os.path.dirname(os.getcwd())
-correct_data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+correct_data_path = os.path.join(
+    pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+)
 
 print("=== Creating ETF Data with Correct Datetime Format ===")
 

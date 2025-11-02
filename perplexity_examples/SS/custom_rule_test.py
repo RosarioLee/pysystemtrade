@@ -7,7 +7,7 @@ from systems.provided.rules.ewmac import ewmac
 system = futures_system()
 
 # Let's first see how existing rules are structured
-existing_rule = system.rules.trading_rules()['ewmac16_64']
+existing_rule = system.rules.trading_rules()["ewmac16_64"]
 print("=== Existing Rule Structure ===")
 print(f"Existing rule: {existing_rule}")
 print(f"Rule type: {type(existing_rule)}")
@@ -16,7 +16,7 @@ print(f"Rule type: {type(existing_rule)}")
 my_custom_rule = TradingRule(
     ewmac,  # function as first argument, not keyword
     ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-    dict(Lfast=8, Lslow=32)  # other_args as dict
+    dict(Lfast=8, Lslow=32),  # other_args as dict
 )
 
 print(f"\n=== Your Custom Rule ===")
@@ -29,7 +29,8 @@ try:
     forecast = ewmac(
         system.rawdata.get_daily_prices(instrument),
         system.rawdata.daily_returns_volatility(instrument),
-        Lfast=8, Lslow=32
+        Lfast=8,
+        Lslow=32,
     )
 
     print(f"\nCustom EWMAC(8,32) forecast for {instrument}:")

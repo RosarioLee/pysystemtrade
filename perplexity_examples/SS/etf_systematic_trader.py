@@ -18,19 +18,21 @@ class ETFSystematicTrader:
         if config_path is None:
             config_path = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
-                "private", "etf_system", "config.yaml"
+                "private",
+                "etf_system",
+                "config.yaml",
             )
 
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 self.config_data = yaml.safe_load(file)
         except FileNotFoundError:
             print(f"⚠️  Config file not found, using default configuration")
             self.config_data = self.get_default_config()
 
-        self.instruments = self.config_data['instruments']
-        self.instrument_weights = self.config_data['instrument_weights']
-        self.vol_target = self.config_data['percentage_vol_target']
+        self.instruments = self.config_data["instruments"]
+        self.instrument_weights = self.config_data["instrument_weights"]
+        self.vol_target = self.config_data["percentage_vol_target"]
         self.etf_data = {}
 
         # Set up PySystemTrade directory structure
@@ -44,7 +46,9 @@ class ETFSystematicTrader:
         os.makedirs(self.csv_dir, exist_ok=True)
         os.makedirs(self.config_dir, exist_ok=True)
 
-        print(f"✅ ETF Systematic Trader initialized with {len(self.instruments)} instruments")
+        print(
+            f"✅ ETF Systematic Trader initialized with {len(self.instruments)} instruments"
+        )
         print(f"📁 Data directory: {self.data_dir}")
         print(f"📁 Using existing instrumentconfig.csv (no modifications needed)")
 
@@ -53,10 +57,10 @@ class ETFSystematicTrader:
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         while current_dir != os.path.dirname(current_dir):
-            if 'pysystemtrade' in os.path.basename(current_dir):
+            if "pysystemtrade" in os.path.basename(current_dir):
                 return current_dir
-            if os.path.exists(os.path.join(current_dir, 'pysystemtrade')):
-                return os.path.join(current_dir, 'pysystemtrade')
+            if os.path.exists(os.path.join(current_dir, "pysystemtrade")):
+                return os.path.join(current_dir, "pysystemtrade")
             current_dir = os.path.dirname(current_dir)
 
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -64,12 +68,29 @@ class ETFSystematicTrader:
     def get_default_config(self):
         """Get default configuration"""
         return {
-            'instruments': ['IVV', 'EFA', 'EEM', 'AGG', 'TLT', 'TIP', 'HYG', 'VNQ', 'GLD'],
-            'instrument_weights': {
-                'IVV': 0.3, 'EFA': 0.2, 'EEM': 0.1, 'AGG': 0.2, 'TLT': 0.1,
-                'TIP': 0.05, 'HYG': 0.025, 'VNQ': 0.025, 'GLD': 0.05
+            "instruments": [
+                "IVV",
+                "EFA",
+                "EEM",
+                "AGG",
+                "TLT",
+                "TIP",
+                "HYG",
+                "VNQ",
+                "GLD",
+            ],
+            "instrument_weights": {
+                "IVV": 0.3,
+                "EFA": 0.2,
+                "EEM": 0.1,
+                "AGG": 0.2,
+                "TLT": 0.1,
+                "TIP": 0.05,
+                "HYG": 0.025,
+                "VNQ": 0.025,
+                "GLD": 0.05,
             },
-            'percentage_vol_target': 12.0
+            "percentage_vol_target": 12.0,
         }
 
     def download_data(self, start_date="2020-01-01"):
@@ -86,13 +107,13 @@ class ETFSystematicTrader:
 
                 # Extract Adj Close price series
                 if isinstance(raw_data.columns, pd.MultiIndex):
-                    if 'Adj Close' in raw_data.columns.get_level_values(0):
-                        data = raw_data['Adj Close'].iloc[:, 0]
+                    if "Adj Close" in raw_data.columns.get_level_values(0):
+                        data = raw_data["Adj Close"].iloc[:, 0]
                     else:
                         data = raw_data.iloc[:, -1]
                 else:
-                    if 'Adj Close' in raw_data.columns:
-                        data = raw_data['Adj Close']
+                    if "Adj Close" in raw_data.columns:
+                        data = raw_data["Adj Close"]
                     else:
                         data = raw_data.iloc[:, -1]
 
@@ -143,13 +164,13 @@ class ETFSystematicTrader:
         for instrument, data in self.etf_data.items():
             try:
                 # PySystemTrade expects PRICE column with DATETIME index
-                df = pd.DataFrame({'PRICE': data})
-                df.index.name = 'DATETIME'
+                df = pd.DataFrame({"PRICE": data})
+                df.index.name = "DATETIME"
 
                 if not isinstance(df.index, pd.DatetimeIndex):
                     df.index = pd.to_datetime(df.index)
 
-                df = df[~df.index.duplicated(keep='first')]
+                df = df[~df.index.duplicated(keep="first")]
                 df = df.sort_index()
 
                 csv_path = os.path.join(self.csv_dir, f"{instrument}.csv")
@@ -178,7 +199,7 @@ class ETFSystematicTrader:
 
         try:
             config_df = pd.read_csv(cfg_path)
-            available_instruments = set(config_df['Instrument'].tolist())
+            available_instruments = set(config_df["Instrument"].tolist())
 
             # Check which of our ETFs are in the config
             missing_instruments = []
@@ -194,12 +215,16 @@ class ETFSystematicTrader:
             print(f"📊 ETFs found: {found_instruments}")
 
             if missing_instruments:
-                print(f"⚠️  Missing {len(missing_instruments)} ETFs: {missing_instruments}")
+                print(
+                    f"⚠️  Missing {len(missing_instruments)} ETFs: {missing_instruments}"
+                )
                 print(f"💡 These ETFs need to be added to instrumentconfig.csv")
 
                 # Remove missing instruments from our list
                 self.instruments = found_instruments
-                print(f"🔄 Updated instruments list to {len(self.instruments)} working ETFs")
+                print(
+                    f"🔄 Updated instruments list to {len(self.instruments)} working ETFs"
+                )
 
             return len(found_instruments) > 0
 
@@ -225,8 +250,9 @@ class ETFSystematicTrader:
             return None
 
         # Prepare instrument weights
-        filtered_weights = {k: v for k, v in self.instrument_weights.items()
-                            if k in self.instruments}
+        filtered_weights = {
+            k: v for k, v in self.instrument_weights.items() if k in self.instruments
+        }
 
         if not filtered_weights:
             print("❌ No valid instrument weights found")
@@ -242,21 +268,17 @@ class ETFSystematicTrader:
             "instruments": self.instruments,
             "instrument_weights": normalized_weights,
             "percentage_vol_target": self.vol_target,
-
             # Currency settings
             "base_currency": "USD",
-
             # ENABLE DYNAMIC IDM (as in your YAML config)
             "use_instrument_div_mult_estimates": True,
             "use_instrument_weight_estimates": True,
-
             # Dynamic IDM estimation parameters with 2.5 cap
             "instrument_div_mult_estimate": {
                 "func": "sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list",
                 "ewma_span": 125,  # Smoothing parameter
-                "dm_max": idm_cap  # Cap at 2.5
+                "dm_max": idm_cap,  # Cap at 2.5
             },
-
             # Correlation estimation for IDM calculation
             "instrument_correlation_estimate": {
                 "func": "sysquant.estimators.correlation_over_time.correlation_over_time_for_returns",
@@ -267,25 +289,27 @@ class ETFSystematicTrader:
                 "min_periods": 20,
                 "cleaning": True,
                 "rollyears": 3,
-                "floor_at_zero": True
+                "floor_at_zero": True,
             },
-
             # EWMAC momentum strategy
             "trading_rules": {
                 "ewmac_8_32": {
                     "function": "systems.provided.rules.ewmac.ewmac",
-                    "data": ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-                    "other_args": {"Lfast": 8, "Lslow": 32}
+                    "data": [
+                        "rawdata.get_daily_prices",
+                        "rawdata.daily_returns_volatility",
+                    ],
+                    "other_args": {"Lfast": 8, "Lslow": 32},
                 }
             },
-            "forecast_weights": {"ewmac_8_32": 1.0}
+            "forecast_weights": {"ewmac_8_32": 1.0},
         }
 
         try:
             # Create data source
             data_paths = {
-                'csvFuturesAdjustedPricesData': self.csv_dir,
-                'csvFuturesInstrumentData': self.config_dir
+                "csvFuturesAdjustedPricesData": self.csv_dir,
+                "csvFuturesInstrumentData": self.config_dir,
             }
 
             data = csvFuturesSimData(csv_data_paths=data_paths)
@@ -303,6 +327,7 @@ class ETFSystematicTrader:
         except Exception as e:
             print(f"❌ System creation failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -315,27 +340,24 @@ class ETFSystematicTrader:
             idm_series = system.portfolio.get_instrument_diversification_multiplier()
 
             # Create analysis DataFrame
-            idm_df = pd.DataFrame({
-                'IDM': idm_series,
-                'Date': idm_series.index
-            })
+            idm_df = pd.DataFrame({"IDM": idm_series, "Date": idm_series.index})
 
             # Add analysis columns
-            idm_df['At_Cap'] = idm_df['IDM'] >= 2.5
-            idm_df['Rolling_Mean_30d'] = idm_df['IDM'].rolling(30).mean()
-            idm_df['Rolling_Std_30d'] = idm_df['IDM'].rolling(30).std()
+            idm_df["At_Cap"] = idm_df["IDM"] >= 2.5
+            idm_df["Rolling_Mean_30d"] = idm_df["IDM"].rolling(30).mean()
+            idm_df["Rolling_Std_30d"] = idm_df["IDM"].rolling(30).std()
 
             # Calculate summary statistics
             stats = {
-                'mean': idm_df['IDM'].mean(),
-                'median': idm_df['IDM'].median(),
-                'min': idm_df['IDM'].min(),
-                'max': idm_df['IDM'].max(),
-                'std': idm_df['IDM'].std(),
-                'fraction_at_cap': idm_df['At_Cap'].mean(),
-                'days_at_cap': idm_df['At_Cap'].sum(),
-                'total_days': len(idm_df),
-                'coefficient_of_variation': idm_df['IDM'].std() / idm_df['IDM'].mean()
+                "mean": idm_df["IDM"].mean(),
+                "median": idm_df["IDM"].median(),
+                "min": idm_df["IDM"].min(),
+                "max": idm_df["IDM"].max(),
+                "std": idm_df["IDM"].std(),
+                "fraction_at_cap": idm_df["At_Cap"].mean(),
+                "days_at_cap": idm_df["At_Cap"].sum(),
+                "total_days": len(idm_df),
+                "coefficient_of_variation": idm_df["IDM"].std() / idm_df["IDM"].mean(),
             }
 
             print(f"✅ IDM Analysis Complete:")
@@ -344,16 +366,19 @@ class ETFSystematicTrader:
             print(f"   Min IDM: {stats['min']:.3f}")
             print(f"   Max IDM: {stats['max']:.3f}")
             print(f"   Standard Deviation: {stats['std']:.3f}")
-            print(f"   Coefficient of Variation: {stats['coefficient_of_variation']:.3f}")
             print(
-                f"   Days at Cap (2.5): {stats['days_at_cap']}/{stats['total_days']} ({stats['fraction_at_cap']:.1%})")
+                f"   Coefficient of Variation: {stats['coefficient_of_variation']:.3f}"
+            )
+            print(
+                f"   Days at Cap (2.5): {stats['days_at_cap']}/{stats['total_days']} ({stats['fraction_at_cap']:.1%})"
+            )
 
             # Stability analysis
-            if stats['coefficient_of_variation'] < 0.1:
+            if stats["coefficient_of_variation"] < 0.1:
                 stability = "Very Stable"
-            elif stats['coefficient_of_variation'] < 0.2:
+            elif stats["coefficient_of_variation"] < 0.2:
                 stability = "Stable"
-            elif stats['coefficient_of_variation'] < 0.3:
+            elif stats["coefficient_of_variation"] < 0.3:
                 stability = "Moderately Stable"
             else:
                 stability = "Unstable"
@@ -365,6 +390,7 @@ class ETFSystematicTrader:
         except Exception as e:
             print(f"❌ IDM analysis failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None, None
 
@@ -377,62 +403,102 @@ class ETFSystematicTrader:
 
         # Plot 1: IDM Time Series with Cap Line
         ax1 = axes[0, 0]
-        ax1.plot(idm_df['Date'], idm_df['IDM'], linewidth=1.5, color='blue', label='Dynamic IDM')
-        ax1.axhline(y=2.5, color='red', linestyle='--', linewidth=2, label='IDM Cap (2.5)')
-        ax1.fill_between(idm_df['Date'], idm_df['IDM'], 2.5,
-                         where=(idm_df['IDM'] >= 2.5), color='red', alpha=0.3, label='At Cap')
-        ax1.set_title('Dynamic IDM Over Time', fontsize=14, fontweight='bold')
-        ax1.set_ylabel('IDM Value')
+        ax1.plot(
+            idm_df["Date"],
+            idm_df["IDM"],
+            linewidth=1.5,
+            color="blue",
+            label="Dynamic IDM",
+        )
+        ax1.axhline(
+            y=2.5, color="red", linestyle="--", linewidth=2, label="IDM Cap (2.5)"
+        )
+        ax1.fill_between(
+            idm_df["Date"],
+            idm_df["IDM"],
+            2.5,
+            where=(idm_df["IDM"] >= 2.5),
+            color="red",
+            alpha=0.3,
+            label="At Cap",
+        )
+        ax1.set_title("Dynamic IDM Over Time", fontsize=14, fontweight="bold")
+        ax1.set_ylabel("IDM Value")
         ax1.legend()
         ax1.grid(True, alpha=0.3)
 
         # Plot 2: IDM with Rolling Statistics
         ax2 = axes[0, 1]
-        ax2.plot(idm_df['Date'], idm_df['IDM'], alpha=0.5, color='blue', label='Daily IDM')
-        ax2.plot(idm_df['Date'], idm_df['Rolling_Mean_30d'], color='red', linewidth=2, label='30-Day Mean')
+        ax2.plot(
+            idm_df["Date"], idm_df["IDM"], alpha=0.5, color="blue", label="Daily IDM"
+        )
+        ax2.plot(
+            idm_df["Date"],
+            idm_df["Rolling_Mean_30d"],
+            color="red",
+            linewidth=2,
+            label="30-Day Mean",
+        )
 
         # Add confidence bands
-        upper_band = idm_df['Rolling_Mean_30d'] + idm_df['Rolling_Std_30d']
-        lower_band = idm_df['Rolling_Mean_30d'] - idm_df['Rolling_Std_30d']
-        ax2.fill_between(idm_df['Date'], lower_band, upper_band, alpha=0.2, color='red', label='±1 Std Dev')
+        upper_band = idm_df["Rolling_Mean_30d"] + idm_df["Rolling_Std_30d"]
+        lower_band = idm_df["Rolling_Mean_30d"] - idm_df["Rolling_Std_30d"]
+        ax2.fill_between(
+            idm_df["Date"],
+            lower_band,
+            upper_band,
+            alpha=0.2,
+            color="red",
+            label="±1 Std Dev",
+        )
 
-        ax2.axhline(y=2.5, color='orange', linestyle='--', label='Cap (2.5)')
-        ax2.set_title('IDM with Rolling Statistics', fontsize=14, fontweight='bold')
-        ax2.set_ylabel('IDM Value')
+        ax2.axhline(y=2.5, color="orange", linestyle="--", label="Cap (2.5)")
+        ax2.set_title("IDM with Rolling Statistics", fontsize=14, fontweight="bold")
+        ax2.set_ylabel("IDM Value")
         ax2.legend()
         ax2.grid(True, alpha=0.3)
 
         # Plot 3: IDM Distribution
         ax3 = axes[1, 0]
-        ax3.hist(idm_df['IDM'], bins=50, alpha=0.7, color='skyblue', edgecolor='black')
-        ax3.axvline(stats['mean'], color='red', linestyle='--', linewidth=2,
-                    label=f"Mean: {stats['mean']:.3f}")
-        ax3.axvline(stats['median'], color='green', linestyle='--', linewidth=2,
-                    label=f"Median: {stats['median']:.3f}")
-        ax3.axvline(2.5, color='orange', linestyle='--', linewidth=2, label='Cap: 2.5')
-        ax3.set_title('IDM Distribution', fontsize=14, fontweight='bold')
-        ax3.set_xlabel('IDM Value')
-        ax3.set_ylabel('Frequency')
+        ax3.hist(idm_df["IDM"], bins=50, alpha=0.7, color="skyblue", edgecolor="black")
+        ax3.axvline(
+            stats["mean"],
+            color="red",
+            linestyle="--",
+            linewidth=2,
+            label=f"Mean: {stats['mean']:.3f}",
+        )
+        ax3.axvline(
+            stats["median"],
+            color="green",
+            linestyle="--",
+            linewidth=2,
+            label=f"Median: {stats['median']:.3f}",
+        )
+        ax3.axvline(2.5, color="orange", linestyle="--", linewidth=2, label="Cap: 2.5")
+        ax3.set_title("IDM Distribution", fontsize=14, fontweight="bold")
+        ax3.set_xlabel("IDM Value")
+        ax3.set_ylabel("Frequency")
         ax3.legend()
         ax3.grid(True, alpha=0.3)
 
         # Plot 4: Summary Statistics Table
         ax4 = axes[1, 1]
-        ax4.axis('off')
+        ax4.axis("off")
 
         # Stability assessment
-        cv = stats['coefficient_of_variation']
+        cv = stats["coefficient_of_variation"]
         if cv < 0.1:
-            stability_color = 'green'
+            stability_color = "green"
             stability = "Very Stable"
         elif cv < 0.2:
-            stability_color = 'lightgreen'
+            stability_color = "lightgreen"
             stability = "Stable"
         elif cv < 0.3:
-            stability_color = 'yellow'
+            stability_color = "yellow"
             stability = "Moderately Stable"
         else:
-            stability_color = 'red'
+            stability_color = "red"
             stability = "Unstable"
 
         summary_text = f"""
@@ -460,11 +526,18 @@ class ETFSystematicTrader:
         {'✅' if cv < 0.2 else '⚠️'} Stability: {stability}
         """
 
-        ax4.text(0.05, 0.95, summary_text, transform=ax4.transAxes,
-                 fontsize=11, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor=stability_color, alpha=0.3))
+        ax4.text(
+            0.05,
+            0.95,
+            summary_text,
+            transform=ax4.transAxes,
+            fontsize=11,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor=stability_color, alpha=0.3),
+        )
 
-        plt.suptitle('Dynamic IDM Analysis Dashboard', fontsize=16, fontweight='bold')
+        plt.suptitle("Dynamic IDM Analysis Dashboard", fontsize=16, fontweight="bold")
         plt.tight_layout()
         plt.show()
 
@@ -499,14 +572,14 @@ class ETFSystematicTrader:
             efficiency = (idm_cap / theoretical_max) * 100
 
             results = {
-                'sharpe_ratio': sharpe_ratio,
-                'current_idm': idm_cap,
-                'theoretical_max_idm': theoretical_max,
-                'diversification_efficiency': efficiency,
-                'idm_cap_used': idm_cap,
-                'portfolio_curve': portfolio_curve,
-                'system': system,
-                'working_instruments': self.instruments
+                "sharpe_ratio": sharpe_ratio,
+                "current_idm": idm_cap,
+                "theoretical_max_idm": theoretical_max,
+                "diversification_efficiency": efficiency,
+                "idm_cap_used": idm_cap,
+                "portfolio_curve": portfolio_curve,
+                "system": system,
+                "working_instruments": self.instruments,
             }
 
             print(f"✅ Backtest Complete:")
@@ -520,6 +593,7 @@ class ETFSystematicTrader:
         except Exception as e:
             print(f"❌ Backtest failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -528,10 +602,10 @@ class ETFSystematicTrader:
         print("=== IDM Scenario Analysis ===")
 
         scenarios = {
-            'Robert Carver (2.5)': 2.5,
-            'Conservative (2.0)': 2.0,
-            'Aggressive (3.0)': 3.0,
-            'Theoretical Max': np.sqrt(len(self.instruments))
+            "Robert Carver (2.5)": 2.5,
+            "Conservative (2.0)": 2.0,
+            "Aggressive (3.0)": 3.0,
+            "Theoretical Max": np.sqrt(len(self.instruments)),
         }
 
         results = {}
@@ -549,9 +623,9 @@ class ETFSystematicTrader:
             print("-" * 60)
 
             for name, result in results.items():
-                sharpe = result['sharpe_ratio']
-                idm = result['current_idm']
-                eff = result['diversification_efficiency']
+                sharpe = result["sharpe_ratio"]
+                idm = result["current_idm"]
+                eff = result["diversification_efficiency"]
                 print(f"{name:<25} {sharpe:<10.4f} {idm:<10.4f} {eff:<12.1f}%")
 
         return results
@@ -564,12 +638,12 @@ class ETFSystematicTrader:
         fig, axes = plt.subplots(2, 2, figsize=(15, 10))
 
         # Portfolio equity curve
-        portfolio_curve = results['portfolio_curve']
-        portfolio_curve.curve().plot(ax=axes[0, 0], title='Portfolio Equity Curve')
+        portfolio_curve = results["portfolio_curve"]
+        portfolio_curve.curve().plot(ax=axes[0, 0], title="Portfolio Equity Curve")
         axes[0, 0].grid(True)
 
         # Performance metrics
-        axes[0, 1].axis('off')
+        axes[0, 1].axis("off")
         metrics_text = f"""
         PERFORMANCE METRICS
 
@@ -583,24 +657,38 @@ class ETFSystematicTrader:
         Robert Carver IDM Cap: {results['idm_cap_used']:.1f}
         """
 
-        axes[0, 1].text(0.1, 0.9, metrics_text, transform=axes[0, 1].transAxes,
-                        fontsize=12, verticalalignment='top', fontfamily='monospace',
-                        bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+        axes[0, 1].text(
+            0.1,
+            0.9,
+            metrics_text,
+            transform=axes[0, 1].transAxes,
+            fontsize=12,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.8),
+        )
 
         # ETF list
-        axes[1, 0].axis('off')
+        axes[1, 0].axis("off")
         etf_text = f"WORKING ETFS ({len(results['working_instruments'])})\n\n"
-        for i, etf in enumerate(results['working_instruments']):
+        for i, etf in enumerate(results["working_instruments"]):
             etf_text += f"{etf}  "
             if (i + 1) % 8 == 0:  # 8 ETFs per line
                 etf_text += "\n"
 
-        axes[1, 0].text(0.1, 0.9, etf_text, transform=axes[1, 0].transAxes,
-                        fontsize=10, verticalalignment='top', fontfamily='monospace',
-                        bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+        axes[1, 0].text(
+            0.1,
+            0.9,
+            etf_text,
+            transform=axes[1, 0].transAxes,
+            fontsize=10,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.8),
+        )
 
         # Summary
-        axes[1, 1].axis('off')
+        axes[1, 1].axis("off")
         summary_text = f"""
         SYSTEMATIC TRADING SUMMARY
 
@@ -615,11 +703,18 @@ class ETFSystematicTrader:
         Status: PRODUCTION READY
         """
 
-        axes[1, 1].text(0.1, 0.9, summary_text, transform=axes[1, 1].transAxes,
-                        fontsize=11, verticalalignment='top', fontfamily='monospace',
-                        bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+        axes[1, 1].text(
+            0.1,
+            0.9,
+            summary_text,
+            transform=axes[1, 1].transAxes,
+            fontsize=11,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8),
+        )
 
-        plt.suptitle('ETF Systematic Trading Dashboard', fontsize=16, fontweight='bold')
+        plt.suptitle("ETF Systematic Trading Dashboard", fontsize=16, fontweight="bold")
         plt.tight_layout()
         plt.show()
 
@@ -660,7 +755,9 @@ if __name__ == "__main__":
                 print(f"📈 Portfolio Sharpe: {sharpe_ratio:.4f}")
                 print(f"🎯 Dynamic IDM Performance:")
                 print(f"   Average IDM: {idm_stats['mean']:.3f}")
-                print(f"   IDM Stability: {idm_stats['coefficient_of_variation']:.3f} (CV)")
+                print(
+                    f"   IDM Stability: {idm_stats['coefficient_of_variation']:.3f} (CV)"
+                )
                 print(f"   Time at Cap: {idm_stats['fraction_at_cap']:.1%}")
 
                 print(f"\n🎉 Dynamic IDM system successfully implemented!")
@@ -674,4 +771,3 @@ if __name__ == "__main__":
         import traceback
 
         traceback.print_exc()
-

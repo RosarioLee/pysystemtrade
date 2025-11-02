@@ -19,7 +19,7 @@ for rule_name in rules.keys():
     rule = rules[rule_name]
     print(f"{rule_name}: {rule}")
 
-instruments = system.data.get_instrument_list()[:5] # First 5 instruments
+instruments = system.data.get_instrument_list()[:5]  # First 5 instruments
 print(f"instruments: {instruments}")
 for instrument in instruments:
     returns = system.data.daily_returns(instrument)

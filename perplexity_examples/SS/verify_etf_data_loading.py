@@ -44,7 +44,7 @@ print(f"Directory exists: {os.path.exists(data_path)}")
 
 if os.path.exists(data_path):
     files = os.listdir(data_path)
-    etf_files = [f for f in files if f.startswith(('IVV', 'HYD'))]
+    etf_files = [f for f in files if f.startswith(("IVV", "HYD"))]
     print(f"ETF files found: {etf_files}")
 else:
     print("❌ Data directory doesn't exist!")

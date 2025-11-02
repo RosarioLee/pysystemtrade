@@ -5,13 +5,17 @@ from systems.provided.rules.ewmac import ewmac
 from sysdata.config.configdata import Config
 
 # Create your proven EWMAC rule (no carry needed)
-my_rule = TradingRule(ewmac, ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"], dict(Lfast=8, Lslow=32))
+my_rule = TradingRule(
+    ewmac,
+    ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
+    dict(Lfast=8, Lslow=32),
+)
 
 # Configure system for ETFs - MOMENTUM ONLY
 my_config_dict = {
     "trading_rules": {"my_ewmac": my_rule},  # Only momentum, no carry
     "instruments": ["IVV", "HYD"],
-    "forecast_weights": {"my_ewmac": 1.0}
+    "forecast_weights": {"my_ewmac": 1.0},
 }
 
 print("=== ETF Momentum-Only System ===")

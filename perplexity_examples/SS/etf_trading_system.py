@@ -25,24 +25,33 @@ class ETFTradingSystem:
         # Debug: Check if ETF files exist in expected location
         current_dir = os.getcwd()
         pysystemtrade_root = os.path.dirname(current_dir)
-        data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+        data_path = os.path.join(
+            pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+        )
 
         for etf in self.etf_symbols:
             file_path = os.path.join(data_path, f"{etf}.csv")
             file_exists = os.path.exists(file_path)
             in_instrument_list = etf in available_instruments
 
-            print(f"{etf}: file exists={file_exists}, in instrument list={in_instrument_list}")
+            print(
+                f"{etf}: file exists={file_exists}, in instrument list={in_instrument_list}"
+            )
 
             if not in_instrument_list:
                 print(f"❌ {etf} data not found in PySystemTrade!")
                 if file_exists:
-                    print(f"   File exists at {file_path} but PySystemTrade can't read it")
+                    print(
+                        f"   File exists at {file_path} but PySystemTrade can't read it"
+                    )
                     # Try to read the file manually to check format
                     try:
                         import pandas as pd
+
                         df = pd.read_csv(file_path, index_col=0, parse_dates=True)
-                        print(f"   File has {len(df)} rows, columns: {list(df.columns)}")
+                        print(
+                            f"   File has {len(df)} rows, columns: {list(df.columns)}"
+                        )
                     except Exception as e:
                         print(f"   Error reading file: {e}")
                 return False
@@ -55,13 +64,15 @@ class ETFTradingSystem:
 
         # Verify data exists first
         if not self.verify_data_available():
-            raise Exception("ETF data not available. Check file format or restart Python session.")
+            raise Exception(
+                "ETF data not available. Check file format or restart Python session."
+            )
 
         # Create EWMAC momentum rule
         ewmac_rule = TradingRule(
             ewmac,
             ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-            dict(Lfast=self.ewmac_fast, Lslow=self.ewmac_slow)
+            dict(Lfast=self.ewmac_fast, Lslow=self.ewmac_slow),
         )
 
         # System configuration
@@ -69,7 +80,9 @@ class ETFTradingSystem:
             "trading_rules": {"ewmac_momentum": ewmac_rule},
             "instruments": self.etf_symbols,
             "forecast_weights": {"ewmac_momentum": 1.0},
-            "instrument_weights": {etf: 1.0 / len(self.etf_symbols) for etf in self.etf_symbols}
+            "instrument_weights": {
+                etf: 1.0 / len(self.etf_symbols) for etf in self.etf_symbols
+            },
         }
 
         # Use default data source (no custom paths)
@@ -82,10 +95,7 @@ class ETFTradingSystem:
             self.create_system()
 
         portfolio = self.system.accounts.portfolio()
-        results = {
-            "portfolio_sharpe": portfolio.sharpe(),
-            "individual_performance": {}
-        }
+        results = {"portfolio_sharpe": portfolio.sharpe(), "individual_performance": {}}
 
         # Individual ETF performance
         for etf in self.etf_symbols:
@@ -108,7 +118,7 @@ if __name__ == "__main__":
 
         print(f"Portfolio Sharpe Ratio: {performance['portfolio_sharpe']:.2f}")
 
-        for etf, sharpe in performance['individual_performance'].items():
+        for etf, sharpe in performance["individual_performance"].items():
             print(f"{etf} Sharpe: {sharpe:.2f}")
 
     except Exception as e:

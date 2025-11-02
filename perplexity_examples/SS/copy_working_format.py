@@ -10,13 +10,18 @@ def copy_working_csv_format():
     # Path to PySystemTrade data
     current_dir = os.getcwd()
     pysystemtrade_root = os.path.dirname(current_dir)
-    data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+    data_path = os.path.join(
+        pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+    )
 
     print("=== Copying Working CSV Format ===")
 
     # Find a working CSV file to use as template
-    working_files = [f for f in os.listdir(data_path)
-                     if f.endswith('.csv') and f not in ['IVV.csv', 'HYD.csv']]
+    working_files = [
+        f
+        for f in os.listdir(data_path)
+        if f.endswith(".csv") and f not in ["IVV.csv", "HYD.csv"]
+    ]
 
     if not working_files:
         print("No working CSV files found!")
@@ -41,29 +46,29 @@ def copy_working_csv_format():
         etf_data = yf.download(symbol, start="2020-01-01", auto_adjust=False)
 
         # Create new dataframe with EXACT same structure as template
-        new_df = pd.DataFrame(index=template_df.index[:len(etf_data)])
+        new_df = pd.DataFrame(index=template_df.index[: len(etf_data)])
 
         # Create datetime index matching template style
-        etf_dates = pd.to_datetime(etf_data.index.strftime('%Y-%m-%d') + ' 23:00:00')
+        etf_dates = pd.to_datetime(etf_data.index.strftime("%Y-%m-%d") + " 23:00:00")
 
         # Trim to available ETF data length
-        available_dates = etf_dates[:len(template_df)]
+        available_dates = etf_dates[: len(template_df)]
 
         # Create ETF dataframe with template's exact structure
         etf_df = pd.DataFrame(index=available_dates)
         etf_df.index.name = template_df.index.name  # Exact same index name
 
         # Fill with ETF data using exact same column order as template
-        price_data = etf_data['Adj Close'].values
+        price_data = etf_data["Adj Close"].values
 
         for col in template_df.columns:
-            if col == 'PRICE':
-                etf_df[col] = price_data[:len(etf_df)]
-            elif col == 'CARRY':
-                etf_df[col] = price_data[:len(etf_df)]
-            elif col == 'FORWARD':
-                etf_df[col] = price_data[:len(etf_df)]
-            elif col in ['PRICE_CONTRACT', 'CARRY_CONTRACT', 'FORWARD_CONTRACT']:
+            if col == "PRICE":
+                etf_df[col] = price_data[: len(etf_df)]
+            elif col == "CARRY":
+                etf_df[col] = price_data[: len(etf_df)]
+            elif col == "FORWARD":
+                etf_df[col] = price_data[: len(etf_df)]
+            elif col in ["PRICE_CONTRACT", "CARRY_CONTRACT", "FORWARD_CONTRACT"]:
                 etf_df[col] = 20991200
             else:
                 # Copy any other columns from template
@@ -75,13 +80,14 @@ def copy_working_csv_format():
 
         # Save with exact same format as template
         output_path = os.path.join(data_path, f"{symbol}.csv")
-        etf_df.to_csv(output_path, date_format='%Y-%m-%d %H:%M:%S')
+        etf_df.to_csv(output_path, date_format="%Y-%m-%d %H:%M:%S")
 
         print(f"✅ {symbol} saved with template format")
         print(f"   Shape: {etf_df.shape}")
         print(f"   Columns: {list(etf_df.columns)}")
         print(
-            f"   Data types match template: {all(etf_df[col].dtype == template_df[col].dtype for col in template_df.columns)}")
+            f"   Data types match template: {all(etf_df[col].dtype == template_df[col].dtype for col in template_df.columns)}"
+        )
 
 
 if __name__ == "__main__":

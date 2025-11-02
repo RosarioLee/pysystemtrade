@@ -23,8 +23,8 @@ class SystemCompletionMonitor:
         while True:
             try:
                 # Find the running Python process
-                for proc in psutil.process_iter(['pid', 'name', 'cpu_percent']):
-                    if process_name in proc.info['name']:
+                for proc in psutil.process_iter(["pid", "name", "cpu_percent"]):
+                    if process_name in proc.info["name"]:
                         cpu_usage = proc.cpu_percent(interval=1)
 
                         # High CPU usage indicates active processing
@@ -37,11 +37,13 @@ class SystemCompletionMonitor:
 
                         elapsed = datetime.now() - self.start_time
 
-                        print(f"⏰ {datetime.now().strftime('%H:%M:%S')} | "
-                              f"Phase: {self.current_phase} | "
-                              f"CPU: {cpu_usage:.1f}% | "
-                              f"Status: {status} | "
-                              f"Elapsed: {elapsed}")
+                        print(
+                            f"⏰ {datetime.now().strftime('%H:%M:%S')} | "
+                            f"Phase: {self.current_phase} | "
+                            f"CPU: {cpu_usage:.1f}% | "
+                            f"Status: {status} | "
+                            f"Elapsed: {elapsed}"
+                        )
 
                         if cpu_usage < 1:
                             print("🎉 SYSTEM EXECUTION APPEARS COMPLETE!")

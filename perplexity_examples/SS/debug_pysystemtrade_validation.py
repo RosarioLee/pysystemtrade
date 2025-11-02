@@ -10,7 +10,9 @@ def debug_csv_validation():
 
     current_dir = os.getcwd()
     pysystemtrade_root = os.path.dirname(current_dir)
-    data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+    data_path = os.path.join(
+        pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+    )
 
     print("=== Debugging PySystemTrade CSV Validation ===")
 
@@ -52,6 +54,7 @@ def debug_csv_validation():
 
         # Download IVV data
         import yfinance as yf
+
         ivv_data = yf.download("IVV", start="2020-01-01", auto_adjust=False)
 
         # Create new dataframe with same structure but IVV prices
@@ -60,10 +63,10 @@ def debug_csv_validation():
         # Replace price data with IVV data (keep same dates as working file)
         for i, (date, row) in enumerate(working_df.iterrows()):
             if i < len(ivv_data):
-                ivv_price = ivv_data['Adj Close'].iloc[i]
-                new_df.loc[date, 'PRICE'] = ivv_price
-                new_df.loc[date, 'CARRY'] = ivv_price
-                new_df.loc[date, 'FORWARD'] = ivv_price
+                ivv_price = ivv_data["Adj Close"].iloc[i]
+                new_df.loc[date, "PRICE"] = ivv_price
+                new_df.loc[date, "CARRY"] = ivv_price
+                new_df.loc[date, "FORWARD"] = ivv_price
 
         # Save modified version
         new_df.to_csv(ivv_file)

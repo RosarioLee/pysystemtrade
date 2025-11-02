@@ -14,7 +14,7 @@ for symbol in ["IVV", "HYD"]:
     print(f"\n{symbol} File Analysis:")
 
     # Read raw file content first
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         first_lines = [f.readline().strip() for _ in range(5)]
 
     print("First 5 raw lines:")
@@ -43,14 +43,18 @@ for symbol in ["IVV", "HYD"]:
 
 # Compare with a working futures file
 print(f"\n=== Comparing with Working Futures File ===")
-working_files = [f for f in os.listdir(data_path) if f.endswith('.csv') and f not in ['IVV.csv', 'HYD.csv']]
+working_files = [
+    f
+    for f in os.listdir(data_path)
+    if f.endswith(".csv") and f not in ["IVV.csv", "HYD.csv"]
+]
 if working_files:
     working_file = working_files[0]
     working_path = os.path.join(data_path, working_file)
 
     print(f"Checking working file: {working_file}")
 
-    with open(working_path, 'r') as f:
+    with open(working_path, "r") as f:
         working_lines = [f.readline().strip() for _ in range(5)]
 
     print("Working file first 5 lines:")

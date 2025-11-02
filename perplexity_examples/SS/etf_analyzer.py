@@ -26,7 +26,9 @@ def analyze_etf_system(etf_symbols):
 
     print(f"\nPortfolio Stats:")
     print(f"Annual Return: {portfolio_curve.pct_change().mean() * 252 * 100:.1f}%")
-    print(f"Annual Volatility: {portfolio_curve.pct_change().std() * (252 ** 0.5) * 100:.1f}%")
+    print(
+        f"Annual Volatility: {portfolio_curve.pct_change().std() * (252 ** 0.5) * 100:.1f}%"
+    )
 
     return system
 

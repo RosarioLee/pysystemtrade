@@ -10,20 +10,22 @@ def create_etf_data_with_futures_format(symbol, start_date="2020-01-01"):
 
     # Create formatted data with all required columns
     formatted_data = pd.DataFrame()
-    formatted_data['PRICE'] = data['Adj Close']
+    formatted_data["PRICE"] = data["Adj Close"]
 
     # For ETFs, we don't have carry or contracts, so we'll use the price
-    formatted_data['CARRY'] = data['Adj Close']  # Same as price for ETFs
-    formatted_data['PRICE_CONTRACT'] = '20991200'  # Dummy contract (far future)
-    formatted_data['CARRY_CONTRACT'] = '20991200'  # Same dummy contract
+    formatted_data["CARRY"] = data["Adj Close"]  # Same as price for ETFs
+    formatted_data["PRICE_CONTRACT"] = "20991200"  # Dummy contract (far future)
+    formatted_data["CARRY_CONTRACT"] = "20991200"  # Same dummy contract
 
-    formatted_data.index.name = 'DATETIME'
+    formatted_data.index.name = "DATETIME"
     return formatted_data
 
 
 # Find correct data path
 pysystemtrade_root = os.path.dirname(os.getcwd())
-correct_data_path = os.path.join(pysystemtrade_root, "data", "futures", "multiple_prices_csv")
+correct_data_path = os.path.join(
+    pysystemtrade_root, "data", "futures", "multiple_prices_csv"
+)
 
 print("=== Creating ETF Data with Futures Format ===")
 

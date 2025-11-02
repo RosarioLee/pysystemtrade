@@ -10,7 +10,7 @@ import seaborn as sns
 from datetime import datetime, timedelta
 import warnings
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 from systems.provided.futures_chapter15.basesystem import futures_system
 from sysdata.config.configdata import Config
@@ -30,21 +30,23 @@ class MultiForecastETFSystem:
         if config_path is None:
             config_path = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)),
-                "private", "etf_system", "config.yaml"
+                "private",
+                "etf_system",
+                "config.yaml",
             )
 
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 self.config_data = yaml.safe_load(file)
         except FileNotFoundError:
             print(f"⚠️ Config file not found at: {config_path}")
             raise
 
         # Extract configuration
-        self.instruments = self.config_data['instruments']
-        self.instrument_weights = self.config_data['instrument_weights']
-        self.vol_target = self.config_data['percentage_vol_target']
-        self.trading_rules = self.config_data['trading_rules']
+        self.instruments = self.config_data["instruments"]
+        self.instrument_weights = self.config_data["instrument_weights"]
+        self.vol_target = self.config_data["percentage_vol_target"]
+        self.trading_rules = self.config_data["trading_rules"]
 
         # Initialize data storage
         self.etf_data = {}
@@ -76,10 +78,10 @@ class MultiForecastETFSystem:
         """Find the pysystemtrade root directory"""
         current_dir = os.path.dirname(os.path.abspath(__file__))
         while current_dir != os.path.dirname(current_dir):
-            if 'pysystemtrade' in os.path.basename(current_dir):
+            if "pysystemtrade" in os.path.basename(current_dir):
                 return current_dir
-            if os.path.exists(os.path.join(current_dir, 'pysystemtrade')):
-                return os.path.join(current_dir, 'pysystemtrade')
+            if os.path.exists(os.path.join(current_dir, "pysystemtrade")):
+                return os.path.join(current_dir, "pysystemtrade")
             current_dir = os.path.dirname(current_dir)
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -88,7 +90,7 @@ class MultiForecastETFSystem:
         print(f"=== Downloading {len(self.instruments)} ETFs ===")
 
         if end_date is None:
-            end_date = datetime.now().strftime('%Y-%m-%d')
+            end_date = datetime.now().strftime("%Y-%m-%d")
 
         successful_downloads = 0
         failed_downloads = []
@@ -98,17 +100,19 @@ class MultiForecastETFSystem:
                 print(f"🔄 Downloading {symbol}...")
 
                 # Download data
-                raw_data = yf.download(symbol, start=start_date, end=end_date, auto_adjust=False)
+                raw_data = yf.download(
+                    symbol, start=start_date, end=end_date, auto_adjust=False
+                )
 
                 # Extract adjusted close price
                 if isinstance(raw_data.columns, pd.MultiIndex):
-                    if 'Adj Close' in raw_data.columns.get_level_values(0):
-                        data = raw_data['Adj Close'].iloc[:, 0]
+                    if "Adj Close" in raw_data.columns.get_level_values(0):
+                        data = raw_data["Adj Close"].iloc[:, 0]
                     else:
                         data = raw_data.iloc[:, -1]
                 else:
-                    if 'Adj Close' in raw_data.columns:
-                        data = raw_data['Adj Close']
+                    if "Adj Close" in raw_data.columns:
+                        data = raw_data["Adj Close"]
                     else:
                         data = raw_data.iloc[:, -1]
 
@@ -171,15 +175,15 @@ class MultiForecastETFSystem:
         for instrument, data in self.etf_data.items():
             try:
                 # PySystemTrade expects PRICE column with DATETIME index
-                df = pd.DataFrame({'PRICE': data})
-                df.index.name = 'DATETIME'
+                df = pd.DataFrame({"PRICE": data})
+                df.index.name = "DATETIME"
 
                 # Ensure datetime index
                 if not isinstance(df.index, pd.DatetimeIndex):
                     df.index = pd.to_datetime(df.index)
 
                 # Remove duplicates and sort
-                df = df[~df.index.duplicated(keep='first')]
+                df = df[~df.index.duplicated(keep="first")]
                 df = df.sort_index()
 
                 # Save to CSV
@@ -209,7 +213,7 @@ class MultiForecastETFSystem:
 
         try:
             config_df = pd.read_csv(cfg_path)
-            available_instruments = set(config_df['Instrument'].tolist())
+            available_instruments = set(config_df["Instrument"].tolist())
 
             # Check which ETFs are available
             found_instruments = []
@@ -224,7 +228,9 @@ class MultiForecastETFSystem:
             print(f"✅ Found {len(found_instruments)} ETFs in instrumentconfig.csv")
 
             if missing_instruments:
-                print(f"⚠️ Missing {len(missing_instruments)} ETFs: {missing_instruments}")
+                print(
+                    f"⚠️ Missing {len(missing_instruments)} ETFs: {missing_instruments}"
+                )
                 print("💡 These ETFs need to be added to instrumentconfig.csv")
 
             # Update valid instruments list
@@ -256,8 +262,11 @@ class MultiForecastETFSystem:
             return None
 
         # Prepare instrument weights for valid instruments only
-        valid_weights = {k: v for k, v in self.instrument_weights.items()
-                         if k in self.valid_instruments}
+        valid_weights = {
+            k: v
+            for k, v in self.instrument_weights.items()
+            if k in self.valid_instruments
+        }
 
         if not valid_weights:
             print("❌ No valid instrument weights")
@@ -276,18 +285,15 @@ class MultiForecastETFSystem:
             "instrument_weights": normalized_weights,
             "percentage_vol_target": self.vol_target,
             "base_currency": "USD",
-
             # Dynamic IDM (preserved from config)
             "use_instrument_div_mult_estimates": True,
             "use_instrument_weight_estimates": True,
-
             # IDM estimation parameters
             "instrument_div_mult_estimate": {
                 "func": "sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list",
                 "ewma_span": 125,
-                "dm_max": 2.5  # Cap at 2.5 as per Robert Carver
+                "dm_max": 2.5,  # Cap at 2.5 as per Robert Carver
             },
-
             # Correlation estimation for IDM
             "instrument_correlation_estimate": {
                 "func": "sysquant.estimators.correlation_over_time.correlation_over_time_for_returns",
@@ -298,29 +304,29 @@ class MultiForecastETFSystem:
                 "min_periods": 20,
                 "cleaning": True,
                 "rollyears": 3,
-                "floor_at_zero": True
+                "floor_at_zero": True,
             },
-
             # Multiple EWMAC trading rules
             "trading_rules": {},
-
             # Dynamic forecast estimation (from config)
-            "use_forecast_scale_estimates": self.config_data.get('use_forecast_scale_estimates', True),
-            "use_forecast_weight_estimates": self.config_data.get('use_forecast_weight_estimates', True),
-            "use_forecast_div_mult_estimates": self.config_data.get('use_forecast_div_mult_estimates', True),
-
+            "use_forecast_scale_estimates": self.config_data.get(
+                "use_forecast_scale_estimates", True
+            ),
+            "use_forecast_weight_estimates": self.config_data.get(
+                "use_forecast_weight_estimates", True
+            ),
+            "use_forecast_div_mult_estimates": self.config_data.get(
+                "use_forecast_div_mult_estimates", True
+            ),
             # Forecast estimation parameters
-            "forecast_weight_estimate": self.config_data.get('forecast_weight_estimate', {
-                "date_method": "expanding",
-                "rollyears": 3,
-                "frequency": "W"
-            }),
-
-            "forecast_scalar_estimate": self.config_data.get('forecast_scalar_estimate', {
-                "date_method": "expanding",
-                "rollyears": 3,
-                "frequency": "W"
-            })
+            "forecast_weight_estimate": self.config_data.get(
+                "forecast_weight_estimate",
+                {"date_method": "expanding", "rollyears": 3, "frequency": "W"},
+            ),
+            "forecast_scalar_estimate": self.config_data.get(
+                "forecast_scalar_estimate",
+                {"date_method": "expanding", "rollyears": 3, "frequency": "W"},
+            ),
         }
 
         # Add trading rules from config
@@ -328,14 +334,14 @@ class MultiForecastETFSystem:
             system_config["trading_rules"][rule_name] = {
                 "function": rule_config["function"],
                 "data": rule_config["data"],
-                "other_args": rule_config["other_args"]
+                "other_args": rule_config["other_args"],
             }
 
         try:
             # Create data source
             data_paths = {
-                'csvFuturesAdjustedPricesData': self.csv_dir,
-                'csvFuturesInstrumentData': self.config_dir
+                "csvFuturesAdjustedPricesData": self.csv_dir,
+                "csvFuturesInstrumentData": self.config_dir,
             }
             data = csvFuturesSimData(csv_data_paths=data_paths)
 
@@ -357,6 +363,7 @@ class MultiForecastETFSystem:
         except Exception as e:
             print(f"❌ System creation failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -368,19 +375,21 @@ class MultiForecastETFSystem:
         trading_rules = system.rules.trading_rules()
 
         forecast_analysis = {
-            'rules': trading_rules,
-            'instruments': instruments,
-            'individual_forecasts': {},
-            'combined_forecasts': {},
-            'forecast_weights': {},
-            'forecast_correlations': {},
-            'performance_metrics': {}
+            "rules": trading_rules,
+            "instruments": instruments,
+            "individual_forecasts": {},
+            "combined_forecasts": {},
+            "forecast_weights": {},
+            "forecast_correlations": {},
+            "performance_metrics": {},
         }
 
         # Sample first 3 instruments for detailed analysis
         sample_instruments = instruments[:3]
 
-        print(f"📊 Analyzing {len(trading_rules)} rules across {len(sample_instruments)} sample instruments")
+        print(
+            f"📊 Analyzing {len(trading_rules)} rules across {len(sample_instruments)} sample instruments"
+        )
 
         # Analyze individual forecasts
         for rule in trading_rules:
@@ -390,34 +399,40 @@ class MultiForecastETFSystem:
             for instrument in sample_instruments:
                 try:
                     # Get scaled forecast
-                    forecast = system.forecastScaleCap.get_scaled_forecast(instrument, rule)
+                    forecast = system.forecastScaleCap.get_scaled_forecast(
+                        instrument, rule
+                    )
                     rule_forecasts[instrument] = forecast
 
                     # Store some basic stats
                     if len(forecast) > 0:
-                        forecast_analysis['performance_metrics'][f"{rule}_{instrument}"] = {
-                            'mean': forecast.mean(),
-                            'std': forecast.std(),
-                            'min': forecast.min(),
-                            'max': forecast.max(),
-                            'count': len(forecast)
+                        forecast_analysis["performance_metrics"][
+                            f"{rule}_{instrument}"
+                        ] = {
+                            "mean": forecast.mean(),
+                            "std": forecast.std(),
+                            "min": forecast.min(),
+                            "max": forecast.max(),
+                            "count": len(forecast),
                         }
                 except Exception as e:
                     print(f"⚠️ {rule} - {instrument}: {str(e)[:50]}...")
 
-            forecast_analysis['individual_forecasts'][rule] = rule_forecasts
+            forecast_analysis["individual_forecasts"][rule] = rule_forecasts
 
         # Analyze combined forecasts
         print("🔄 Analyzing combined forecasts...")
         for instrument in sample_instruments:
             try:
-                combined_forecast = system.combForecast.get_combined_forecast(instrument)
-                forecast_analysis['combined_forecasts'][instrument] = combined_forecast
+                combined_forecast = system.combForecast.get_combined_forecast(
+                    instrument
+                )
+                forecast_analysis["combined_forecasts"][instrument] = combined_forecast
 
                 # Get forecast weights if available
                 try:
                     weights = system.combForecast.get_forecast_weights(instrument)
-                    forecast_analysis['forecast_weights'][instrument] = weights
+                    forecast_analysis["forecast_weights"][instrument] = weights
                 except:
                     pass
 
@@ -430,15 +445,22 @@ class MultiForecastETFSystem:
             try:
                 forecast_data = {}
                 for rule in trading_rules:
-                    if rule in forecast_analysis['individual_forecasts']:
-                        if instrument in forecast_analysis['individual_forecasts'][rule]:
-                            forecast_data[rule] = forecast_analysis['individual_forecasts'][rule][instrument]
+                    if rule in forecast_analysis["individual_forecasts"]:
+                        if (
+                            instrument
+                            in forecast_analysis["individual_forecasts"][rule]
+                        ):
+                            forecast_data[rule] = forecast_analysis[
+                                "individual_forecasts"
+                            ][rule][instrument]
 
                 if len(forecast_data) > 1:
                     forecast_df = pd.DataFrame(forecast_data).dropna()
                     if len(forecast_df) > 0:
                         corr_matrix = forecast_df.corr()
-                        forecast_analysis['forecast_correlations'][instrument] = corr_matrix
+                        forecast_analysis["forecast_correlations"][
+                            instrument
+                        ] = corr_matrix
 
             except Exception as e:
                 print(f"⚠️ Correlation calculation {instrument}: {str(e)[:50]}...")
@@ -455,8 +477,11 @@ class MultiForecastETFSystem:
         single_rules = {
             "ewmac_8_32": {
                 "function": "systems.provided.rules.ewmac.ewmac",
-                "data": ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-                "other_args": {"Lfast": 8, "Lslow": 32}
+                "data": [
+                    "rawdata.get_daily_prices",
+                    "rawdata.daily_returns_volatility",
+                ],
+                "other_args": {"Lfast": 8, "Lslow": 32},
             }
         }
 
@@ -500,17 +525,17 @@ class MultiForecastETFSystem:
             improvement = ((multi_sharpe / single_sharpe) - 1) * 100
 
             comparison_results = {
-                'single_ewmac': {
-                    'sharpe': single_sharpe,
-                    'system': single_system,
-                    'portfolio': single_portfolio
+                "single_ewmac": {
+                    "sharpe": single_sharpe,
+                    "system": single_system,
+                    "portfolio": single_portfolio,
                 },
-                'multi_forecast': {
-                    'sharpe': multi_sharpe,
-                    'system': multi_system,
-                    'portfolio': multi_portfolio
+                "multi_forecast": {
+                    "sharpe": multi_sharpe,
+                    "system": multi_system,
+                    "portfolio": multi_portfolio,
                 },
-                'improvement_pct': improvement
+                "improvement_pct": improvement,
             }
 
             print(f"\n=== PERFORMANCE COMPARISON RESULTS ===")
@@ -542,31 +567,51 @@ class MultiForecastETFSystem:
         try:
             # Try multiple methods to get portfolio data
             portfolio = system.accounts.portfolio()
-            if hasattr(portfolio, 'curve'):
+            if hasattr(portfolio, "curve"):
                 curve_data = portfolio.curve()
                 if len(curve_data) > 10:  # Ensure we have meaningful data
-                    curve_data.plot(ax=ax1, title='Portfolio Equity Curve',
-                                    color='blue', linewidth=2)
+                    curve_data.plot(
+                        ax=ax1,
+                        title="Portfolio Equity Curve",
+                        color="blue",
+                        linewidth=2,
+                    )
                     ax1.grid(True, alpha=0.3)
-                    ax1.set_ylabel('Cumulative Returns')
+                    ax1.set_ylabel("Cumulative Returns")
                 else:
-                    ax1.text(0.5, 0.5, 'Portfolio calculation in progress...\nNeed more data points',
-                             ha='center', va='center', transform=ax1.transAxes, fontsize=12)
+                    ax1.text(
+                        0.5,
+                        0.5,
+                        "Portfolio calculation in progress...\nNeed more data points",
+                        ha="center",
+                        va="center",
+                        transform=ax1.transAxes,
+                        fontsize=12,
+                    )
             else:
                 # Alternative: Show individual instrument performance
                 instruments = system.get_instrument_list()
                 sample_data = system.rawdata.get_daily_prices(instruments[0])
                 sample_returns = sample_data.pct_change().cumsum()
-                sample_returns.tail(252).plot(ax=ax1, title=f'Sample Performance\n{instruments[0]}')
+                sample_returns.tail(252).plot(
+                    ax=ax1, title=f"Sample Performance\n{instruments[0]}"
+                )
                 ax1.grid(True, alpha=0.3)
         except Exception as e:
-            ax1.text(0.5, 0.5, f'Portfolio calculation error:\n{str(e)[:80]}...\n\nTrying forecast calculation...',
-                     ha='center', va='center', transform=ax1.transAxes, fontsize=10)
-            ax1.set_title('Portfolio Analysis')
+            ax1.text(
+                0.5,
+                0.5,
+                f"Portfolio calculation error:\n{str(e)[:80]}...\n\nTrying forecast calculation...",
+                ha="center",
+                va="center",
+                transform=ax1.transAxes,
+                fontsize=10,
+            )
+            ax1.set_title("Portfolio Analysis")
 
         # Plot 2: System Status and Configuration
         ax2 = axes[0, 1]
-        ax2.axis('off')
+        ax2.axis("off")
 
         # Get actual system information
         try:
@@ -614,9 +659,16 @@ class MultiForecastETFSystem:
     ⚠️ Forecast Estimation: Needs Fix
     """
 
-        ax2.text(0.05, 0.95, status_text, transform=ax2.transAxes,
-                 fontsize=10, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+        ax2.text(
+            0.05,
+            0.95,
+            status_text,
+            transform=ax2.transAxes,
+            fontsize=10,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.8),
+        )
 
         # Plot 3: Individual Forecast Analysis
         ax3 = axes[1, 0]
@@ -629,13 +681,17 @@ class MultiForecastETFSystem:
             for instrument in instruments[:5]:  # Try first 5 instruments
                 for rule_name in rules.keys():
                     try:
-                        forecast = system.forecastScaleCap.get_scaled_forecast(instrument, rule_name)
+                        forecast = system.forecastScaleCap.get_scaled_forecast(
+                            instrument, rule_name
+                        )
                         if len(forecast) > 100:  # Need meaningful data
-                            forecast.tail(252).plot(ax=ax3,
-                                                    title=f'Sample Forecast\n{instrument} - {rule_name}',
-                                                    alpha=0.8)
+                            forecast.tail(252).plot(
+                                ax=ax3,
+                                title=f"Sample Forecast\n{instrument} - {rule_name}",
+                                alpha=0.8,
+                            )
                             ax3.grid(True, alpha=0.3)
-                            ax3.set_ylabel('Forecast Value')
+                            ax3.set_ylabel("Forecast Value")
                             forecast_found = True
                             break
                     except:
@@ -644,19 +700,32 @@ class MultiForecastETFSystem:
                     break
 
             if not forecast_found:
-                ax3.text(0.5, 0.5,
-                         'Forecast calculations in progress...\n\nThis may take several minutes for\n32 ETFs with 4 EWMAC rules.\n\nCheck console for progress.',
-                         ha='center', va='center', transform=ax3.transAxes, fontsize=11)
-                ax3.set_title('Forecast Analysis')
+                ax3.text(
+                    0.5,
+                    0.5,
+                    "Forecast calculations in progress...\n\nThis may take several minutes for\n32 ETFs with 4 EWMAC rules.\n\nCheck console for progress.",
+                    ha="center",
+                    va="center",
+                    transform=ax3.transAxes,
+                    fontsize=11,
+                )
+                ax3.set_title("Forecast Analysis")
 
         except Exception as e:
-            ax3.text(0.5, 0.5, f'Forecast error:\n{str(e)[:60]}...\n\nUpdate configuration and restart',
-                     ha='center', va='center', transform=ax3.transAxes, fontsize=10)
-            ax3.set_title('Forecast Analysis - Configuration Needed')
+            ax3.text(
+                0.5,
+                0.5,
+                f"Forecast error:\n{str(e)[:60]}...\n\nUpdate configuration and restart",
+                ha="center",
+                va="center",
+                transform=ax3.transAxes,
+                fontsize=10,
+            )
+            ax3.set_title("Forecast Analysis - Configuration Needed")
 
         # Plot 4: Next Steps and Troubleshooting
         ax4 = axes[1, 1]
-        ax4.axis('off')
+        ax4.axis("off")
 
         troubleshooting_text = """
     TROUBLESHOOTING GUIDE
@@ -690,12 +759,22 @@ class MultiForecastETFSystem:
     • Robert Carver methodology fully implemented
     """
 
-        ax4.text(0.05, 0.95, troubleshooting_text, transform=ax4.transAxes,
-                 fontsize=9, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+        ax4.text(
+            0.05,
+            0.95,
+            troubleshooting_text,
+            transform=ax4.transAxes,
+            fontsize=9,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8),
+        )
 
-        plt.suptitle('Multi-Forecast ETF System - Diagnostic Dashboard',
-                     fontsize=14, fontweight='bold')
+        plt.suptitle(
+            "Multi-Forecast ETF System - Diagnostic Dashboard",
+            fontsize=14,
+            fontweight="bold",
+        )
         plt.tight_layout()
         plt.show()
 
@@ -713,22 +792,44 @@ class MultiForecastETFSystem:
             if portfolio_curve is not None:
                 curve_data = portfolio_curve.curve()
                 if len(curve_data) > 0:
-                    curve_data.plot(ax=axes[0, 0], title='Portfolio Equity Curve',
-                                    color='blue', linewidth=2)
+                    curve_data.plot(
+                        ax=axes[0, 0],
+                        title="Portfolio Equity Curve",
+                        color="blue",
+                        linewidth=2,
+                    )
                     axes[0, 0].grid(True, alpha=0.3)
                 else:
-                    axes[0, 0].text(0.5, 0.5, 'Portfolio data calculating...',
-                                    ha='center', va='center', transform=axes[0, 0].transAxes)
+                    axes[0, 0].text(
+                        0.5,
+                        0.5,
+                        "Portfolio data calculating...",
+                        ha="center",
+                        va="center",
+                        transform=axes[0, 0].transAxes,
+                    )
             else:
-                axes[0, 0].text(0.5, 0.5, 'Portfolio data not ready',
-                                ha='center', va='center', transform=axes[0, 0].transAxes)
+                axes[0, 0].text(
+                    0.5,
+                    0.5,
+                    "Portfolio data not ready",
+                    ha="center",
+                    va="center",
+                    transform=axes[0, 0].transAxes,
+                )
         except Exception as e:
-            axes[0, 0].text(0.5, 0.5, f'Portfolio error:\n{str(e)[:50]}...',
-                            ha='center', va='center', transform=axes[0, 0].transAxes)
+            axes[0, 0].text(
+                0.5,
+                0.5,
+                f"Portfolio error:\n{str(e)[:50]}...",
+                ha="center",
+                va="center",
+                transform=axes[0, 0].transAxes,
+            )
 
         # Plot 2: Trading Rules Summary
         ax2 = axes[0, 1]
-        ax2.axis('off')
+        ax2.axis("off")
 
         rules_text = f"""
     MULTI-FORECAST SYSTEM STATUS
@@ -749,9 +850,16 @@ class MultiForecastETFSystem:
     • Monitor system performance
     """
 
-        ax2.text(0.05, 0.95, rules_text, transform=ax2.transAxes,
-                 fontsize=10, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+        ax2.text(
+            0.05,
+            0.95,
+            rules_text,
+            transform=ax2.transAxes,
+            fontsize=10,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.8),
+        )
 
         # Plot 3: Sample Forecast Data
         ax3 = axes[1, 0]
@@ -763,26 +871,55 @@ class MultiForecastETFSystem:
                 rules = system.rules.trading_rules()
                 if len(rules) > 0:
                     first_rule = list(rules.keys())[0]
-                    forecast = system.forecastScaleCap.get_scaled_forecast(sample_instrument, first_rule)
+                    forecast = system.forecastScaleCap.get_scaled_forecast(
+                        sample_instrument, first_rule
+                    )
                     if len(forecast) > 252:  # If we have enough data
-                        forecast.tail(252).plot(ax=ax3, title=f'Sample Forecast\n{sample_instrument} - {first_rule}')
+                        forecast.tail(252).plot(
+                            ax=ax3,
+                            title=f"Sample Forecast\n{sample_instrument} - {first_rule}",
+                        )
                         ax3.grid(True, alpha=0.3)
                     else:
-                        ax3.text(0.5, 0.5, f'Limited forecast data\n{len(forecast)} points',
-                                 ha='center', va='center', transform=ax3.transAxes)
+                        ax3.text(
+                            0.5,
+                            0.5,
+                            f"Limited forecast data\n{len(forecast)} points",
+                            ha="center",
+                            va="center",
+                            transform=ax3.transAxes,
+                        )
                 else:
-                    ax3.text(0.5, 0.5, 'No trading rules found',
-                             ha='center', va='center', transform=ax3.transAxes)
+                    ax3.text(
+                        0.5,
+                        0.5,
+                        "No trading rules found",
+                        ha="center",
+                        va="center",
+                        transform=ax3.transAxes,
+                    )
             else:
-                ax3.text(0.5, 0.5, 'No instruments found',
-                         ha='center', va='center', transform=ax3.transAxes)
+                ax3.text(
+                    0.5,
+                    0.5,
+                    "No instruments found",
+                    ha="center",
+                    va="center",
+                    transform=ax3.transAxes,
+                )
         except Exception as e:
-            ax3.text(0.5, 0.5, f'Forecast error:\n{str(e)[:50]}...',
-                     ha='center', va='center', transform=ax3.transAxes)
+            ax3.text(
+                0.5,
+                0.5,
+                f"Forecast error:\n{str(e)[:50]}...",
+                ha="center",
+                va="center",
+                transform=ax3.transAxes,
+            )
 
         # Plot 4: System Diagnostics
         ax4 = axes[1, 1]
-        ax4.axis('off')
+        ax4.axis("off")
 
         try:
             instruments = system.get_instrument_list()
@@ -819,12 +956,22 @@ class MultiForecastETFSystem:
     • Restart system
     """
 
-        ax4.text(0.05, 0.95, diagnostics, transform=ax4.transAxes,
-                 fontsize=9, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightcoral', alpha=0.8))
+        ax4.text(
+            0.05,
+            0.95,
+            diagnostics,
+            transform=ax4.transAxes,
+            fontsize=9,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightcoral", alpha=0.8),
+        )
 
-        plt.suptitle('Multi-Forecast ETF System - Simplified Dashboard',
-                     fontsize=14, fontweight='bold')
+        plt.suptitle(
+            "Multi-Forecast ETF System - Simplified Dashboard",
+            fontsize=14,
+            fontweight="bold",
+        )
         plt.tight_layout()
         plt.show()
 
@@ -839,93 +986,164 @@ class MultiForecastETFSystem:
         # Plot 1: Portfolio Performance
         try:
             portfolio_curve = system.accounts.portfolio()
-            portfolio_curve.curve().plot(ax=axes[0, 0],
-                                         title='Portfolio Equity Curve',
-                                         color='blue', linewidth=2)
+            portfolio_curve.curve().plot(
+                ax=axes[0, 0], title="Portfolio Equity Curve", color="blue", linewidth=2
+            )
             axes[0, 0].grid(True, alpha=0.3)
-            axes[0, 0].set_ylabel('Cumulative Returns')
+            axes[0, 0].set_ylabel("Cumulative Returns")
         except Exception as e:
-            axes[0, 0].text(0.5, 0.5, f'Portfolio curve\nnot available\n{str(e)[:30]}...',
-                            ha='center', va='center', transform=axes[0, 0].transAxes)
+            axes[0, 0].text(
+                0.5,
+                0.5,
+                f"Portfolio curve\nnot available\n{str(e)[:30]}...",
+                ha="center",
+                va="center",
+                transform=axes[0, 0].transAxes,
+            )
 
         # Plot 2: Forecast Correlations Heatmap
         ax2 = axes[0, 1]
-        if forecast_analysis['forecast_correlations']:
-            first_instrument = list(forecast_analysis['forecast_correlations'].keys())[0]
-            corr_matrix = forecast_analysis['forecast_correlations'][first_instrument]
+        if forecast_analysis["forecast_correlations"]:
+            first_instrument = list(forecast_analysis["forecast_correlations"].keys())[
+                0
+            ]
+            corr_matrix = forecast_analysis["forecast_correlations"][first_instrument]
 
-            sns.heatmap(corr_matrix, annot=True, ax=ax2, cmap='RdYlBu_r',
-                        center=0, square=True, linewidths=0.5)
-            ax2.set_title(f'Forecast Correlations\n({first_instrument})')
+            sns.heatmap(
+                corr_matrix,
+                annot=True,
+                ax=ax2,
+                cmap="RdYlBu_r",
+                center=0,
+                square=True,
+                linewidths=0.5,
+            )
+            ax2.set_title(f"Forecast Correlations\n({first_instrument})")
         else:
-            ax2.text(0.5, 0.5, 'Forecast correlations\nnot available',
-                     ha='center', va='center', transform=ax2.transAxes)
+            ax2.text(
+                0.5,
+                0.5,
+                "Forecast correlations\nnot available",
+                ha="center",
+                va="center",
+                transform=ax2.transAxes,
+            )
 
         # Plot 3: Dynamic IDM Time Series
         ax3 = axes[0, 2]
         try:
             idm_series = system.portfolio.get_instrument_diversification_multiplier()
-            idm_series.plot(ax=ax3, title='Dynamic IDM Over Time',
-                            color='green', linewidth=2)
-            ax3.axhline(y=2.5, color='red', linestyle='--', label='IDM Cap (2.5)')
+            idm_series.plot(
+                ax=ax3, title="Dynamic IDM Over Time", color="green", linewidth=2
+            )
+            ax3.axhline(y=2.5, color="red", linestyle="--", label="IDM Cap (2.5)")
             ax3.grid(True, alpha=0.3)
             ax3.legend()
-            ax3.set_ylabel('IDM Value')
+            ax3.set_ylabel("IDM Value")
         except Exception as e:
-            ax3.text(0.5, 0.5, f'IDM series\nnot available\n{str(e)[:30]}...',
-                     ha='center', va='center', transform=ax3.transAxes)
+            ax3.text(
+                0.5,
+                0.5,
+                f"IDM series\nnot available\n{str(e)[:30]}...",
+                ha="center",
+                va="center",
+                transform=ax3.transAxes,
+            )
 
         # Plot 4: Forecast Weights Over Time
         ax4 = axes[1, 0]
-        if forecast_analysis['forecast_weights']:
-            first_instrument = list(forecast_analysis['forecast_weights'].keys())[0]
-            weights = forecast_analysis['forecast_weights'][first_instrument]
+        if forecast_analysis["forecast_weights"]:
+            first_instrument = list(forecast_analysis["forecast_weights"].keys())[0]
+            weights = forecast_analysis["forecast_weights"][first_instrument]
 
             if isinstance(weights, pd.DataFrame) and len(weights) > 0:
-                weights.plot(ax=ax4, title=f'Dynamic Forecast Weights\n({first_instrument})')
-                ax4.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+                weights.plot(
+                    ax=ax4, title=f"Dynamic Forecast Weights\n({first_instrument})"
+                )
+                ax4.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
                 ax4.grid(True, alpha=0.3)
             else:
-                ax4.text(0.5, 0.5, 'Forecast weights\nnot available',
-                         ha='center', va='center', transform=ax4.transAxes)
+                ax4.text(
+                    0.5,
+                    0.5,
+                    "Forecast weights\nnot available",
+                    ha="center",
+                    va="center",
+                    transform=ax4.transAxes,
+                )
         else:
-            ax4.text(0.5, 0.5, 'Forecast weights\nnot available',
-                     ha='center', va='center', transform=ax4.transAxes)
+            ax4.text(
+                0.5,
+                0.5,
+                "Forecast weights\nnot available",
+                ha="center",
+                va="center",
+                transform=ax4.transAxes,
+            )
 
         # Plot 5: Individual vs Combined Forecasts
         ax5 = axes[1, 1]
         try:
-            if (forecast_analysis['combined_forecasts'] and
-                    forecast_analysis['individual_forecasts']):
-
-                first_instrument = list(forecast_analysis['combined_forecasts'].keys())[0]
-                combined = forecast_analysis['combined_forecasts'][first_instrument]
+            if (
+                forecast_analysis["combined_forecasts"]
+                and forecast_analysis["individual_forecasts"]
+            ):
+                first_instrument = list(forecast_analysis["combined_forecasts"].keys())[
+                    0
+                ]
+                combined = forecast_analysis["combined_forecasts"][first_instrument]
 
                 # Get first available individual forecast
-                first_rule = list(forecast_analysis['individual_forecasts'].keys())[0]
-                individual = forecast_analysis['individual_forecasts'][first_rule][first_instrument]
+                first_rule = list(forecast_analysis["individual_forecasts"].keys())[0]
+                individual = forecast_analysis["individual_forecasts"][first_rule][
+                    first_instrument
+                ]
 
                 # Plot recent data
                 recent_combined = combined.tail(252)
                 recent_individual = individual.tail(252)
 
-                ax5.plot(recent_combined.index, recent_combined.values,
-                         label='Combined', linewidth=2, alpha=0.8)
-                ax5.plot(recent_individual.index, recent_individual.values,
-                         label=f'Individual ({first_rule})', linewidth=1, alpha=0.6)
-                ax5.set_title(f'Combined vs Individual Forecasts\n({first_instrument}, Last 252 Days)')
+                ax5.plot(
+                    recent_combined.index,
+                    recent_combined.values,
+                    label="Combined",
+                    linewidth=2,
+                    alpha=0.8,
+                )
+                ax5.plot(
+                    recent_individual.index,
+                    recent_individual.values,
+                    label=f"Individual ({first_rule})",
+                    linewidth=1,
+                    alpha=0.6,
+                )
+                ax5.set_title(
+                    f"Combined vs Individual Forecasts\n({first_instrument}, Last 252 Days)"
+                )
                 ax5.legend()
                 ax5.grid(True, alpha=0.3)
             else:
-                ax5.text(0.5, 0.5, 'Forecast comparison\nnot available',
-                         ha='center', va='center', transform=ax5.transAxes)
+                ax5.text(
+                    0.5,
+                    0.5,
+                    "Forecast comparison\nnot available",
+                    ha="center",
+                    va="center",
+                    transform=ax5.transAxes,
+                )
         except Exception as e:
-            ax5.text(0.5, 0.5, f'Forecast comparison\nerror: {str(e)[:30]}...',
-                     ha='center', va='center', transform=ax5.transAxes)
+            ax5.text(
+                0.5,
+                0.5,
+                f"Forecast comparison\nerror: {str(e)[:30]}...",
+                ha="center",
+                va="center",
+                transform=ax5.transAxes,
+            )
 
         # Plot 6: System Performance Metrics
         ax6 = axes[1, 2]
-        ax6.axis('off')
+        ax6.axis("off")
 
         try:
             portfolio_curve = system.accounts.portfolio()
@@ -951,50 +1169,103 @@ RISK MANAGEMENT:
 STATUS: PRODUCTION READY
 """
 
-            ax6.text(0.05, 0.95, metrics_text, transform=ax6.transAxes,
-                     fontsize=10, verticalalignment='top', fontfamily='monospace',
-                     bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+            ax6.text(
+                0.05,
+                0.95,
+                metrics_text,
+                transform=ax6.transAxes,
+                fontsize=10,
+                verticalalignment="top",
+                fontfamily="monospace",
+                bbox=dict(boxstyle="round", facecolor="lightblue", alpha=0.8),
+            )
         except Exception as e:
-            ax6.text(0.5, 0.5, f'Metrics calculation\nerror: {str(e)[:50]}...',
-                     ha='center', va='center', transform=ax6.transAxes)
+            ax6.text(
+                0.5,
+                0.5,
+                f"Metrics calculation\nerror: {str(e)[:50]}...",
+                ha="center",
+                va="center",
+                transform=ax6.transAxes,
+            )
 
         # Plot 7: ETF Allocation Summary
         ax7 = axes[2, 0]
-        ax7.axis('off')
+        ax7.axis("off")
 
         # Group ETFs by category for display
         etf_categories = {
-            'US Equity': ['IVV', 'FLCA'],
-            'International Equity': ['VGK', 'FLJP', 'BBAX', 'ILF', 'EZA', 'EPOL', 'KSA', 'IEMG'],
-            'US Bonds': ['HYD', 'VMBS', 'CMBS', 'ICVT', 'SPHY', 'HYLB', 'SCHO', 'SPSB', 'SCHR', 'VCIT', 'SPTL', 'VCLT',
-                         'SCHP'],
-            'International Bonds': ['BWX', 'PICB', 'IHY', 'WIP', 'VWOB', 'EMLC', 'EMHY', 'EMB'],
-            'Alternatives': ['IAU']
+            "US Equity": ["IVV", "FLCA"],
+            "International Equity": [
+                "VGK",
+                "FLJP",
+                "BBAX",
+                "ILF",
+                "EZA",
+                "EPOL",
+                "KSA",
+                "IEMG",
+            ],
+            "US Bonds": [
+                "HYD",
+                "VMBS",
+                "CMBS",
+                "ICVT",
+                "SPHY",
+                "HYLB",
+                "SCHO",
+                "SPSB",
+                "SCHR",
+                "VCIT",
+                "SPTL",
+                "VCLT",
+                "SCHP",
+            ],
+            "International Bonds": [
+                "BWX",
+                "PICB",
+                "IHY",
+                "WIP",
+                "VWOB",
+                "EMLC",
+                "EMHY",
+                "EMB",
+            ],
+            "Alternatives": ["IAU"],
         }
 
         allocation_text = "ETF ALLOCATION SUMMARY\n\n"
         for category, etfs in etf_categories.items():
             active_etfs = [etf for etf in etfs if etf in self.valid_instruments]
             if active_etfs:
-                total_weight = sum(self.instrument_weights.get(etf, 0) for etf in active_etfs)
+                total_weight = sum(
+                    self.instrument_weights.get(etf, 0) for etf in active_etfs
+                )
                 allocation_text += f"{category}: {total_weight:.1%}\n"
                 allocation_text += f"  ETFs: {', '.join(active_etfs[:3])}"
                 if len(active_etfs) > 3:
                     allocation_text += f" (+{len(active_etfs) - 3} more)"
                 allocation_text += "\n\n"
 
-        ax7.text(0.05, 0.95, allocation_text, transform=ax7.transAxes,
-                 fontsize=9, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+        ax7.text(
+            0.05,
+            0.95,
+            allocation_text,
+            transform=ax7.transAxes,
+            fontsize=9,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightgreen", alpha=0.8),
+        )
 
         # Plot 8: Trading Rules Analysis
         ax8 = axes[2, 1]
-        ax8.axis('off')
+        ax8.axis("off")
 
         rules_text = "TRADING RULES ANALYSIS\n\n"
         for rule_name, rule_config in self.trading_rules.items():
-            fast = rule_config['other_args']['Lfast']
-            slow = rule_config['other_args']['Lslow']
+            fast = rule_config["other_args"]["Lfast"]
+            slow = rule_config["other_args"]["Lslow"]
             timeframe = "Short" if fast <= 8 else "Medium" if fast <= 16 else "Long"
 
             rules_text += f"{rule_name}:\n"
@@ -1002,13 +1273,20 @@ STATUS: PRODUCTION READY
             rules_text += f"  Timeframe: {timeframe}\n"
             rules_text += f"  Status: ✅ Active\n\n"
 
-        ax8.text(0.05, 0.95, rules_text, transform=ax8.transAxes,
-                 fontsize=9, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+        ax8.text(
+            0.05,
+            0.95,
+            rules_text,
+            transform=ax8.transAxes,
+            fontsize=9,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightyellow", alpha=0.8),
+        )
 
         # Plot 9: Next Steps and Recommendations
         ax9 = axes[2, 2]
-        ax9.axis('off')
+        ax9.axis("off")
 
         next_steps_text = """
 SYSTEM STATUS & NEXT STEPS
@@ -1035,12 +1313,23 @@ POTENTIAL ENHANCEMENTS:
 SYSTEM READY FOR PRODUCTION
 """
 
-        ax9.text(0.05, 0.95, next_steps_text, transform=ax9.transAxes,
-                 fontsize=9, verticalalignment='top', fontfamily='monospace',
-                 bbox=dict(boxstyle='round', facecolor='lightcoral', alpha=0.8))
+        ax9.text(
+            0.05,
+            0.95,
+            next_steps_text,
+            transform=ax9.transAxes,
+            fontsize=9,
+            verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round", facecolor="lightcoral", alpha=0.8),
+        )
 
-        plt.suptitle('Multi-Forecast ETF Systematic Trading System - Comprehensive Dashboard',
-                     fontsize=16, fontweight='bold', y=0.98)
+        plt.suptitle(
+            "Multi-Forecast ETF Systematic Trading System - Comprehensive Dashboard",
+            fontsize=16,
+            fontweight="bold",
+            y=0.98,
+        )
         plt.tight_layout()
         plt.show()
 
@@ -1097,7 +1386,7 @@ SYSTEM READY FOR PRODUCTION
             print(f"✅ Volatility Targeting: {self.vol_target}%")
 
             if comparison_results:
-                improvement = comparison_results['improvement_pct']
+                improvement = comparison_results["improvement_pct"]
                 print(f"🎯 Multi-forecast improvement: {improvement:+.2f}%")
 
             print(f"=" * 60)
@@ -1108,10 +1397,10 @@ SYSTEM READY FOR PRODUCTION
             print(f"⚠️ Summary calculation error: {e}")
 
         return {
-            'system': system,
-            'forecast_analysis': forecast_analysis,
-            'comparison_results': comparison_results,
-            'dashboard': dashboard
+            "system": system,
+            "forecast_analysis": forecast_analysis,
+            "comparison_results": comparison_results,
+            "dashboard": dashboard,
         }
 
     def create_etf_optimized_system(self):
@@ -1128,8 +1417,11 @@ SYSTEM READY FOR PRODUCTION
             return None
 
         # Prepare valid instruments and weights
-        valid_weights = {k: v for k, v in self.instrument_weights.items()
-                         if k in self.valid_instruments}
+        valid_weights = {
+            k: v
+            for k, v in self.instrument_weights.items()
+            if k in self.valid_instruments
+        }
 
         if not valid_weights:
             print("❌ No valid instrument weights")
@@ -1139,7 +1431,9 @@ SYSTEM READY FOR PRODUCTION
         total_weight = sum(valid_weights.values())
         normalized_weights = {k: v / total_weight for k, v in valid_weights.items()}
 
-        print(f"📊 Creating ETF-optimized system with {len(self.valid_instruments)} instruments")
+        print(
+            f"📊 Creating ETF-optimized system with {len(self.valid_instruments)} instruments"
+        )
         print(f"🎯 Dynamic forecast scaling: ENABLED")
 
         # Enhanced system configuration for ETFs
@@ -1148,18 +1442,15 @@ SYSTEM READY FOR PRODUCTION
             "instrument_weights": normalized_weights,
             "percentage_vol_target": self.vol_target,
             "base_currency": "USD",
-
             # Dynamic IDM (preserved)
             "use_instrument_div_mult_estimates": True,
             "use_instrument_weight_estimates": True,
-
             # IDM estimation parameters
             "instrument_div_mult_estimate": {
                 "func": "sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list",
                 "ewma_span": 125,
-                "dm_max": 2.5
+                "dm_max": 2.5,
             },
-
             # Correlation estimation for IDM
             "instrument_correlation_estimate": {
                 "func": "sysquant.estimators.correlation_over_time.correlation_over_time_for_returns",
@@ -1170,26 +1461,22 @@ SYSTEM READY FOR PRODUCTION
                 "min_periods": 20,
                 "cleaning": True,
                 "rollyears": 3,
-                "floor_at_zero": True
+                "floor_at_zero": True,
             },
-
             # EWMAC trading rules
             "trading_rules": {},
-
             # DYNAMIC FORECAST ESTIMATION - Optimized for ETFs
             "use_forecast_scale_estimates": True,
             "use_forecast_weight_estimates": True,
             "use_forecast_div_mult_estimates": True,
-
             # ETF-specific forecast scalar estimation
             "forecast_scalar_estimate": {
                 "pool_instruments": True,
                 "func": "sysquant.estimators.forecast_scalar.forecast_scalar",
                 "window": 250000,
                 "min_periods": 500,
-                "backfill": True
+                "backfill": True,
             },
-
             # Enhanced forecast weight estimation
             "forecast_weight_estimate": {
                 "func": "sysquant.optimisation.generic_optimiser.genericOptimiser",
@@ -1202,15 +1489,14 @@ SYSTEM READY FOR PRODUCTION
                 "cleaning": True,
                 "equalise_SR": False,
                 "ann_target_SR": 0.5,
-                "equalise_vols": True
+                "equalise_vols": True,
             },
-
             # Forecast diversification estimation
             "forecast_div_mult_estimate": {
                 "func": "sysquant.estimators.diversification_multipliers.diversification_multiplier_from_list",
                 "ewma_span": 125,
-                "dm_max": 2.5
-            }
+                "dm_max": 2.5,
+            },
         }
 
         # Add trading rules from config
@@ -1218,14 +1504,14 @@ SYSTEM READY FOR PRODUCTION
             system_config["trading_rules"][rule_name] = {
                 "function": rule_config["function"],
                 "data": rule_config["data"],
-                "other_args": rule_config["other_args"]
+                "other_args": rule_config["other_args"],
             }
 
         try:
             # Create data source and system
             data_paths = {
-                'csvFuturesAdjustedPricesData': self.csv_dir,
-                'csvFuturesInstrumentData': self.config_dir
+                "csvFuturesAdjustedPricesData": self.csv_dir,
+                "csvFuturesInstrumentData": self.config_dir,
             }
             data = csvFuturesSimData(csv_data_paths=data_paths)
 
@@ -1273,7 +1559,9 @@ SYSTEM READY FOR PRODUCTION
         # Sample first 3 instruments for analysis
         sample_instruments = instruments[:3]
 
-        print(f"📊 Analyzing forecast scalars for {len(sample_instruments)} sample instruments")
+        print(
+            f"📊 Analyzing forecast scalars for {len(sample_instruments)} sample instruments"
+        )
 
         for instrument in sample_instruments:
             instrument_scalars = {}
@@ -1281,18 +1569,22 @@ SYSTEM READY FOR PRODUCTION
             for rule_name in trading_rules.keys():
                 try:
                     # Get forecast scalar time series
-                    scalar_series = system.forecastScaleCap.get_forecast_scalar(instrument, rule_name)
+                    scalar_series = system.forecastScaleCap.get_forecast_scalar(
+                        instrument, rule_name
+                    )
 
                     if len(scalar_series) > 0:
                         instrument_scalars[rule_name] = {
-                            'current_scalar': scalar_series.iloc[-1],
-                            'mean_scalar': scalar_series.mean(),
-                            'std_scalar': scalar_series.std(),
-                            'min_scalar': scalar_series.min(),
-                            'max_scalar': scalar_series.max()
+                            "current_scalar": scalar_series.iloc[-1],
+                            "mean_scalar": scalar_series.mean(),
+                            "std_scalar": scalar_series.std(),
+                            "min_scalar": scalar_series.min(),
+                            "max_scalar": scalar_series.max(),
                         }
 
-                        print(f"📈 {instrument} - {rule_name}: Current scalar = {scalar_series.iloc[-1]:.2f}")
+                        print(
+                            f"📈 {instrument} - {rule_name}: Current scalar = {scalar_series.iloc[-1]:.2f}"
+                        )
 
                 except Exception as e:
                     print(f"⚠️ {instrument} - {rule_name}: {str(e)[:50]}...")
@@ -1336,10 +1628,10 @@ def run_etf_optimized_analysis(self):
     dashboard = self.create_working_dashboard(system, forecast_analysis)
 
     return {
-        'system': system,
-        'scalar_analysis': scalar_analysis,
-        'forecast_analysis': forecast_analysis,
-        'dashboard': dashboard
+        "system": system,
+        "scalar_analysis": scalar_analysis,
+        "forecast_analysis": forecast_analysis,
+        "dashboard": dashboard,
     }
 
 

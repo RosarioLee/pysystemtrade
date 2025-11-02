@@ -8,16 +8,14 @@ from sysdata.config.configdata import Config
 my_rule = TradingRule(
     ewmac,
     ["rawdata.get_daily_prices", "rawdata.daily_returns_volatility"],
-    dict(Lfast=8, Lslow=32)
+    dict(Lfast=8, Lslow=32),
 )
 
 # Create a config with just your rule
 my_config_dict = {
-    "trading_rules": {
-        "my_ewmac": my_rule
-    },
+    "trading_rules": {"my_ewmac": my_rule},
     "instruments": ["CORN"],  # Test with just one instrument
-    "forecast_weights": {"my_ewmac": 1.0}  # Give it 100% weight
+    "forecast_weights": {"my_ewmac": 1.0},  # Give it 100% weight
 }
 
 my_config = Config(my_config_dict)

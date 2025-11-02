@@ -29,8 +29,8 @@ def run_simple_etf_system():
 
     # Download ETF data
     print("Downloading ETF data...")
-    ivv_data = yf.download("IVV", start="2020-01-01", auto_adjust=False)['Adj Close']
-    hyd_data = yf.download("HYD", start="2020-01-01", auto_adjust=False)['Adj Close']
+    ivv_data = yf.download("IVV", start="2020-01-01", auto_adjust=False)["Adj Close"]
+    hyd_data = yf.download("HYD", start="2020-01-01", auto_adjust=False)["Adj Close"]
 
     print(f"IVV: {len(ivv_data)} days")
     print(f"HYD: {len(hyd_data)} days")
@@ -57,25 +57,31 @@ def run_simple_etf_system():
     ivv_positions = calculate_position_size(
         ivv_forecast.loc[common_dates],
         ivv_data.loc[common_dates],
-        ivv_vol.loc[common_dates]
+        ivv_vol.loc[common_dates],
     )
 
     hyd_positions = calculate_position_size(
         hyd_forecast.loc[common_dates],
         hyd_data.loc[common_dates],
-        hyd_vol.loc[common_dates]
+        hyd_vol.loc[common_dates],
     )
 
     # Calculate returns (Carver's portfolio approach)
     print("\n=== Performance Calculation ===")
 
     # Individual instrument returns
-    ivv_strategy_returns = (ivv_positions.shift(1) * ivv_returns.loc[common_dates]).dropna()
-    hyd_strategy_returns = (hyd_positions.shift(1) * hyd_returns.loc[common_dates]).dropna()
+    ivv_strategy_returns = (
+        ivv_positions.shift(1) * ivv_returns.loc[common_dates]
+    ).dropna()
+    hyd_strategy_returns = (
+        hyd_positions.shift(1) * hyd_returns.loc[common_dates]
+    ).dropna()
 
     # FIX: Portfolio returns with proper date alignment
     # Find common dates where both strategies have valid returns
-    common_return_dates = ivv_strategy_returns.index.intersection(hyd_strategy_returns.index)
+    common_return_dates = ivv_strategy_returns.index.intersection(
+        hyd_strategy_returns.index
+    )
 
     if len(common_return_dates) > 0:
         # Calculate portfolio returns on common dates only
@@ -98,7 +104,11 @@ def run_simple_etf_system():
             return np.nan
 
         # Convert to numpy array to ensure scalar std and mean (from search results)
-        returns_array = returns_series.values if isinstance(returns_series, pd.Series) else np.array(returns_series)
+        returns_array = (
+            returns_series.values
+            if isinstance(returns_series, pd.Series)
+            else np.array(returns_series)
+        )
         std_val = np.std(returns_array)
         mean_val = np.mean(returns_array)
 
@@ -126,7 +136,9 @@ def run_simple_etf_system():
         else:
             print("ℹ️ Portfolio provides risk reduction through diversification")
     else:
-        print("Portfolio Sharpe Ratio: Could not calculate (insufficient overlapping data)")
+        print(
+            "Portfolio Sharpe Ratio: Could not calculate (insufficient overlapping data)"
+        )
         # Calculate simple average as fallback
         avg_sharpe = (ivv_sharpe + hyd_sharpe) / 2
         print(f"Average Individual Sharpe: {avg_sharpe:.2f}")
@@ -135,7 +147,7 @@ def run_simple_etf_system():
     def safe_value(series, index=-1):
         """Safely extract scalar value from Series"""
         val = series.iloc[index]
-        if hasattr(val, 'iloc'):
+        if hasattr(val, "iloc"):
             val = val.iloc[0] if len(val) > 0 else 0
         return float(val)
 
@@ -145,8 +157,12 @@ def run_simple_etf_system():
     hyd_pos_val = safe_value(hyd_positions)
 
     print(f"\n=== Latest Trading Signals ===")
-    print(f"IVV forecast: {ivv_forecast_val:.2f} ({'BUY' if ivv_forecast_val > 0 else 'SELL'})")
-    print(f"HYD forecast: {hyd_forecast_val:.2f} ({'BUY' if hyd_forecast_val > 0 else 'SELL'})")
+    print(
+        f"IVV forecast: {ivv_forecast_val:.2f} ({'BUY' if ivv_forecast_val > 0 else 'SELL'})"
+    )
+    print(
+        f"HYD forecast: {hyd_forecast_val:.2f} ({'BUY' if hyd_forecast_val > 0 else 'SELL'})"
+    )
 
     print(f"\n=== Current Positions ===")
     print(f"IVV position: {ivv_pos_val:.2f}")
@@ -155,11 +171,11 @@ def run_simple_etf_system():
     print(f"\n🎉 ETF systematic trading system working using Carver's direct approach!")
 
     return {
-        'ivv_sharpe': ivv_sharpe,
-        'hyd_sharpe': hyd_sharpe,
-        'portfolio_sharpe': portfolio_sharpe,
-        'ivv_forecast': ivv_forecast_val,
-        'hyd_forecast': hyd_forecast_val
+        "ivv_sharpe": ivv_sharpe,
+        "hyd_sharpe": hyd_sharpe,
+        "portfolio_sharpe": portfolio_sharpe,
+        "ivv_forecast": ivv_forecast_val,
+        "hyd_forecast": hyd_forecast_val,
     }
 
 
