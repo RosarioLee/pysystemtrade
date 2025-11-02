@@ -39,6 +39,7 @@ from syscore.constants import arg_not_supplied
 from systems.provided.rob_system.run_system import futures_system
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 from sysdata.config.configdata import Config
+from turnover_analysis import RobertCarverTurnoverAnalyzer, quick_turnover_check
 
 # Keep analysis imports
 from syscore.constants import arg_not_supplied
@@ -696,6 +697,34 @@ class DynamicSystemBacktester:
         except Exception as e:
             print(f"⚠ Risk analysis calculation error: {e}")
 
+    def analyze_turnover_comprehensive(self):
+        """
+        Comprehensive turnover analysis following Robert Carver's methodology
+        """
+        if not self.system:
+            print("❌ No system available for turnover analysis")
+            return
+
+        print(f"\n🔄 COMPREHENSIVE TURNOVER ANALYSIS")
+        print(f"{'═' * 60}")
+
+        # Initialize Robert's turnover analyzer
+        analyzer = RobertCarverTurnoverAnalyzer(self.system)
+
+        # Extract all turnover metrics
+        turnover_results = analyzer.extract_all_turnover_metrics()
+
+        # Generate comprehensive report
+        report_file = analyzer.generate_turnover_report('project_dynamic/results')
+
+        # Create visualization plots
+        plot_file = analyzer.plot_turnover_analysis('project_dynamic/results')
+
+        # Store results for later use
+        self.results['turnover_analysis'] = turnover_results
+
+        return turnover_results
+
 def main():
     """Main execution function"""
     print(f"🚀 ROBERT CARVER'S DYNAMIC OPTIMIZATION BACKTEST")
@@ -723,11 +752,15 @@ def main():
     # Print advanced risk metrics
     backtester.print_advanced_risk_analysis()
 
+    # COMPREHENSIVE TURNOVER ANALYSIS
+    backtester.analyze_turnover_comprehensive()
+
     # Save results (includes plotting now)
     backtester.save_results()
 
     print(f"\n✅ BACKTEST COMPLETED SUCCESSFULLY")
     print(f"📊 Charts saved to: project_dynamic/results/")
+    print(f"📋 Turnover report saved with detailed analysis")
     print(f"🔍 Check CSV files and performance plots for detailed analysis")
 
 
