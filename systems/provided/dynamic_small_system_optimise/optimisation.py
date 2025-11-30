@@ -252,14 +252,120 @@ class objectiveFunctionForGreedy:
     def calculate_costs(self, weights: np.array) -> float:
         if self.no_prior_positions_provided:
             return 0.0
+
         trade_gap = weights - self.weights_prior_as_np_replace_nans_with_zeros
         costs_per_trade = self.costs_as_np
         trade_shadow_cost = self.trade_shadow_cost
+
         trade_costs = sum(abs(costs_per_trade * trade_gap * trade_shadow_cost))
 
         if np.isnan(trade_costs):
+            print("\n" + "=" * 80)
+            print("🚨 NaN COST DETECTED")
+            print("=" * 80)
+
+            # Get instrument names
+            try:
+                if hasattr(self, 'keys_with_valid_data'):
+                    instrument_names = self.keys_with_valid_data
+                elif hasattr(self.costs, 'assets'):
+                    instrument_names = list(self.costs.assets)
+                else:
+                    instrument_names = [f"Instrument_{i}" for i in range(len(costs_per_trade))]
+            except:
+                instrument_names = [f"Instrument_{i}" for i in range(len(costs_per_trade))]
+
+            # Find problem instruments
+            problem_instruments = []
+            problem_indices = []
+
+            for i, (inst, cost, gap) in enumerate(zip(instrument_names, costs_per_trade, trade_gap)):
+                if np.isinf(cost):
+                    problem_instruments.append(inst)
+                    problem_indices.append(i)
+
+            print(f"\nProblem instruments: {problem_instruments}")
+            print(f"Total instruments: {len(costs_per_trade)}")
+            print(f"Infinite costs: {np.sum(np.isinf(costs_per_trade))}")
+
+            # ====================================================================
+            # VARIANCE MATRIX DIAGNOSTICS
+            # ====================================================================
+            print("\n" + "=" * 80)
+            print("VARIANCE MATRIX DIAGNOSTICS")
+            print("=" * 80)
+
+            try:
+                # Original covariance matrix
+                original_cov = self.covariance_matrix
+                print(f"\nOriginal covariance shape: {original_cov.values.shape}")
+                print(f"Original columns: {len(original_cov.columns)}")
+
+                # Check filtering
+                assets_with_data = original_cov.assets_with_data()
+                assets_missing_data = original_cov.assets_with_missing_data()
+
+                print(f"\nAssets with data: {len(assets_with_data)}")
+                print(f"Assets missing data: {len(assets_missing_data)}")
+                print(f"Missing: {assets_missing_data}")
+
+                # Check if problem instruments are correctly identified
+                for prob_inst in problem_instruments:
+                    if prob_inst in assets_missing_data:
+                        print(f"  ✓ {prob_inst} in missing data list")
+                    else:
+                        print(f"  ❌ {prob_inst} NOT in missing data list")
+
+                # Variance analysis
+                print(f"\nVARIANCE ANALYSIS:")
+                cov_values = original_cov.values
+                variances = np.diag(cov_values)
+
+                print(f"Total variances: {len(variances)}")
+                print(f"NaN variances: {np.sum(np.isnan(variances))}")
+                print(f"Valid variances: {np.sum((variances > 0) & np.isfinite(variances))}")
+
+                # Problem instrument details
+                print(f"\nPROBLEM INSTRUMENT DETAILS:")
+                for prob_inst in problem_instruments:
+                    if prob_inst in original_cov.columns:
+                        idx = list(original_cov.columns).index(prob_inst)
+                        variance = variances[idx]
+                        row = cov_values[idx, :]
+                        non_nan_count = (~np.isnan(row)).sum()
+
+                        print(f"\n  {prob_inst}:")
+                        print(f"    Variance: {variance}")
+                        print(
+                            f"    Volatility: {np.sqrt(variance) if variance >= 0 and np.isfinite(variance) else 'N/A'}")
+                        print(f"    Non-NaN in row: {non_nan_count}/{len(row)}")
+                    else:
+                        print(f"\n  {prob_inst}: NOT in covariance matrix")
+
+                # Filtered matrix check
+                print(f"\nFILTERED MATRIX (used in optimization):")
+                print(f"Filtered shape: {self.covariance_matrix_as_np.shape}")
+                print(f"Keys with valid data: {len(self.keys_with_valid_data)}")
+
+                # Critical check: are problem instruments in filtered list?
+                for prob_inst in problem_instruments:
+                    if prob_inst in self.keys_with_valid_data:
+                        idx_filtered = self.keys_with_valid_data.index(prob_inst)
+                        variance_filtered = self.covariance_matrix_as_np[idx_filtered, idx_filtered]
+                        print(f"  ❌ {prob_inst} in filtered list (index {idx_filtered}), variance: {variance_filtered}")
+                    else:
+                        print(f"  ✓ {prob_inst} correctly excluded")
+
+            except Exception as e:
+                print(f"\n❌ Error in diagnostics: {str(e)}")
+                import traceback
+                traceback.print_exc()
+
+            print("\n" + "=" * 80)
+
             raise Exception(
-                "Trade costs are zero, most likely have a zero cost somewhere"
+                f"Trade costs are NaN. Problem instruments: {problem_instruments} "
+                f"have infinite costs (insufficient data)."
             )
 
         return trade_costs

@@ -105,6 +105,13 @@ class optimisedPositions(SystemStage):
         previous_positions: portfolioWeights = arg_not_supplied,
         maximum_positions: portfolioWeights = arg_not_supplied,
     ) -> objectiveFunctionForGreedy:
+        # ============================================================================
+        # ADD THIS: Run diagnostics BEFORE getting costs
+        # ============================================================================
+        # DIAGNOSTIC: Uncomment to enable cost component diagnostics
+        # self.diagnose_cost_components(relevant_date)
+        # ============================================================================
+
         covariance_matrix = self.get_covariance_matrix(relevant_date=relevant_date)
 
         per_contract_value = self.get_per_contract_value(relevant_date)
@@ -380,6 +387,251 @@ class optimisedPositions(SystemStage):
     @property
     def config(self):
         return self.parent.config
+
+    def diagnose_cost_components(
+            self,
+            relevant_date: datetime.datetime,
+            instrument_list: list = None
+    ):
+        import numpy as np
+        """
+        Comprehensive diagnostic of SR_cost calculation components.
+        Only runs for dates around the problematic period (1 month before/after 2005-05-23).
+        Shows ALL instruments to catch ETHANOL.
+        """
+        # ============================================================================
+        # DIAGNOSTIC DATE FILTER: Only run around the problem date
+        # ============================================================================
+        import datetime as dt
+        problem_date = dt.datetime(2005, 5, 23)
+        one_month_before = problem_date - dt.timedelta(days=30)
+        one_month_after = problem_date + dt.timedelta(days=30)
+
+        # Skip diagnostic if outside the window
+        if relevant_date < one_month_before or relevant_date > one_month_after:
+            return []
+        # ============================================================================
+
+        if instrument_list is None:
+            instrument_list = self.instrument_list()
+
+        print("\n" + "=" * 120)
+        print(f"💰 COST COMPONENT DIAGNOSTICS - Date: {relevant_date}")
+        print(f"   (Showing ALL {len(instrument_list)} instruments)")
+        print("=" * 120)
+
+        # Track problematic instruments
+        problematic_instruments = []
+
+        # Create summary table header
+        print("\n{:<15} {:<12} {:<12} {:<12} {:<12} {:<12} {:<15} {:<12}".format(
+            "Instrument", "Price", "FX Rate", "Multiplier", "SR_cost_vol", "Cost_deflt", "Final_Cost", "Status"
+        ))
+        print("-" * 120)
+
+        # ============================================================================
+        # SHOW ALL INSTRUMENTS (not just first 20)
+        # ============================================================================
+        for instrument_code in instrument_list:  # ← Changed from [:20] to all
+            try:
+                # Get all components of the cost calculation
+
+                # 1. Price (last available price)
+                try:
+                    price = self.get_final_price(instrument_code)
+                except:
+                    price = np.nan
+
+                # 2. FX rate
+                try:
+                    fx_rate = self.get_last_fx_rate(instrument_code)
+                except:
+                    fx_rate = np.nan
+
+                # 3. Contract multiplier (point size)
+                try:
+                    multiplier = self.get_contract_multiplier(instrument_code)
+                except:
+                    multiplier = np.nan
+
+                # 4. Volatility (used in SR_cost calculation)
+                try:
+                    # This is the percentage volatility from rawdata
+                    vol_series = self.parent.rawdata.get_daily_percentage_volatility(instrument_code)
+                    if relevant_date in vol_series.index:
+                        sr_cost_vol = vol_series.loc[relevant_date]
+                    else:
+                        # Get most recent before date
+                        historical = vol_series[vol_series.index <= relevant_date]
+                        sr_cost_vol = historical.iloc[-1] if len(historical) > 0 else np.nan
+                except:
+                    sr_cost_vol = np.nan
+
+                # 5. Cost deflator
+                try:
+                    cost_deflator = self.get_cost_deflator_on_date(
+                        instrument_code, relevant_date=relevant_date
+                    )
+                except:
+                    cost_deflator = np.nan
+
+                # 6. Final cost (what gets passed to optimizer)
+                try:
+                    final_cost = self.get_cost_per_contract_as_proportion_of_capital_on_date(
+                        instrument_code, relevant_date=relevant_date
+                    )
+                except:
+                    final_cost = np.nan
+
+                # Determine status
+                status = "✓ OK"
+                if np.isinf(final_cost):
+                    status = "❌ INF"
+                    problematic_instruments.append(instrument_code)
+                elif np.isnan(final_cost):
+                    status = "⚠️ NaN"
+                    problematic_instruments.append(instrument_code)
+                elif price == 0 or np.isnan(price):
+                    status = "⚠️ NoPrice"
+                elif sr_cost_vol == 0 or np.isnan(sr_cost_vol):
+                    status = "⚠️ NoVol"
+                elif multiplier == 0 or np.isnan(multiplier):
+                    status = "⚠️ NoMult"
+
+                # Print row (every instrument now!)
+                print("{:<15} {:<12.4f} {:<12.4f} {:<12.2f} {:<12.6f} {:<12.4f} {:<15} {:<12}".format(
+                    instrument_code[:14],
+                    price if np.isfinite(price) else float('nan'),
+                    fx_rate if np.isfinite(fx_rate) else float('nan'),
+                    multiplier if np.isfinite(multiplier) else float('nan'),
+                    sr_cost_vol if np.isfinite(sr_cost_vol) else float('nan'),
+                    cost_deflator if np.isfinite(cost_deflator) else float('nan'),
+                    f"{final_cost:.8f}" if np.isfinite(final_cost) else str(final_cost),
+                    status
+                ))
+
+            except Exception as e:
+                print("{:<15} ERROR: {}".format(instrument_code[:14], str(e)[:60]))
+
+        # Detailed analysis for problematic instruments
+        if problematic_instruments:
+            print("\n" + "=" * 120)
+            print("🔍 DETAILED ANALYSIS OF PROBLEMATIC INSTRUMENTS")
+            print("=" * 120)
+
+            for instrument_code in problematic_instruments[:5]:  # Analyze first 5 problems
+                print(f"\n{'─' * 120}")
+                print(f"📍 {instrument_code}")
+                print(f"{'─' * 120}")
+
+                try:
+                    # Raw cost data
+                    print("\n1️⃣ RAW COST DATA:")
+                    raw_cost_data = self.get_raw_cost_data(instrument_code)
+                    print(f"   Type: {type(raw_cost_data)}")
+                    print(f"   Percentage cost: {getattr(raw_cost_data, 'percentage_cost', 'N/A')}")
+                    print(f"   Block commission: {getattr(raw_cost_data, 'value_of_block_commission', 'N/A')}")
+                    print(f"   Per-trade commission: {getattr(raw_cost_data, 'value_of_pertrade_commission', 'N/A')}")
+
+                    # Price data
+                    print("\n2️⃣ PRICE DATA:")
+                    price_series = self.get_raw_price(instrument_code)
+                    historical_prices = price_series[price_series.index <= relevant_date]
+                    print(f"   Total price points: {len(historical_prices)}")
+                    print(f"   Last 5 prices:")
+                    for dt, p in historical_prices.tail(5).items():
+                        print(f"      {dt.date()}: {p:.4f}")
+                    print(f"   Final price (used in calc): {self.get_final_price(instrument_code):.4f}")
+
+                    # Volatility data - THE KEY SECTION!
+                    print("\n3️⃣ VOLATILITY DATA (SR_cost_vol):")
+                    vol_series = self.parent.rawdata.get_daily_percentage_volatility(instrument_code)
+                    historical_vol = vol_series[vol_series.index <= relevant_date]
+                    print(f"   Total volatility points: {len(historical_vol)}")
+                    print(f"   Last 10 volatilities:")
+                    for dt, v in historical_vol.tail(10).items():
+                        vol_status = "⚠️" if v == 0 or np.isnan(v) or np.isinf(v) else "  "
+                        print(f"      {vol_status} {dt.date()}: {v:.8f}")
+
+                    if len(historical_vol) == 0:
+                        print(f"   ❌ NO VOLATILITY DATA AVAILABLE!")
+                    elif historical_vol.iloc[-1] == 0:
+                        print(f"   ❌ LATEST VOLATILITY IS ZERO!")
+                    elif np.isnan(historical_vol.iloc[-1]):
+                        print(f"   ❌ LATEST VOLATILITY IS NaN!")
+
+                    # FX rate
+                    print("\n4️⃣ FX RATE:")
+                    fx_series = self.get_fx_rate(instrument_code)
+                    print(f"   Last FX rate: {self.get_last_fx_rate(instrument_code):.6f}")
+
+                    # Contract specifications
+                    print("\n5️⃣ CONTRACT SPECIFICATIONS:")
+                    multiplier = self.get_contract_multiplier(instrument_code)
+                    print(f"   Multiplier (point size): {multiplier}")
+                    try:
+                        per_contract_val = self.get_per_contract_value(relevant_date)
+                        if hasattr(per_contract_val, '__getitem__') and instrument_code in per_contract_val.keys():
+                            print(f"   Per contract value: {per_contract_val[instrument_code]}")
+                    except:
+                        print(f"   Per contract value: Could not retrieve")
+
+                    # Cost calculation breakdown
+                    print("\n6️⃣ COST CALCULATION BREAKDOWN:")
+                    cost_per_contract_base = self.get_cost_per_contract_in_base_ccy(instrument_code)
+                    print(f"   Cost per contract (base ccy): {cost_per_contract_base}")
+
+                    cost_per_notional = self.get_cost_per_notional_weight_as_proportion_of_capital(instrument_code)
+                    print(f"   Cost per notional weight: {cost_per_notional}")
+
+                    cost_deflator = self.get_cost_deflator_on_date(instrument_code, relevant_date)
+                    print(f"   Cost deflator: {cost_deflator}")
+
+                    final_cost = self.get_cost_per_contract_as_proportion_of_capital_on_date(
+                        instrument_code, relevant_date
+                    )
+                    print(f"   Final cost: {final_cost}")
+
+                    # SR_cost formula check
+                    print("\n7️⃣ SR_COST FORMULA CHECK:")
+                    print("   SR_cost = (spread + commission) / (price × SR_cost_vol × point_size)")
+                    print("")
+                    price = self.get_final_price(instrument_code)
+                    vol = historical_vol.iloc[-1] if len(historical_vol) > 0 else np.nan
+
+                    print(f"   Denominator = {price:.4f} × {vol:.8f} × {multiplier:.2f}")
+                    denominator = price * vol * multiplier
+                    print(f"   Denominator = {denominator:.8f}")
+
+                    if denominator == 0:
+                        print(f"   ❌ DENOMINATOR IS ZERO → SR_cost will be INF")
+                        if price == 0:
+                            print(f"      Cause: Price = 0")
+                        if vol == 0:
+                            print(f"      Cause: SR_cost_vol = 0 ← THIS IS THE PROBLEM!")
+                        if multiplier == 0:
+                            print(f"      Cause: Multiplier = 0")
+                    elif np.isnan(denominator):
+                        print(f"   ❌ DENOMINATOR IS NaN → SR_cost will be INF")
+                        if np.isnan(price):
+                            print(f"      Cause: Price = NaN")
+                        if np.isnan(vol):
+                            print(f"      Cause: SR_cost_vol = NaN ← THIS IS THE PROBLEM!")
+                        if np.isnan(multiplier):
+                            print(f"      Cause: Multiplier = NaN")
+
+                except Exception as e:
+                    print(f"   Error in detailed analysis: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+
+        print("\n" + "=" * 120)
+        print(f"Summary: {len(problematic_instruments)} instruments with problematic costs")
+        if problematic_instruments:
+            print(f"Problematic: {', '.join(problematic_instruments)}")
+        print("=" * 120 + "\n")
+
+        return problematic_instruments
 
 
 def calculate_cost_per_notional_weight_as_proportion_of_capital(

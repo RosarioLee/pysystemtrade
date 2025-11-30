@@ -4,6 +4,16 @@
 # Based on systems/provided/rob_system/config.yaml
 
 # ============================================================
+# COST AND EXECUTION SETTINGS
+# ============================================================
+use_SR_costs: True
+# vol_normalise_currency_costs: True
+# multiply_roll_costs_by: 0.5
+# percentage_cost: 0.01  # 1 basis point per trade
+# value_of_block_commission: 0.0
+# value_of_pertrade_commission: 0.0
+
+# ============================================================
 # SYSTEM IDENTIFICATION
 # ============================================================
 use_forecast_weight_estimates: False
@@ -12,9 +22,17 @@ use_instrument_weight_estimates: True
 use_instrument_div_mult_estimates: True
 use_forecast_scale_estimates: False
 
+forecast_scalar_estimate:
+   pool_instruments: True
+   func: "sysquant.estimators.forecast_scalar.forecast_scalar"
+   window: 250000
+   min_periods: 500
+   backfill: True
+
 # Start date for backtesting
 start_date: 2000-01-19
-
+#start_date: "2004-01-01"
+# end_date: "2006-12-31"
 # ============================================================
 # FORECAST DIVERSIFICATION MULTIPLIER ESTIMATION - CORRECTED
 # ============================================================
@@ -62,19 +80,19 @@ trading_rules:
   breakout10:
     function: systems.provided.rules.breakout.breakout
     data:
-      - rawdata.get_daily_prices
+      - "rawdata.get_daily_prices"
     other_args:
       lookback: 10
   breakout40:
     function: systems.provided.rules.breakout.breakout
     data:
-      - rawdata.get_daily_prices
+      - "rawdata.get_daily_prices"
     other_args:
       lookback: 40
   breakout160:
     function: systems.provided.rules.breakout.breakout
     data:
-      - rawdata.get_daily_prices
+      - "rawdata.get_daily_prices"
     other_args:
       lookback: 160
 
@@ -82,8 +100,8 @@ trading_rules:
   momentum16:
     function: systems.provided.rules.ewmac.ewmac
     data:
-      - rawdata.get_daily_prices
-      - rawdata.daily_returns_volatility
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
     other_args:
       Lfast: 16
       Lslow: 64
@@ -91,8 +109,8 @@ trading_rules:
   momentum64:
     function: systems.provided.rules.ewmac.ewmac
     data:
-      - rawdata.get_daily_prices
-      - rawdata.daily_returns_volatility
+      - "rawdata.get_daily_prices"
+      - "rawdata.daily_returns_volatility"
     other_args:
       Lfast: 64
       Lslow: 256
@@ -101,7 +119,7 @@ trading_rules:
   carry60:
     function: systems.provided.rules.carry.carry
     data:
-      - rawdata.raw_carry
+      - "rawdata.raw_carry"
     other_args:
       smooth_days: 60
 
@@ -146,7 +164,7 @@ base_currency: USD
 # DYNAMIC OPTIMIZATION PARAMETERS - CORRECTED VALUES
 # ============================================================
 small_system:
-  shadow_cost: 50                    # Correct value from latest pysystemtrade
+  shadow_cost: 50                   # Correct value from latest pysystemtrade
   cost_multiplier: 1.0              # Standard cost multiplier
   tracking_error_buffer: 0.0125     # Tracking error buffer (NOT shadow cost)
   shrink_instrument_returns_correlation: 0.5  # Correlation shrinkage factor
@@ -236,7 +254,7 @@ instruments:
   - GAS_US
   - HEATOIL
   - GASOILINE
-  - ETHANOL
+  # - ETHANOL
 
   # Precious Metals (4)
   - GOLD
@@ -372,7 +390,7 @@ instrument_weights:
   GAS_US: 0.0085
   HEATOIL: 0.0085
   GASOILINE: 0.0085
-  ETHANOL: 0.0085
+  # ETHANOL: 0.0085
   GOLD: 0.0080
   SILVER: 0.0080
   PLAT: 0.0080
@@ -446,15 +464,16 @@ optimization_constraints:
   integer_position_rounding: True
   max_portfolio_turnover_per_day: 0.15
 
-# ============================================================
-# COST AND EXECUTION SETTINGS
-# ============================================================
-use_SR_costs: False
-vol_normalise_currency_costs: True
-multiply_roll_costs_by: 0.5
+
 
 # Simple uniform cost to prevent "Trade costs are zero" error
-percentage_cost_per_trade: 0.01  # 1 basis point per trade
+# percentage_cost_per_trade: 0.01  # 1 basis point per trade
+
+# ============================================================
+# CSV DATA PATHS - POINT TO ROBERT'S ORIGINAL COST DATA
+# ============================================================
+# csv_data_paths:
+#   spread_cost_data: "data.futures.csvconfig"
 
 # ============================================================
 # CORRELATION AND ESTIMATION SETTINGS

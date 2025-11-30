@@ -17,7 +17,8 @@ Based on research from:
 Author: Systematic Trading Implementation
 Date: October 2025
 """
-
+import logging
+# logging.basicConfig(level=logging.DEBUG)
 import os
 import sys
 import warnings
@@ -47,6 +48,31 @@ import pandas as pd
 import numpy as np
 
 
+def debug_cost_calculation(data, instruments, date):
+    """Debug: Print what optimizer sees"""
+    print("\n" + "=" * 70)
+    print("DEBUG: Cost Calculation at", date)
+    print("=" * 70)
+
+    for inst in instruments[:5]:  # First 5
+        try:
+            cost_obj = data.get_raw_cost_data(inst)
+            price = data.daily_prices(inst).loc[date]
+
+            slip = cost_obj.price_slippage
+            block = cost_obj.value_of_block_commission
+            pct = (slip + block) / price
+
+            print(f"{inst:12s} ${slip + block:.4f} = {pct * 100:.4f}%")
+
+            # CHECK: What does percentage_cost show?
+            if hasattr(cost_obj, 'percentage_cost'):
+                print(f"             percentage_cost attribute: {cost_obj.percentage_cost}")
+                if cost_obj.percentage_cost == 0 and pct > 0:
+                    print(f"             ⚠️  BUG: percentage_cost=0 but SR cost={pct:.6f}")
+        except:
+            pass
+    print("=" * 70 + "\n")
 
 
 class DynamicSystemBacktester:
@@ -61,69 +87,362 @@ class DynamicSystemBacktester:
         self.results = {}
         self.start_time = datetime.now()
 
-    def setup_data_source(self, data_type='csv'):
-        """Setup data source for backtesting"""
-        print("Setting up data source...")
+    def setup_data_source(self):
+        """Initialize CSV data source with date filtering"""
+        print("\nSetting up data source...")
 
-        if data_type == 'csv':
-            # Use built-in CSV sample data
-            self.data_source = csvFuturesSimData()
-            print(f"✓ CSV data source initialized")
+        try:
+            from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 
-            # Check available instruments
-            available_instruments = self.data_source.get_instrument_list()
-            print(f"✓ Available instruments: {len(available_instruments)}")
-            print(f"  Sample: {available_instruments[:10]}")
+            # Create data source
+            data = csvFuturesSimData()
 
-        elif data_type == 'database':
-            # Use database connection (requires MongoDB setup)
-            from sysdata.sim.db_futures_sim_data import dbFuturesSimData
-            self.data_source = dbFuturesSimData()
-            print(f"✓ Database data source initialized")
+            # **ADD DATE FILTERING HERE**
+            # Load config to get date range
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            config_path = os.path.join(script_dir, "dynamic_backtest_config.yaml")
 
-        return self.data_source
+            if os.path.exists(config_path):
+                import yaml
+                with open(config_path, 'r') as f:
+                    config = yaml.safe_load(f)
+
+                start_date = config.get('startdate', '2000-01-19')  # Match config
+                end_date = config.get('enddate', None)
+
+                print(f"✓ Filtering data: {start_date} to {end_date}")
+
+                # Store for later use
+                self.start_date = pd.Timestamp(start_date)
+                self.end_date = pd.Timestamp(end_date)
+            else:
+                # Default to full range if no config
+                self.start_date = None
+                self.end_date = None
+
+            self.data_source = data
+            print("✓ CSV data source initialized")
+
+            return data
+
+        except Exception as e:
+            print(f"❌ Error setting up data source: {str(e)}")
+            raise
+
+    def setup_file_logging(self, log_dir='backtest_logs'):
+        """
+        Setup REAL-TIME file logging for complete backtest monitoring.
+        Unbuffered writes ensure you see progress as it happens.
+        """
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        log_filename = f"{log_dir}/backtest_{timestamp}.log"
+
+        # Create file handler with unbuffered mode
+        file_handler = logging.FileHandler(
+            log_filename,
+            mode='a',  # Append mode
+            encoding='utf-8'
+        )
+        file_handler.setLevel(logging.INFO)
+
+        # Detailed format
+        formatter = logging.Formatter(
+            '%(asctime)s | %(levelname)-8s | %(name)-30s | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        file_handler.setFormatter(formatter)
+
+        # Add to root logger
+        root_logger = logging.getLogger()
+        root_logger.addHandler(file_handler)
+        root_logger.setLevel(logging.INFO)
+
+        # Also add console handler so you see progress
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.WARNING)  # Only warnings/errors to console
+        console_handler.setFormatter(formatter)
+        root_logger.addHandler(console_handler)
+
+        print(f"✅ Real-time logging to: {log_filename}")
+        print(f"📊 Watch file grow: tail -f {log_filename}")
+        return log_filename
+
+    def monitor_backtest_progress(self):
+        """
+        Monitor and log backtest progress with key metrics.
+        Call this AFTER system is created to track execution.
+
+        Provides:
+        - Date range being processed
+        - Active position counts
+        - Instrument participation
+        - Performance indicators
+        """
+        logger = logging.getLogger('BacktestMonitor')
+        logger.setLevel(logging.INFO)
+
+        try:
+            logger.info("=" * 60)
+            logger.info("BACKTEST PROGRESS MONITORING")
+            logger.info("=" * 60)
+
+            # 1. Get optimized positions
+            logger.info("Fetching optimized positions...")
+            positions = self.system.optimisedPositions.get_optimised_position_df()
+
+            # 2. Date range analysis
+            total_dates = len(positions.index)
+            start_date = positions.index[0]
+            end_date = positions.index[-1]
+
+            logger.info(f"📅 Processing {total_dates} dates")
+            logger.info(f"📅 From: {start_date.strftime('%Y-%m-%d')}")
+            logger.info(f"📅 To:   {end_date.strftime('%Y-%m-%d')}")
+            logger.info(f"📅 Years: {(end_date - start_date).days / 365.25:.1f}")
+
+            # 3. Position activity analysis
+            non_zero_positions = (positions != 0).sum(axis=1)
+            avg_positions = non_zero_positions.mean()
+            max_positions = non_zero_positions.max()
+            min_positions = non_zero_positions.min()
+
+            logger.info(f"📊 Average positions per day: {avg_positions:.1f}")
+            logger.info(f"📊 Maximum positions: {max_positions}")
+            logger.info(f"📊 Minimum positions: {min_positions}")
+
+            # 4. Instrument participation
+            total_instruments = len(positions.columns)
+            ever_traded = (positions != 0).any(axis=0).sum()
+            participation_pct = (ever_traded / total_instruments) * 100
+
+            logger.info(f"🎯 Instruments in universe: {total_instruments}")
+            logger.info(f"🎯 Instruments ever traded: {ever_traded}")
+            logger.info(f"🎯 Participation rate: {participation_pct:.1f}%")
+
+            # 5. Most active instruments
+            trade_frequency = (positions != 0).sum(axis=0)
+            most_active = trade_frequency.nlargest(10)
+
+            logger.info("🔥 Top 10 most active instruments:")
+            for instrument, days in most_active.items():
+                pct = (days / total_dates) * 100
+                logger.info(f"   {instrument:15s}: {days:5d} days ({pct:5.1f}%)")
+
+            # 6. Position distribution
+            position_sizes = positions[positions != 0].abs()
+
+            logger.info(f"📏 Position size statistics (contracts):")
+            logger.info(f"   Mean:   {position_sizes.mean().mean():.2f}")
+            logger.info(f"   Median: {position_sizes.median().median():.2f}")
+            logger.info(f"   Max:    {position_sizes.max().max():.0f}")
+
+            logger.info("=" * 60)
+
+        except Exception as e:
+            logger.error(f"❌ Progress monitoring failed: {e}")
+            logger.error(f"   This is OK - backtest will continue")
+
+    def log_optimization_milestones(self, positions_df):
+        """
+        Log key optimization milestones as backtest progresses.
+        Call this periodically during backtest to track progress.
+
+        Args:
+            positions_df: Current positions dataframe
+        """
+        logger = logging.getLogger('OptimizationMilestones')
+
+        try:
+            total_dates = len(positions_df.index)
+
+            # Log every 250 days (roughly once per trading year)
+            for milestone in [250, 500, 1000, 2000, 3000, 4000, 5000]:
+                if total_dates >= milestone and total_dates < milestone + 50:
+                    current_date = positions_df.index[milestone - 1]
+                    current_positions = positions_df.iloc[milestone - 1]
+                    active_count = (current_positions != 0).sum()
+
+                    logger.info(f"🎯 Milestone: {milestone} dates processed")
+                    logger.info(f"   Current date: {current_date.strftime('%Y-%m-%d')}")
+                    logger.info(f"   Active positions: {active_count}")
+                    logger.info(f"   Progress: {(milestone / total_dates) * 100:.1f}%")
+
+        except Exception as e:
+            logger.debug(f"Milestone logging skipped: {e}")
+
+    def enable_detailed_optimization_logging(self):
+        """
+        Enable DEBUG-level logging for optimization components.
+        This shows EVERY optimization decision in detail.
+
+        Warning: Creates large log files (100MB+) but invaluable for debugging.
+        """
+        print("🔍 Enabling detailed optimization logging...")
+
+        # Set DEBUG level for key optimization modules
+        optimization_modules = [
+            'objectiveFunctionForGreedy',  # Core optimization logic
+            'optimisedPositions',  # Position calculator
+            'greedy_algo',  # Greedy algorithm
+            'buffering',  # Speed control
+            'portfolio',  # Portfolio construction
+            'accounts',  # Account/cost calculations
+        ]
+
+        for module_name in optimization_modules:
+            logger = logging.getLogger(module_name)
+            logger.setLevel(logging.DEBUG)
+            print(f"  ✓ {module_name}: DEBUG")
+
+        print("✅ Detailed optimization logging enabled")
+        print("⚠️  Warning: Log files will be much larger (50-200MB)")
+
+    def setup_complete_logging(self, log_dir='backtest_logs'):
+        """
+        Capture EVERYTHING: both logging output AND console print statements.
+        This mirrors exactly what you see in PyCharm's Run window.
+        """
+        import sys
+
+        # Create log directory
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+        # ===== FILE 1: Complete output (print + logging) =====
+        complete_log = f"{log_dir}/complete_output_{timestamp}.log"
+
+        # ===== FILE 2: Just logging output =====
+        logging_log = f"{log_dir}/logging_only_{timestamp}.log"
+
+        # ===== Setup console output capture =====
+        class TeeOutput:
+            """Write to both file and console simultaneously"""
+
+            def __init__(self, file_path, original_stream):
+                self.file = open(file_path, 'a', encoding='utf-8')
+                self.original = original_stream
+
+            def write(self, data):
+                self.file.write(data)
+                self.file.flush()  # Immediate write
+                self.original.write(data)
+
+            def flush(self):
+                self.file.flush()
+                self.original.flush()
+
+        # Redirect stdout (print statements)
+        sys.stdout = TeeOutput(complete_log, sys.stdout)
+
+        # Redirect stderr (error messages)
+        sys.stderr = TeeOutput(complete_log, sys.stderr)
+
+        # ===== Setup logging module capture =====
+        # Configure logging to go to BOTH files
+        formatter = logging.Formatter(
+            '%(asctime)s | %(levelname)-8s | %(name)-30s | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+
+        # Handler for complete log
+        complete_handler = logging.FileHandler(complete_log, mode='a', encoding='utf-8')
+        complete_handler.setLevel(logging.DEBUG)
+        complete_handler.setFormatter(formatter)
+
+        # Handler for logging-only log
+        logging_handler = logging.FileHandler(logging_log, mode='a', encoding='utf-8')
+        logging_handler.setLevel(logging.INFO)
+        logging_handler.setFormatter(formatter)
+
+        # Add to root logger
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+        root_logger.addHandler(complete_handler)
+        root_logger.addHandler(logging_handler)
+
+        print("=" * 70)
+        print("📝 COMPLETE OUTPUT LOGGING ENABLED")
+        print("=" * 70)
+        print(f"✅ Complete output (print + logging): {complete_log}")
+        print(f"✅ Logging only:                      {logging_log}")
+        print(f"✅ All console output will be saved")
+        print("=" * 70)
+
+        return complete_log, logging_log
 
     def create_system(self, custom_config=None):
-        """Create system using the config_filename parameter correctly"""
-        print("\nCreating dynamic optimization system...")
+        """Create system using Robert's futures_system() with correct parameters"""
+        print("Creating dynamic optimization system...")
+
         try:
-            # Get the absolute path to your config file
+            from systems.provided.rob_system.run_system import futures_system
+
+            # Get config path
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            config_path = os.path.join(script_dir, 'dynamic_backtest_config.yaml')
+            config_path = os.path.join(script_dir, "dynamic_backtest_config.yaml")
 
+            # Verify config exists
             if not os.path.exists(config_path):
-                raise FileNotFoundError(f"Config file not found: {config_path}")
+                raise FileNotFoundError(f"Config not found: {config_path}")
 
-            print(f"✓ Using config file: {config_path}")
+            print(f"✓ Config found: {config_path}")
 
-            # SOLUTION: Pass config_filename parameter directly to futures_system()
+            # CORRECT: futures_system() uses 'sim_data' and 'config_filename'
+            # (Different versions of pysystemtrade use different parameter names)
             self.system = futures_system(
-                sim_data=self.data_source,
-                config_filename=config_path  # ← This is the key fix!
+                sim_data=self.data_source,  # Use sim_data, not data
+                config_filename=config_path  # Use config_filename, not config
             )
 
-            print("✓ System created with YOUR custom config")
-            print("✓ No more NIFTY errors - using your instrument list!")
+            print("✅ System created with Robert's futures_system()")
+            print(f"✅ Using config: {config_path}")
+            print(f"✅ Instruments: {len(self.system.get_instrument_list())}")
 
-            # Verify the config was loaded
-            try:
-                instruments = self.system.get_instrument_list()
-                print(f"✓ System loaded {len(instruments)} instruments from your config")
-
-                # Check if NIFTY is still there (it shouldn't be)
-                if 'NIFTY' in instruments:
-                    print("❌ WARNING: NIFTY still detected - config not loaded properly")
-                else:
-                    print("✓ SUCCESS: No NIFTY detected - your config is active!")
-
-            except Exception as e:
-                print(f"⚠ Could not verify instruments: {e}")
+            # Verify cost system is working
+            # self.verify_system_costs()
 
             return self.system
 
         except Exception as e:
             print(f"❌ Error creating system: {str(e)}")
+            import traceback
+            traceback.print_exc()
             raise
+
+    def verify_config_loading(self):
+        """Verify config loaded correctly"""
+        print("\n📋 Config Verification:")
+        print("-" * 50)
+
+        config = self.system.config
+
+        # Check key settings
+        print(f"use_SR_costs: {getattr(config, 'use_SR_costs', 'NOT SET')}")
+        print(f"use_instrument_weight_estimates: {getattr(config, 'use_instrument_weight_estimates', 'NOT SET')}")
+        print(f"percentage_vol_target: {getattr(config, 'percentage_vol_target', 'NOT SET')}")
+
+        # Check ignored instruments
+        if hasattr(config, 'ignore_instruments'):
+            ignored = config.ignore_instruments
+            print(f"ignore_instruments: {ignored}")
+        else:
+            ignored = []
+            print("ignore_instruments: NOT SET")
+
+        # Check actual instrument list
+        actual_instruments = self.system.get_instrument_list()
+        config_instruments = config.instruments if hasattr(config, 'instruments') else []
+
+        print(f"\nInstruments in config: {len(config_instruments)}")
+        print(f"Instruments in system: {len(actual_instruments)}")
+        print(f"Excluded:              {len(config_instruments) - len(actual_instruments)}")
+
+        print("-" * 50 + "\n")
 
     def run_backtest(self, start_date=None, end_date=None):
         """Execute the backtest using modern approach"""
@@ -725,43 +1044,147 @@ class DynamicSystemBacktester:
 
         return turnover_results
 
+    def verify_cost_loading(self):
+        # Test that costs are being loaded from spreadcosts.csv
+        print("🔍 COST SYSTEM VERIFICATION")
+        print("─" * 40)
+
+        test_instruments = ['US10', 'BUND', 'SP500_micro', 'CORN', 'EUR_micro']
+
+        for instrument in test_instruments:
+            try:
+                if instrument in self.data_source.get_instrument_list():
+                    cost_data = self.data_source.get_raw_cost_data(instrument)
+                    spread_cost = cost_data.price_slippage  # ✅ CORRECT API
+                    commission = cost_data.value_of_block_commission  # ✅ ADDITIONAL INFO
+                    print(f"✓ {instrument}: spread={spread_cost}, commission={commission}")
+
+                    if spread_cost == 0.0:
+                        print(f"  ❌ {instrument} has zero cost!")
+                        return False
+                    else:
+                        print(f"  ✅ {instrument} has valid cost")
+            except Exception as e:
+                print(f"❌ {instrument}: Error getting cost - {e}")
+                return False
+
+        print("✓ Cost system working properly")
+        return True
+
+
 def main():
-    """Main execution function"""
-    print(f"🚀 ROBERT CARVER'S DYNAMIC OPTIMIZATION BACKTEST")
+    """Main execution with full analysis pipeline"""
+    print(f"\n🚀 ROBERT CARVER'S DYNAMIC OPTIMIZATION BACKTEST")
     print(f"Starting at: {datetime.now()}")
     print(f"Project directory: project_dynamic/")
+    print("=" * 70)
 
-    # Initialize backtester
+    # Initialize
     backtester = DynamicSystemBacktester()
 
-    # Setup data source
-    data_source = backtester.setup_data_source(data_type='csv')
+    # Setup logging (optional - comment out if too verbose)
+    backtester.setup_file_logging()
 
-    # Create system with config file
+    # Setup data
+    backtester.setup_data_source()
+
+    # Create system
+    print("\n🔧 Creating system...")
     system = backtester.create_system()
+    print("✅ System created successfully\n")
 
-    # Run the backtest
+    # Verify configuration
+    backtester.verify_config_loading()
+
+    # ============================================================
+    # RUN BACKTEST
+    # ============================================================
+    print("\n" + "=" * 70)
+    print("📈 RUNNING BACKTEST")
+    print("=" * 70)
+
     results = backtester.run_backtest()
 
-    # Analyze results
+    # ============================================================
+    # COMPREHENSIVE ANALYSIS SUITE
+    # ============================================================
+
+    print("\n" + "=" * 70)
+    print("📊 GENERATING COMPREHENSIVE ANALYSIS")
+    print("=" * 70)
+
+    # 1. Basic statistics
+    print("\n1️⃣ Analyzing Results...")
     backtester.analyze_results()
 
-    # NEW: Add small system specific analysis
+    # 2. Small system specific metrics
+    print("\n2️⃣ Small System Performance Analysis...")
     backtester.analyze_small_system_performance()
 
-    # Print advanced risk metrics
+    # 3. Advanced risk analysis
+    print("\n3️⃣ Advanced Risk Analysis...")
     backtester.print_advanced_risk_analysis()
 
-    # COMPREHENSIVE TURNOVER ANALYSIS
-    backtester.analyze_turnover_comprehensive()
+    # 4. Save results to CSV files
+    print("\n4️⃣ Saving Results...")
+    backtester.save_results(output_dir='project_dynamic/results')
 
-    # Save results (includes plotting now)
-    backtester.save_results()
+    # 5. Create performance plots (equity curve + drawdown)
+    print("\n5️⃣ Creating Performance Plots...")
+    performance_plots = backtester.create_performance_plots(
+        output_dir='project_dynamic/results'
+    )
 
-    print(f"\n✅ BACKTEST COMPLETED SUCCESSFULLY")
-    print(f"📊 Charts saved to: project_dynamic/results/")
-    print(f"📋 Turnover report saved with detailed analysis")
-    print(f"🔍 Check CSV files and performance plots for detailed analysis")
+    # 6. Create position and risk analysis plots
+    print("\n6️⃣ Creating Position & Risk Analysis Plots...")
+    position_plots = backtester.create_position_and_risk_plots(
+        output_dir='project_dynamic/results'
+    )
+
+    # 7. Turnover analysis (if turnover_analysis module is available)
+    print("\n7️⃣ Turnover Analysis...")
+    try:
+        turnover_results = backtester.analyze_turnover_comprehensive()
+        print("✓ Turnover analysis completed")
+    except (ImportError, AttributeError) as e:
+        print(f"⚠ Turnover analysis not available: {e}")
+        print("  (This is optional - basic turnover metrics already shown)")
+
+    # ============================================================
+    # FINAL SUMMARY
+    # ============================================================
+
+    print("\n" + "=" * 70)
+    print("✅ BACKTEST COMPLETED SUCCESSFULLY")
+    print("=" * 70)
+
+    duration = datetime.now() - backtester.start_time
+    print(f"\n⏱  Total Duration: {duration}")
+    print(f"📁 Results saved to: project_dynamic/results/")
+
+    # Print key metrics summary
+    portfolio_returns = results['portfolio_returns']
+    print(f"\n📊 KEY PERFORMANCE METRICS:")
+    print(f"   Sharpe Ratio: {portfolio_returns.sharpe():.3f}")
+    print(f"   Annual Return: {portfolio_returns.percent.mean() * 256:.1f}%")
+    print(f"   Annual Vol: {portfolio_returns.percent.std() * (256 ** 0.5):.1f}%")
+    print(f"   Max Drawdown: {portfolio_returns.percent.drawdown().min():.1f}%")
+    try:
+        print(f"   Calmar Ratio: {portfolio_returns.calmar():.3f}")
+    except:
+        print(f"   Calmar Ratio: N/A")
+
+    # Print file locations
+    print(f"\n📁 OUTPUT FILES:")
+    print(f"   • Positions CSV")
+    print(f"   • Weights CSV")
+    print(f"   • Performance plots (PNG + PDF)")
+    print(f"   • Position/Risk analysis (PNG + PDF)")
+    print(f"   • Performance summary (TXT)")
+
+    print(f"\n✅ All analysis complete! Check 'project_dynamic/results/' directory")
+    print(f"Finished at: {datetime.now()}")
+    print("=" * 70 + "\n")
 
 
 if __name__ == "__main__":
