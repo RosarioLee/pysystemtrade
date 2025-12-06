@@ -1303,18 +1303,6 @@ def main():
     print("\n4️⃣ Saving Results...")
     backtester.save_results(output_dir="project_dynamic/results")
 
-    # 5. Create performance plots (equity curve + drawdown)
-    print("\n5️⃣ Creating Performance Plots...")
-    performance_plots = backtester.create_performance_plots(
-        output_dir="project_dynamic/results"
-    )
-
-    # 6. Create position and risk analysis plots
-    print("\n6️⃣ Creating Position & Risk Analysis Plots...")
-    position_plots = backtester.create_position_and_risk_plots(
-        output_dir="project_dynamic/results"
-    )
-
     # 7. Turnover analysis (if turnover_analysis module is available)
     print("\n7️⃣ Turnover Analysis...")
     try:
@@ -1324,10 +1312,10 @@ def main():
         print(f"⚠ Turnover analysis not available: {e}")
         print("  (This is optional - basic turnover metrics already shown)")
 
-    print("=" * 70)
-    print("3️⃣ Running Turnover Diagnostics...")
-    diagnostic_results = backtester.run_turnover_diagnostics()
-    backtester.results["diagnostic_results"] = diagnostic_results
+    # print("=" * 70)
+    # print("3️⃣ Running Turnover Diagnostics...")
+    # diagnostic_results = backtester.run_turnover_diagnostics()
+    # backtester.results["diagnostic_results"] = diagnostic_results
 
     # ============================================================
     # FINAL SUMMARY
