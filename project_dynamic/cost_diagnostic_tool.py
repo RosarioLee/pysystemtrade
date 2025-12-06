@@ -24,7 +24,7 @@ print("=" * 80)
 config_path = "dynamic_backtest_config.yaml"
 
 try:
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config = yaml.safe_load(f)
     print(f"\n✅ Loaded config: {config_path}")
 except Exception as e:
@@ -32,17 +32,17 @@ except Exception as e:
     sys.exit(1)
 
 # Extract instrument list
-if 'instruments' in config and config['instruments']:
-    my_instruments = config['instruments']
+if "instruments" in config and config["instruments"]:
+    my_instruments = config["instruments"]
     print(f"✅ Found {len(my_instruments)} instruments in YOUR config")
 else:
     print("❌ No instruments found in config!")
     sys.exit(1)
 
 # Config settings
-use_sr_costs = config.get('use_SR_costs', False)
-shadow_cost = config.get('small_system', {}).get('shadow_cost', 50)
-start_date = pd.Timestamp(config.get('start_date', '2000-01-01'))
+use_sr_costs = config.get("use_SR_costs", False)
+shadow_cost = config.get("small_system", {}).get("shadow_cost", 50)
+start_date = pd.Timestamp(config.get("start_date", "2000-01-01"))
 
 print(f"\nConfig Settings:")
 print(f"  use_SR_costs: {use_sr_costs}")
@@ -53,14 +53,14 @@ print(f"  start_date: {start_date}")
 # DEFINE CHECK DATES
 # ==============================================================================
 check_dates = [
-    ('Backtest Start', start_date),
-    ('1 Month Before Problem', pd.Timestamp('2005-04-23')),
-    ('1 Week Before Problem', pd.Timestamp('2005-05-16')),
-    ('3 Days Before Problem', pd.Timestamp('2005-05-20')),
-    ('PROBLEM DATE', pd.Timestamp('2005-05-23')),
-    ('1 Day After Problem', pd.Timestamp('2005-05-24')),
-    ('1 Week After Problem', pd.Timestamp('2005-05-30')),
-    ('1 Month After Problem', pd.Timestamp('2005-06-23')),
+    ("Backtest Start", start_date),
+    ("1 Month Before Problem", pd.Timestamp("2005-04-23")),
+    ("1 Week Before Problem", pd.Timestamp("2005-05-16")),
+    ("3 Days Before Problem", pd.Timestamp("2005-05-20")),
+    ("PROBLEM DATE", pd.Timestamp("2005-05-23")),
+    ("1 Day After Problem", pd.Timestamp("2005-05-24")),
+    ("1 Week After Problem", pd.Timestamp("2005-05-30")),
+    ("1 Month After Problem", pd.Timestamp("2005-06-23")),
 ]
 
 print(f"\n📅 Will check costs at {len(check_dates)} different dates")
@@ -90,13 +90,13 @@ print(f"✅ {len(available_instruments)} instruments valid")
 def analyze_costs_at_date(instruments, date, data):
     """Analyze cost quality for all instruments at a specific date"""
     results = {
-        'date': date,
-        'active': 0,
-        'valid': 0,
-        'invalid_price': [],
-        'zero_cost': [],
-        'negative_price_ok': [],
-        'all_ok': []
+        "date": date,
+        "active": 0,
+        "valid": 0,
+        "invalid_price": [],
+        "zero_cost": [],
+        "negative_price_ok": [],
+        "all_ok": [],
     }
 
     for inst in instruments:
@@ -107,7 +107,7 @@ def analyze_costs_at_date(instruments, date, data):
             if date not in prices.index:
                 continue
 
-            results['active'] += 1
+            results["active"] += 1
 
             price = prices.loc[date]
             cost_obj = data.get_raw_cost_data(inst)
@@ -118,32 +118,34 @@ def analyze_costs_at_date(instruments, date, data):
 
             # Categorize
             if pd.isna(price) or price == 0:
-                results['invalid_price'].append({
-                    'instrument': inst,
-                    'price': price,
-                    'slippage': slippage,
-                    'block': block
-                })
+                results["invalid_price"].append(
+                    {
+                        "instrument": inst,
+                        "price": price,
+                        "slippage": slippage,
+                        "block": block,
+                    }
+                )
             elif sr_cash == 0 or np.isnan(sr_cash):
-                results['zero_cost'].append({
-                    'instrument': inst,
-                    'price': price,
-                    'slippage': slippage,
-                    'block': block
-                })
+                results["zero_cost"].append(
+                    {
+                        "instrument": inst,
+                        "price": price,
+                        "slippage": slippage,
+                        "block": block,
+                    }
+                )
             elif price < 0:
                 # Negative price but calculable cost (Panama backadjustment)
                 sr_pct = sr_cash / abs(price)
-                results['negative_price_ok'].append({
-                    'instrument': inst,
-                    'price': price,
-                    'sr_cost': sr_pct
-                })
-                results['valid'] += 1
+                results["negative_price_ok"].append(
+                    {"instrument": inst, "price": price, "sr_cost": sr_pct}
+                )
+                results["valid"] += 1
             else:
                 # Normal valid instrument
-                results['all_ok'].append(inst)
-                results['valid'] += 1
+                results["all_ok"].append(inst)
+                results["valid"] += 1
 
         except Exception:
             continue
@@ -172,18 +174,22 @@ for label, date in check_dates:
     print(f"  ✅ Valid costs:         {results['valid']}")
     print(f"  ❌ Invalid price (NaN): {len(results['invalid_price'])}")
     print(f"  ❌ Zero costs:          {len(results['zero_cost'])}")
-    print(f"  ⚠️  Negative prices:    {len(results['negative_price_ok'])} (OK with abs)")
+    print(
+        f"  ⚠️  Negative prices:    {len(results['negative_price_ok'])} (OK with abs)"
+    )
 
     # Show problem instruments if any
-    if results['invalid_price']:
+    if results["invalid_price"]:
         print(f"\n  🔴 Invalid Price Instruments:")
-        for item in results['invalid_price']:
+        for item in results["invalid_price"]:
             print(f"     - {item['instrument']}: price={item['price']}")
 
-    if results['zero_cost']:
+    if results["zero_cost"]:
         print(f"\n  🔴 Zero Cost Instruments:")
-        for item in results['zero_cost']:
-            print(f"     - {item['instrument']}: slippage=${item['slippage']:.4f}, block=${item['block']:.2f}")
+        for item in results["zero_cost"]:
+            print(
+                f"     - {item['instrument']}: slippage=${item['slippage']:.4f}, block=${item['block']:.2f}"
+            )
 
 # ==============================================================================
 # PHASE 2: IDENTIFY WHAT CHANGED
@@ -193,7 +199,9 @@ print("PHASE 2: WHAT CHANGED OVER TIME?")
 print("=" * 80)
 
 # Find the problem date index
-problem_idx = next(i for i, (label, _, _) in enumerate(timeline_results) if label == 'PROBLEM DATE')
+problem_idx = next(
+    i for i, (label, _, _) in enumerate(timeline_results) if label == "PROBLEM DATE"
+)
 
 # Get before/after
 if problem_idx > 0:
@@ -204,8 +212,8 @@ if problem_idx > 0:
     print("-" * 80)
 
     # What changed in active instruments?
-    before_active = before_results['active']
-    problem_active = problem_results['active']
+    before_active = before_results["active"]
+    problem_active = problem_results["active"]
 
     print(f"\nActive Instruments:")
     print(f"  Before ({before_date}): {before_active}")
@@ -213,10 +221,14 @@ if problem_idx > 0:
     print(f"  Change: {problem_active - before_active:+d}")
 
     # What changed in problems?
-    before_problems = set([x['instrument'] for x in before_results['invalid_price']] +
-                          [x['instrument'] for x in before_results['zero_cost']])
-    problem_problems = set([x['instrument'] for x in problem_results['invalid_price']] +
-                           [x['instrument'] for x in problem_results['zero_cost']])
+    before_problems = set(
+        [x["instrument"] for x in before_results["invalid_price"]]
+        + [x["instrument"] for x in before_results["zero_cost"]]
+    )
+    problem_problems = set(
+        [x["instrument"] for x in problem_results["invalid_price"]]
+        + [x["instrument"] for x in problem_results["zero_cost"]]
+    )
 
     new_problems = problem_problems - before_problems
     fixed_problems = before_problems - problem_problems
@@ -252,38 +264,52 @@ canola_timeline = []
 
 for label, date, _ in timeline_results:
     try:
-        prices = data.daily_prices('CANOLA')
+        prices = data.daily_prices("CANOLA")
         if date in prices.index:
             price = prices.loc[date]
-            cost_obj = data.get_raw_cost_data('CANOLA')
+            cost_obj = data.get_raw_cost_data("CANOLA")
             sr_cash = cost_obj.price_slippage + cost_obj.value_of_block_commission
 
-            canola_timeline.append({
-                'date': date,
-                'label': label,
-                'price': price,
-                'has_price': not pd.isna(price),
-                'sr_cost': sr_cash / abs(price) if not pd.isna(price) and price != 0 else 0
-            })
+            canola_timeline.append(
+                {
+                    "date": date,
+                    "label": label,
+                    "price": price,
+                    "has_price": not pd.isna(price),
+                    "sr_cost": sr_cash / abs(price)
+                    if not pd.isna(price) and price != 0
+                    else 0,
+                }
+            )
     except:
-        canola_timeline.append({
-            'date': date,
-            'label': label,
-            'price': None,
-            'has_price': False,
-            'sr_cost': 0
-        })
+        canola_timeline.append(
+            {
+                "date": date,
+                "label": label,
+                "price": None,
+                "has_price": False,
+                "sr_cost": 0,
+            }
+        )
 
-print(f"\n{'Date':<12} {'Label':<25} {'Price':<15} {'Has Valid Price?':<20} {'SR Cost %'}")
+print(
+    f"\n{'Date':<12} {'Label':<25} {'Price':<15} {'Has Valid Price?':<20} {'SR Cost %'}"
+)
 print("-" * 90)
 
 for item in canola_timeline:
-    date_str = str(item['date'])[:10]
-    price_str = f"${item['price']:.2f}" if item['price'] is not None and not pd.isna(item['price']) else "NaN/Missing"
-    valid_str = "✅ YES" if item['has_price'] else "❌ NO"
-    cost_str = f"{item['sr_cost'] * 100:.4f}%" if item['sr_cost'] > 0 else "N/A"
+    date_str = str(item["date"])[:10]
+    price_str = (
+        f"${item['price']:.2f}"
+        if item["price"] is not None and not pd.isna(item["price"])
+        else "NaN/Missing"
+    )
+    valid_str = "✅ YES" if item["has_price"] else "❌ NO"
+    cost_str = f"{item['sr_cost'] * 100:.4f}%" if item["sr_cost"] > 0 else "N/A"
 
-    print(f"{date_str:<12} {item['label']:<25} {price_str:<15} {valid_str:<20} {cost_str}")
+    print(
+        f"{date_str:<12} {item['label']:<25} {price_str:<15} {valid_str:<20} {cost_str}"
+    )
 
 # ==============================================================================
 # PHASE 4: SUMMARY & RECOMMENDATION
@@ -295,8 +321,9 @@ print("=" * 80)
 # Find all problem instruments across all dates
 all_problem_instruments = set()
 for label, date, results in timeline_results:
-    problems = [x['instrument'] for x in results['invalid_price']] + \
-               [x['instrument'] for x in results['zero_cost']]
+    problems = [x["instrument"] for x in results["invalid_price"]] + [
+        x["instrument"] for x in results["zero_cost"]
+    ]
     all_problem_instruments.update(problems)
 
 print(f"\n📊 Instruments with cost problems at ANY point in timeline:")
@@ -308,12 +335,15 @@ if all_problem_instruments:
         # Count how many dates had problems
         problem_count = 0
         for label, date, results in timeline_results:
-            problems = [x['instrument'] for x in results['invalid_price']] + \
-                       [x['instrument'] for x in results['zero_cost']]
+            problems = [x["instrument"] for x in results["invalid_price"]] + [
+                x["instrument"] for x in results["zero_cost"]
+            ]
             if inst in problems:
                 problem_count += 1
 
-        print(f"     - {inst:<15} (problems at {problem_count}/{len(check_dates)} dates)")
+        print(
+            f"     - {inst:<15} (problems at {problem_count}/{len(check_dates)} dates)"
+        )
 
 print(f"\n{'=' * 80}")
 print("RECOMMENDED FIX")

@@ -20,7 +20,7 @@ def view_dynamic_optimization_results():
     system = futures_system(sim_data=data)
 
     # Get a few liquid instruments
-    test_instruments = ['AUD', 'SP500_micro', 'GOLD']
+    test_instruments = ["AUD", "SP500_micro", "GOLD"]
     available = system.get_instrument_list()
     test_instruments = [inst for inst in test_instruments if inst in available][:3]
 
@@ -51,7 +51,7 @@ def view_dynamic_optimization_results():
                 print(f"   Limited data available ({len(portfolio_position)} points)")
 
         # Try to access the optimization stage directly
-        if hasattr(system, 'optimisedPositions'):
+        if hasattr(system, "optimisedPositions"):
             print(f"\n🔧 OPTIMIZATION STAGE ACCESS:")
             opt_stage = system.optimisedPositions
             print(f"   ✅ Dynamic optimization stage: ACTIVE")

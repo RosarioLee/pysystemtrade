@@ -18,6 +18,7 @@ Author: Systematic Trading Implementation
 Date: October 2025
 """
 import logging
+
 # logging.basicConfig(level=logging.DEBUG)
 import os
 import sys
@@ -26,7 +27,7 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 
 # Suppress warnings for cleaner output
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 # Add project directory to Python path
 project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -66,10 +67,14 @@ def debug_cost_calculation(data, instruments, date):
             print(f"{inst:12s} ${slip + block:.4f} = {pct * 100:.4f}%")
 
             # CHECK: What does percentage_cost show?
-            if hasattr(cost_obj, 'percentage_cost'):
-                print(f"             percentage_cost attribute: {cost_obj.percentage_cost}")
+            if hasattr(cost_obj, "percentage_cost"):
+                print(
+                    f"             percentage_cost attribute: {cost_obj.percentage_cost}"
+                )
                 if cost_obj.percentage_cost == 0 and pct > 0:
-                    print(f"             ⚠️  BUG: percentage_cost=0 but SR cost={pct:.6f}")
+                    print(
+                        f"             ⚠️  BUG: percentage_cost=0 but SR cost={pct:.6f}"
+                    )
         except:
             pass
     print("=" * 70 + "\n")
@@ -80,7 +85,7 @@ class DynamicSystemBacktester:
     Comprehensive backtesting framework for Robert Carver's dynamic optimization system
     """
 
-    def __init__(self, config_file='project_dynamic/dynamic_backtest_config.yaml'):
+    def __init__(self, config_file="project_dynamic/dynamic_backtest_config.yaml"):
         """Initialize the backtester with configuration"""
         self.config_file = config_file
         self.system = None
@@ -104,11 +109,12 @@ class DynamicSystemBacktester:
 
             if os.path.exists(config_path):
                 import yaml
-                with open(config_path, 'r') as f:
+
+                with open(config_path, "r") as f:
                     config = yaml.safe_load(f)
 
-                start_date = config.get('startdate', '2000-01-19')  # Match config
-                end_date = config.get('enddate', None)
+                start_date = config.get("startdate", "2000-01-19")  # Match config
+                end_date = config.get("enddate", None)
 
                 print(f"✓ Filtering data: {start_date} to {end_date}")
 
@@ -129,7 +135,7 @@ class DynamicSystemBacktester:
             print(f"❌ Error setting up data source: {str(e)}")
             raise
 
-    def setup_file_logging(self, log_dir='backtest_logs'):
+    def setup_file_logging(self, log_dir="backtest_logs"):
         """
         Setup REAL-TIME file logging for complete backtest monitoring.
         Unbuffered writes ensure you see progress as it happens.
@@ -137,21 +143,19 @@ class DynamicSystemBacktester:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_filename = f"{log_dir}/backtest_{timestamp}.log"
 
         # Create file handler with unbuffered mode
         file_handler = logging.FileHandler(
-            log_filename,
-            mode='a',  # Append mode
-            encoding='utf-8'
+            log_filename, mode="a", encoding="utf-8"  # Append mode
         )
         file_handler.setLevel(logging.INFO)
 
         # Detailed format
         formatter = logging.Formatter(
-            '%(asctime)s | %(levelname)-8s | %(name)-30s | %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            "%(asctime)s | %(levelname)-8s | %(name)-30s | %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         file_handler.setFormatter(formatter)
 
@@ -181,7 +185,7 @@ class DynamicSystemBacktester:
         - Instrument participation
         - Performance indicators
         """
-        logger = logging.getLogger('BacktestMonitor')
+        logger = logging.getLogger("BacktestMonitor")
         logger.setLevel(logging.INFO)
 
         try:
@@ -253,7 +257,7 @@ class DynamicSystemBacktester:
         Args:
             positions_df: Current positions dataframe
         """
-        logger = logging.getLogger('OptimizationMilestones')
+        logger = logging.getLogger("OptimizationMilestones")
 
         try:
             total_dates = len(positions_df.index)
@@ -284,12 +288,12 @@ class DynamicSystemBacktester:
 
         # Set DEBUG level for key optimization modules
         optimization_modules = [
-            'objectiveFunctionForGreedy',  # Core optimization logic
-            'optimisedPositions',  # Position calculator
-            'greedy_algo',  # Greedy algorithm
-            'buffering',  # Speed control
-            'portfolio',  # Portfolio construction
-            'accounts',  # Account/cost calculations
+            "objectiveFunctionForGreedy",  # Core optimization logic
+            "optimisedPositions",  # Position calculator
+            "greedy_algo",  # Greedy algorithm
+            "buffering",  # Speed control
+            "portfolio",  # Portfolio construction
+            "accounts",  # Account/cost calculations
         ]
 
         for module_name in optimization_modules:
@@ -300,7 +304,7 @@ class DynamicSystemBacktester:
         print("✅ Detailed optimization logging enabled")
         print("⚠️  Warning: Log files will be much larger (50-200MB)")
 
-    def setup_complete_logging(self, log_dir='backtest_logs'):
+    def setup_complete_logging(self, log_dir="backtest_logs"):
         """
         Capture EVERYTHING: both logging output AND console print statements.
         This mirrors exactly what you see in PyCharm's Run window.
@@ -311,7 +315,7 @@ class DynamicSystemBacktester:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # ===== FILE 1: Complete output (print + logging) =====
         complete_log = f"{log_dir}/complete_output_{timestamp}.log"
@@ -324,7 +328,7 @@ class DynamicSystemBacktester:
             """Write to both file and console simultaneously"""
 
             def __init__(self, file_path, original_stream):
-                self.file = open(file_path, 'a', encoding='utf-8')
+                self.file = open(file_path, "a", encoding="utf-8")
                 self.original = original_stream
 
             def write(self, data):
@@ -345,17 +349,17 @@ class DynamicSystemBacktester:
         # ===== Setup logging module capture =====
         # Configure logging to go to BOTH files
         formatter = logging.Formatter(
-            '%(asctime)s | %(levelname)-8s | %(name)-30s | %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            "%(asctime)s | %(levelname)-8s | %(name)-30s | %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
 
         # Handler for complete log
-        complete_handler = logging.FileHandler(complete_log, mode='a', encoding='utf-8')
+        complete_handler = logging.FileHandler(complete_log, mode="a", encoding="utf-8")
         complete_handler.setLevel(logging.DEBUG)
         complete_handler.setFormatter(formatter)
 
         # Handler for logging-only log
-        logging_handler = logging.FileHandler(logging_log, mode='a', encoding='utf-8')
+        logging_handler = logging.FileHandler(logging_log, mode="a", encoding="utf-8")
         logging_handler.setLevel(logging.INFO)
         logging_handler.setFormatter(formatter)
 
@@ -396,7 +400,7 @@ class DynamicSystemBacktester:
             # (Different versions of pysystemtrade use different parameter names)
             self.system = futures_system(
                 sim_data=self.data_source,  # Use sim_data, not data
-                config_filename=config_path  # Use config_filename, not config
+                config_filename=config_path,  # Use config_filename, not config
             )
 
             print("✅ System created with Robert's futures_system()")
@@ -411,6 +415,7 @@ class DynamicSystemBacktester:
         except Exception as e:
             print(f"❌ Error creating system: {str(e)}")
             import traceback
+
             traceback.print_exc()
             raise
 
@@ -423,11 +428,15 @@ class DynamicSystemBacktester:
 
         # Check key settings
         print(f"use_SR_costs: {getattr(config, 'use_SR_costs', 'NOT SET')}")
-        print(f"use_instrument_weight_estimates: {getattr(config, 'use_instrument_weight_estimates', 'NOT SET')}")
-        print(f"percentage_vol_target: {getattr(config, 'percentage_vol_target', 'NOT SET')}")
+        print(
+            f"use_instrument_weight_estimates: {getattr(config, 'use_instrument_weight_estimates', 'NOT SET')}"
+        )
+        print(
+            f"percentage_vol_target: {getattr(config, 'percentage_vol_target', 'NOT SET')}"
+        )
 
         # Check ignored instruments
-        if hasattr(config, 'ignore_instruments'):
+        if hasattr(config, "ignore_instruments"):
             ignored = config.ignore_instruments
             print(f"ignore_instruments: {ignored}")
         else:
@@ -436,11 +445,15 @@ class DynamicSystemBacktester:
 
         # Check actual instrument list
         actual_instruments = self.system.get_instrument_list()
-        config_instruments = config.instruments if hasattr(config, 'instruments') else []
+        config_instruments = (
+            config.instruments if hasattr(config, "instruments") else []
+        )
 
         print(f"\nInstruments in config: {len(config_instruments)}")
         print(f"Instruments in system: {len(actual_instruments)}")
-        print(f"Excluded:              {len(config_instruments) - len(actual_instruments)}")
+        print(
+            f"Excluded:              {len(config_instruments) - len(actual_instruments)}"
+        )
 
         print("-" * 50 + "\n")
 
@@ -469,19 +482,25 @@ class DynamicSystemBacktester:
 
             # Store results
             self.results = {
-                'portfolio_returns': portfolio_returns,
-                'backtest_start_time': backtest_start,
-                'backtest_end_time': datetime.now()
+                "portfolio_returns": portfolio_returns,
+                "backtest_start_time": backtest_start,
+                "backtest_end_time": datetime.now(),
             }
 
             # Add position and weight data if available
             try:
-                if hasattr(self.system, 'optimisedPositions'):
-                    self.results['optimized_positions'] = self.system.optimisedPositions.get_optimised_position_df()
-                    self.results['optimized_weights'] = self.system.optimisedPositions.get_optimised_weights_df()
+                if hasattr(self.system, "optimisedPositions"):
+                    self.results[
+                        "optimized_positions"
+                    ] = self.system.optimisedPositions.get_optimised_position_df()
+                    self.results[
+                        "optimized_weights"
+                    ] = self.system.optimisedPositions.get_optimised_weights_df()
                     print("✓ Dynamic optimization data retrieved")
             except:
-                print("⚠ Dynamic optimization data not available - using standard results")
+                print(
+                    "⚠ Dynamic optimization data not available - using standard results"
+                )
 
             # Performance summary
             duration = datetime.now() - backtest_start
@@ -489,7 +508,9 @@ class DynamicSystemBacktester:
             print(f"⏱ Duration: {duration}")
             print(f"📊 Sharpe Ratio: {portfolio_returns.sharpe():.3f}")
             print(f"📈 Annual Return: {portfolio_returns.percent.mean() * 256:.1f}%")
-            print(f"📉 Annual Volatility: {portfolio_returns.percent.std() * (256 ** 0.5):.1f}%")
+            print(
+                f"📉 Annual Volatility: {portfolio_returns.percent.std() * (256 ** 0.5):.1f}%"
+            )
 
             return self.results
 
@@ -503,10 +524,10 @@ class DynamicSystemBacktester:
             config = self.system.config
 
             # Check buffering method
-            if hasattr(config, 'buffer_method'):
+            if hasattr(config, "buffer_method"):
                 buffer_method = config.buffer_method
-                buffer_size = getattr(config, 'buffer_size', 0.0)
-                buffer_trade_to_edge = getattr(config, 'buffer_trade_to_edge', False)
+                buffer_size = getattr(config, "buffer_size", 0.0)
+                buffer_trade_to_edge = getattr(config, "buffer_trade_to_edge", False)
 
                 print(f"✓ Position buffering configured:")
                 print(f"  Method: {buffer_method}")
@@ -516,7 +537,9 @@ class DynamicSystemBacktester:
                 if buffer_method == "position" and buffer_size >= 0.05:
                     print(f"✓ Proper position buffering for small system")
                 else:
-                    print(f"⚠ Warning: Buffer configuration may cause excessive turnover")
+                    print(
+                        f"⚠ Warning: Buffer configuration may cause excessive turnover"
+                    )
 
             else:
                 print(f"⚠ Warning: No buffering configured - may cause overtrading")
@@ -530,7 +553,7 @@ class DynamicSystemBacktester:
         print("─" * 30)
 
         # Check system has required stages
-        required_attributes = ['accounts', 'portfolio', 'config']
+        required_attributes = ["accounts", "portfolio", "config"]
         for attr in required_attributes:
             if hasattr(self.system, attr):
                 print(f"✓ {attr} available")
@@ -538,7 +561,7 @@ class DynamicSystemBacktester:
                 print(f"❌ Missing {attr}")
 
         # Check if dynamic optimization is configured
-        if hasattr(self.system.config, 'use_instrument_weight_estimates'):
+        if hasattr(self.system.config, "use_instrument_weight_estimates"):
             if self.system.config.use_instrument_weight_estimates:
                 print("✓ Dynamic portfolio optimization enabled")
             else:
@@ -555,27 +578,34 @@ class DynamicSystemBacktester:
         print(f"{'─' * 40}")
 
         try:
-            positions = self.results['optimized_positions']
-            weights = self.results['optimized_weights']
+            positions = self.results["optimized_positions"]
+            weights = self.results["optimized_weights"]
 
             # Integer constraint analysis
-            non_integer_positions = positions[positions != positions.round()].count().sum()
+            non_integer_positions = (
+                positions[positions != positions.round()].count().sum()
+            )
             total_position_observations = (positions != 0).sum().sum()
 
             print(f"📊 INTEGER CONSTRAINT COMPLIANCE")
             print(f"   Non-integer positions: {non_integer_positions}")
             print(f"   Total position observations: {total_position_observations}")
             print(
-                f"   Integer compliance: {(1 - non_integer_positions / max(total_position_observations, 1)) * 100:.1f}%")
+                f"   Integer compliance: {(1 - non_integer_positions / max(total_position_observations, 1)) * 100:.1f}%"
+            )
 
             # Sparse portfolio analysis
             avg_positions_per_day = (positions != 0).sum(axis=1).mean()
             max_positions_per_day = (positions != 0).sum(axis=1).max()
 
             print(f"📈 PORTFOLIO SPARSITY")
-            print(f"   Average active positions: {avg_positions_per_day:.1f} instruments")
+            print(
+                f"   Average active positions: {avg_positions_per_day:.1f} instruments"
+            )
             print(f"   Maximum active positions: {max_positions_per_day} instruments")
-            print(f"   Sparsity ratio: {avg_positions_per_day / len(positions.columns) * 100:.1f}%")
+            print(
+                f"   Sparsity ratio: {avg_positions_per_day / len(positions.columns) * 100:.1f}%"
+            )
 
             # Turnover analysis (key for small system)
             position_changes = positions.diff().abs().sum(axis=1)
@@ -583,7 +613,9 @@ class DynamicSystemBacktester:
 
             print(f"🔄 TURNOVER METRICS")
             print(f"   Average daily turnover: {avg_daily_turnover:.1f} contracts")
-            print(f"   Turnover efficiency: {(avg_daily_turnover > 0).sum() / len(positions) * 100:.1f}% active days")
+            print(
+                f"   Turnover efficiency: {(avg_daily_turnover > 0).sum() / len(positions) * 100:.1f}% active days"
+            )
 
         except Exception as e:
             print(f"⚠ Small system analysis error: {e}")
@@ -626,7 +658,7 @@ class DynamicSystemBacktester:
             print(f"Skew: {float(portfolio_returns.skew()):.3f}")
             print(f"Kurtosis: {float(portfolio_returns.kurtosis()):.3f}")
 
-    def save_results(self, output_dir='project_dynamic/results'):
+    def save_results(self, output_dir="project_dynamic/results"):
         """Save backtest results to files"""
         if not self.results:
             print("❌ No results to save")
@@ -640,26 +672,32 @@ class DynamicSystemBacktester:
         try:
             # Save positions
             positions_file = f"{output_dir}/optimized_positions_{timestamp}.csv"
-            self.results['optimized_positions'].to_csv(positions_file)
+            self.results["optimized_positions"].to_csv(positions_file)
             print(f"✓ Positions saved: {positions_file}")
 
             # Save weights
             weights_file = f"{output_dir}/optimized_weights_{timestamp}.csv"
-            self.results['optimized_weights'].to_csv(weights_file)
+            self.results["optimized_weights"].to_csv(weights_file)
             print(f"✓ Weights saved: {weights_file}")
 
             # Save performance summary
-            portfolio_returns = self.results['portfolio_returns']
+            portfolio_returns = self.results["portfolio_returns"]
             summary_file = f"{output_dir}/performance_summary_{timestamp}.txt"
 
-            with open(summary_file, 'w') as f:
+            with open(summary_file, "w") as f:
                 f.write(f"Dynamic Optimization Backtest Results\n")
                 f.write(f"Generated: {datetime.now()}\n")
                 f.write(f"{'=' * 50}\n\n")
                 f.write(f"Sharpe Ratio: {portfolio_returns.sharpe():.3f}\n")
-                f.write(f"Annual Return: {portfolio_returns.percent.mean() * 256:.1f}%\n")
-                f.write(f"Annual Volatility: {portfolio_returns.percent.std() * (256 ** 0.5):.1f}%\n")
-                f.write(f"Max Drawdown: {portfolio_returns.percent.drawdown().min():.1f}%\n")
+                f.write(
+                    f"Annual Return: {portfolio_returns.percent.mean() * 256:.1f}%\n"
+                )
+                f.write(
+                    f"Annual Volatility: {portfolio_returns.percent.std() * (256 ** 0.5):.1f}%\n"
+                )
+                f.write(
+                    f"Max Drawdown: {portfolio_returns.percent.drawdown().min():.1f}%\n"
+                )
                 f.write(f"Calmar Ratio: {portfolio_returns.calmar():.3f}\n")
 
             print(f"✓ Summary saved: {summary_file}")
@@ -677,7 +715,7 @@ class DynamicSystemBacktester:
         except Exception as e:
             print(f"❌ Error saving results: {str(e)}")
 
-    def create_performance_plots(self, output_dir='project_dynamic/results'):
+    def create_performance_plots(self, output_dir="project_dynamic/results"):
         """
         Create equity curve and drawdown plots following Robert Carver's visualization style
         """
@@ -694,7 +732,7 @@ class DynamicSystemBacktester:
             from matplotlib.patches import Rectangle
 
             # Get portfolio returns data
-            portfolio_returns = self.results['portfolio_returns']
+            portfolio_returns = self.results["portfolio_returns"]
 
             # Calculate equity curve (cumulative returns)
             equity_curve = (1 + portfolio_returns.percent / 100).cumprod()
@@ -707,21 +745,32 @@ class DynamicSystemBacktester:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
             # Set up the plotting style (Robert Carver prefers clean, professional charts)
-            plt.style.use('default')
+            plt.style.use("default")
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
-            fig.suptitle('Robert Carver Dynamic Optimization System - Performance Analysis',
-                         fontsize=16, fontweight='bold', y=0.98)
+            fig.suptitle(
+                "Robert Carver Dynamic Optimization System - Performance Analysis",
+                fontsize=16,
+                fontweight="bold",
+                y=0.98,
+            )
 
             # ======== EQUITY CURVE PLOT ========
-            ax1.plot(equity_curve.index, equity_curve.values,
-                     linewidth=1.5, color='#2E86AB', label='Dynamic Portfolio')
-            ax1.set_title('Cumulative Equity Curve', fontsize=14, fontweight='semibold', pad=20)
-            ax1.set_ylabel('Portfolio Value (Base = 1.0)', fontsize=12)
-            ax1.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
-            ax1.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
+            ax1.plot(
+                equity_curve.index,
+                equity_curve.values,
+                linewidth=1.5,
+                color="#2E86AB",
+                label="Dynamic Portfolio",
+            )
+            ax1.set_title(
+                "Cumulative Equity Curve", fontsize=14, fontweight="semibold", pad=20
+            )
+            ax1.set_ylabel("Portfolio Value (Base = 1.0)", fontsize=12)
+            ax1.grid(True, alpha=0.3, linestyle="-", linewidth=0.5)
+            ax1.legend(loc="upper left", frameon=True, fancybox=True, shadow=True)
 
             # Format x-axis dates
-            ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
             ax1.xaxis.set_major_locator(mdates.YearLocator(2))
 
             # Add key statistics as text box
@@ -729,35 +778,51 @@ class DynamicSystemBacktester:
             total_return = (final_value - 1) * 100
             sharpe = portfolio_returns.sharpe()
 
-            stats_text = f'Total Return: {total_return:.1f}%\nSharpe Ratio: {sharpe:.3f}\nFinal Value: {final_value:.2f}'
-            ax1.text(0.02, 0.98, stats_text, transform=ax1.transAxes,
-                     verticalalignment='top', bbox=dict(boxstyle='round',
-                                                        facecolor='wheat', alpha=0.8), fontsize=10)
+            stats_text = f"Total Return: {total_return:.1f}%\nSharpe Ratio: {sharpe:.3f}\nFinal Value: {final_value:.2f}"
+            ax1.text(
+                0.02,
+                0.98,
+                stats_text,
+                transform=ax1.transAxes,
+                verticalalignment="top",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
+                fontsize=10,
+            )
 
             # ======== DRAWDOWN PLOT ========
-            ax2.fill_between(drawdown.index, drawdown.values, 0,
-                             color='#A23B72', alpha=0.6, label='Drawdown')
-            ax2.plot(drawdown.index, drawdown.values,
-                     linewidth=1, color='#A23B72')
-            ax2.set_title('Drawdown Analysis', fontsize=14, fontweight='semibold', pad=20)
-            ax2.set_xlabel('Year', fontsize=12)
-            ax2.set_ylabel('Drawdown (%)', fontsize=12)
-            ax2.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
-            ax2.legend(loc='lower right', frameon=True, fancybox=True, shadow=True)
+            ax2.fill_between(
+                drawdown.index,
+                drawdown.values,
+                0,
+                color="#A23B72",
+                alpha=0.6,
+                label="Drawdown",
+            )
+            ax2.plot(drawdown.index, drawdown.values, linewidth=1, color="#A23B72")
+            ax2.set_title(
+                "Drawdown Analysis", fontsize=14, fontweight="semibold", pad=20
+            )
+            ax2.set_xlabel("Year", fontsize=12)
+            ax2.set_ylabel("Drawdown (%)", fontsize=12)
+            ax2.grid(True, alpha=0.3, linestyle="-", linewidth=0.5)
+            ax2.legend(loc="lower right", frameon=True, fancybox=True, shadow=True)
 
             # Format x-axis dates
-            ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
             ax2.xaxis.set_major_locator(mdates.YearLocator(2))
 
             # Add max drawdown annotation
             max_dd = drawdown.min()
             max_dd_date = drawdown.idxmin()
-            ax2.annotate(f'Max DD: {max_dd:.1f}%',
-                         xy=(max_dd_date, max_dd),
-                         xytext=(max_dd_date, max_dd + 5),
-                         arrowprops=dict(arrowstyle='->', color='red', lw=1.5),
-                         fontsize=10, ha='center',
-                         bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))
+            ax2.annotate(
+                f"Max DD: {max_dd:.1f}%",
+                xy=(max_dd_date, max_dd),
+                xytext=(max_dd_date, max_dd + 5),
+                arrowprops=dict(arrowstyle="->", color="red", lw=1.5),
+                fontsize=10,
+                ha="center",
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.7),
+            )
 
             # Adjust layout and save
             plt.tight_layout()
@@ -765,14 +830,24 @@ class DynamicSystemBacktester:
 
             # Save the plot
             plot_filename = f"{output_dir}/performance_analysis_{timestamp}.png"
-            plt.savefig(plot_filename, dpi=300, bbox_inches='tight',
-                        facecolor='white', edgecolor='none')
+            plt.savefig(
+                plot_filename,
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white",
+                edgecolor="none",
+            )
             print(f"✓ Performance plots saved: {plot_filename}")
 
             # Also save as PDF for publication quality
             pdf_filename = f"{output_dir}/performance_analysis_{timestamp}.pdf"
-            plt.savefig(pdf_filename, dpi=300, bbox_inches='tight',
-                        facecolor='white', edgecolor='none')
+            plt.savefig(
+                pdf_filename,
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white",
+                edgecolor="none",
+            )
             print(f"✓ PDF version saved: {pdf_filename}")
 
             # Display the plot
@@ -789,7 +864,7 @@ class DynamicSystemBacktester:
             print(f"❌ Error creating plots: {e}")
             return None, None
 
-    def create_position_and_risk_plots(self, output_dir='project_dynamic/results'):
+    def create_position_and_risk_plots(self, output_dir="project_dynamic/results"):
         """
         Create advanced position evolution and risk metrics plots
         Following Robert Carver's systematic trading analysis methodology
@@ -808,31 +883,44 @@ class DynamicSystemBacktester:
             import numpy as np
 
             # Get data
-            positions = self.results['optimized_positions']
-            weights = self.results['optimized_weights']
-            portfolio_returns = self.results['portfolio_returns']
+            positions = self.results["optimized_positions"]
+            weights = self.results["optimized_weights"]
+            portfolio_returns = self.results["portfolio_returns"]
 
             # Create timestamp for file naming
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
             # Set up professional styling
-            plt.style.use('default')
+            plt.style.use("default")
             fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
-            fig.suptitle('Robert Carver Dynamic System - Position Evolution & Risk Analysis',
-                         fontsize=16, fontweight='bold', y=0.98)
+            fig.suptitle(
+                "Robert Carver Dynamic System - Position Evolution & Risk Analysis",
+                fontsize=16,
+                fontweight="bold",
+                y=0.98,
+            )
 
             # ======== 1. POSITION EVOLUTION HEATMAP ========
             # Sample positions every 30 days for visibility
             positions_sampled = positions.iloc[::30, :]
 
             # Create heatmap of positions over time
-            im1 = ax1.imshow(positions_sampled.T, aspect='auto', cmap='RdBu_r',
-                             interpolation='nearest', alpha=0.8)
+            im1 = ax1.imshow(
+                positions_sampled.T,
+                aspect="auto",
+                cmap="RdBu_r",
+                interpolation="nearest",
+                alpha=0.8,
+            )
 
-            ax1.set_title('Position Evolution Over Time (Contract Sizes)',
-                          fontsize=12, fontweight='semibold', pad=15)
-            ax1.set_xlabel('Time (sampled every 30 days)', fontsize=10)
-            ax1.set_ylabel('Instruments', fontsize=10)
+            ax1.set_title(
+                "Position Evolution Over Time (Contract Sizes)",
+                fontsize=12,
+                fontweight="semibold",
+                pad=15,
+            )
+            ax1.set_xlabel("Time (sampled every 30 days)", fontsize=10)
+            ax1.set_ylabel("Instruments", fontsize=10)
 
             # Set y-axis labels to instrument names
             ax1.set_yticks(range(len(positions.columns)))
@@ -841,78 +929,125 @@ class DynamicSystemBacktester:
             # Set x-axis labels to dates (every 2 years)
             date_indices = range(0, len(positions_sampled), len(positions_sampled) // 8)
             ax1.set_xticks(date_indices)
-            ax1.set_xticklabels([positions_sampled.index[i].strftime('%Y')
-                                 for i in date_indices], rotation=45, fontsize=9)
+            ax1.set_xticklabels(
+                [positions_sampled.index[i].strftime("%Y") for i in date_indices],
+                rotation=45,
+                fontsize=9,
+            )
 
             # Add colorbar
             cbar1 = plt.colorbar(im1, ax=ax1, shrink=0.8)
-            cbar1.set_label('Position Size (Contracts)', fontsize=9)
+            cbar1.set_label("Position Size (Contracts)", fontsize=9)
 
             # ======== 2. PORTFOLIO CONCENTRATION OVER TIME ========
             # Calculate concentration metrics
             abs_weights = weights.abs()
-            concentration = (abs_weights ** 2).sum(axis=1)  # Herfindahl concentration index
-            num_positions = (abs_weights > 0.01).sum(axis=1)  # Number of significant positions
+            concentration = (abs_weights**2).sum(
+                axis=1
+            )  # Herfindahl concentration index
+            num_positions = (abs_weights > 0.01).sum(
+                axis=1
+            )  # Number of significant positions
 
             # Plot concentration over time
-            ax2.plot(concentration.index, concentration.values,
-                     linewidth=1.5, color='#E74C3C', label='Concentration Index')
+            ax2.plot(
+                concentration.index,
+                concentration.values,
+                linewidth=1.5,
+                color="#E74C3C",
+                label="Concentration Index",
+            )
             ax2_twin = ax2.twinx()
-            ax2_twin.plot(num_positions.index, num_positions.values,
-                          linewidth=1.5, color='#3498DB', label='Active Positions', linestyle='--')
+            ax2_twin.plot(
+                num_positions.index,
+                num_positions.values,
+                linewidth=1.5,
+                color="#3498DB",
+                label="Active Positions",
+                linestyle="--",
+            )
 
-            ax2.set_title('Portfolio Concentration Evolution', fontsize=12, fontweight='semibold', pad=15)
-            ax2.set_xlabel('Year', fontsize=10)
-            ax2.set_ylabel('Concentration Index', color='#E74C3C', fontsize=10)
-            ax2_twin.set_ylabel('Number of Active Positions', color='#3498DB', fontsize=10)
+            ax2.set_title(
+                "Portfolio Concentration Evolution",
+                fontsize=12,
+                fontweight="semibold",
+                pad=15,
+            )
+            ax2.set_xlabel("Year", fontsize=10)
+            ax2.set_ylabel("Concentration Index", color="#E74C3C", fontsize=10)
+            ax2_twin.set_ylabel(
+                "Number of Active Positions", color="#3498DB", fontsize=10
+            )
 
             ax2.grid(True, alpha=0.3)
-            ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
             ax2.xaxis.set_major_locator(mdates.YearLocator(3))
 
             # Combined legend
             lines1, labels1 = ax2.get_legend_handles_labels()
             lines2, labels2 = ax2_twin.get_legend_handles_labels()
-            ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+            ax2.legend(lines1 + lines2, labels1 + labels2, loc="upper right")
 
             # ======== 3. ROLLING VOLATILITY & RISK METRICS ========
             # Calculate rolling metrics (quarterly windows)
-            rolling_vol = portfolio_returns.percent.rolling(window=63).std() * np.sqrt(256)  # 63 = ~3 months
-            rolling_sharpe = portfolio_returns.percent.rolling(window=252).mean() * 256 / (
-                    portfolio_returns.percent.rolling(window=252).std() * np.sqrt(256))
+            rolling_vol = portfolio_returns.percent.rolling(window=63).std() * np.sqrt(
+                256
+            )  # 63 = ~3 months
+            rolling_sharpe = (
+                portfolio_returns.percent.rolling(window=252).mean()
+                * 256
+                / (portfolio_returns.percent.rolling(window=252).std() * np.sqrt(256))
+            )
 
             # Plot volatility over time
-            ax3.plot(rolling_vol.index, rolling_vol.values,
-                     linewidth=1.5, color='#9B59B6', label='Rolling Volatility (3M)')
+            ax3.plot(
+                rolling_vol.index,
+                rolling_vol.values,
+                linewidth=1.5,
+                color="#9B59B6",
+                label="Rolling Volatility (3M)",
+            )
 
             # Add target volatility line
             target_vol = 20.0  # From your config
-            ax3.axhline(y=target_vol, color='#F39C12', linestyle='--', linewidth=2,
-                        label=f'Target Vol ({target_vol}%)', alpha=0.8)
+            ax3.axhline(
+                y=target_vol,
+                color="#F39C12",
+                linestyle="--",
+                linewidth=2,
+                label=f"Target Vol ({target_vol}%)",
+                alpha=0.8,
+            )
 
-            ax3.set_title('Rolling Risk Metrics', fontsize=12, fontweight='semibold', pad=15)
-            ax3.set_xlabel('Year', fontsize=10)
-            ax3.set_ylabel('Annualized Volatility (%)', fontsize=10)
+            ax3.set_title(
+                "Rolling Risk Metrics", fontsize=12, fontweight="semibold", pad=15
+            )
+            ax3.set_xlabel("Year", fontsize=10)
+            ax3.set_ylabel("Annualized Volatility (%)", fontsize=10)
             ax3.grid(True, alpha=0.3)
-            ax3.legend(loc='upper right')
-            ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax3.legend(loc="upper right")
+            ax3.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
             ax3.xaxis.set_major_locator(mdates.YearLocator(3))
 
             # ======== 4. ASSET CLASS ALLOCATION OVER TIME ========
             # Group instruments by asset class for allocation analysis
             asset_classes = {
-                'Interest_Rates': ['US10', 'US2', 'SOFR'],
-                'Equities': ['SP500_micro', 'NASDAQ', 'EUROSTX'],
-                'Commodities': ['CORN', 'CRUDE_W', 'GOLD'],
-                'FX': ['EUR', 'GBP', 'JPY']
+                "Interest_Rates": ["US10", "US2", "SOFR"],
+                "Equities": ["SP500_micro", "NASDAQ", "EUROSTX"],
+                "Commodities": ["CORN", "CRUDE_W", "GOLD"],
+                "FX": ["EUR", "GBP", "JPY"],
             }
 
             # Calculate asset class weights over time
             asset_class_weights = {}
             for asset_class, instruments in asset_classes.items():
-                available_instruments = [inst for inst in instruments if inst in weights.columns]
+                available_instruments = [
+                    inst for inst in instruments if inst in weights.columns
+                ]
                 if available_instruments:
-                    asset_class_weights[asset_class] = weights[available_instruments].abs().sum(axis=1)
+                    asset_class_weights[asset_class] = (
+                        weights[available_instruments].abs().sum(axis=1)
+                    )
 
             # Create stacked area plot
             asset_df = pd.DataFrame(asset_class_weights)
@@ -921,21 +1056,29 @@ class DynamicSystemBacktester:
             # Sample every 60 days for cleaner visualization
             asset_df_sampled = asset_df.iloc[::60, :]
 
-            colors = ['#3498DB', '#E74C3C', '#F39C12', '#27AE60']
-            ax4.stackplot(asset_df_sampled.index,
-                          asset_df_sampled['Interest_Rates'],
-                          asset_df_sampled['Equities'],
-                          asset_df_sampled['Commodities'],
-                          asset_df_sampled['FX'],
-                          labels=['Interest Rates', 'Equities', 'Commodities', 'FX'],
-                          colors=colors, alpha=0.8)
+            colors = ["#3498DB", "#E74C3C", "#F39C12", "#27AE60"]
+            ax4.stackplot(
+                asset_df_sampled.index,
+                asset_df_sampled["Interest_Rates"],
+                asset_df_sampled["Equities"],
+                asset_df_sampled["Commodities"],
+                asset_df_sampled["FX"],
+                labels=["Interest Rates", "Equities", "Commodities", "FX"],
+                colors=colors,
+                alpha=0.8,
+            )
 
-            ax4.set_title('Dynamic Asset Class Allocation', fontsize=12, fontweight='semibold', pad=15)
-            ax4.set_xlabel('Year', fontsize=10)
-            ax4.set_ylabel('Total Weight by Asset Class', fontsize=10)
-            ax4.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+            ax4.set_title(
+                "Dynamic Asset Class Allocation",
+                fontsize=12,
+                fontweight="semibold",
+                pad=15,
+            )
+            ax4.set_xlabel("Year", fontsize=10)
+            ax4.set_ylabel("Total Weight by Asset Class", fontsize=10)
+            ax4.legend(loc="upper right", frameon=True, fancybox=True, shadow=True)
             ax4.grid(True, alpha=0.3)
-            ax4.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+            ax4.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
             ax4.xaxis.set_major_locator(mdates.YearLocator(3))
 
             # Adjust layout
@@ -944,14 +1087,24 @@ class DynamicSystemBacktester:
 
             # Save the comprehensive analysis
             analysis_filename = f"{output_dir}/position_risk_analysis_{timestamp}.png"
-            plt.savefig(analysis_filename, dpi=300, bbox_inches='tight',
-                        facecolor='white', edgecolor='none')
+            plt.savefig(
+                analysis_filename,
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white",
+                edgecolor="none",
+            )
             print(f"✓ Position & Risk analysis saved: {analysis_filename}")
 
             # Also save as PDF
             analysis_pdf = f"{output_dir}/position_risk_analysis_{timestamp}.pdf"
-            plt.savefig(analysis_pdf, dpi=300, bbox_inches='tight',
-                        facecolor='white', edgecolor='none')
+            plt.savefig(
+                analysis_pdf,
+                dpi=300,
+                bbox_inches="tight",
+                facecolor="white",
+                edgecolor="none",
+            )
             print(f"✓ PDF version saved: {analysis_pdf}")
 
             # Display the plot
@@ -979,9 +1132,9 @@ class DynamicSystemBacktester:
         print(f"{'─' * 50}")
 
         try:
-            positions = self.results['optimized_positions']
-            weights = self.results['optimized_weights']
-            portfolio_returns = self.results['portfolio_returns'].percent
+            positions = self.results["optimized_positions"]
+            weights = self.results["optimized_weights"]
+            portfolio_returns = self.results["portfolio_returns"].percent
 
             # Position concentration analysis
             daily_total_positions = positions.abs().sum(axis=1)
@@ -991,7 +1144,9 @@ class DynamicSystemBacktester:
             print(f"📍 POSITION METRICS")
             print(f"   Average daily positions: {avg_daily_exposure:.1f} contracts")
             print(f"   Maximum daily positions: {max_daily_exposure:.0f} contracts")
-            print(f"   Position concentration:  {(positions != 0).sum(axis=1).mean():.1f} instruments/day")
+            print(
+                f"   Position concentration:  {(positions != 0).sum(axis=1).mean():.1f} instruments/day"
+            )
 
             # Volatility analysis
             rolling_vol_quarterly = portfolio_returns.rolling(63).std() * np.sqrt(256)
@@ -999,9 +1154,13 @@ class DynamicSystemBacktester:
 
             print(f"\n⚡ VOLATILITY ANALYSIS")
             print(f"   Target volatility:       20.0%")
-            print(f"   Achieved volatility:     {portfolio_returns.std() * np.sqrt(256):.1f}%")
+            print(
+                f"   Achieved volatility:     {portfolio_returns.std() * np.sqrt(256):.1f}%"
+            )
             print(f"   Volatility consistency:  {vol_of_vol:.1f}% (vol of vol)")
-            print(f"   Vol control efficiency:  {20.0 / (portfolio_returns.std() * np.sqrt(256)):.2f}x")
+            print(
+                f"   Vol control efficiency:  {20.0 / (portfolio_returns.std() * np.sqrt(256)):.2f}x"
+            )
 
             # Dynamic rebalancing frequency
             position_changes = positions.diff().abs().sum(axis=1)
@@ -1009,9 +1168,15 @@ class DynamicSystemBacktester:
             rebalance_frequency = rebalance_days / len(positions) * 100
 
             print(f"\n🔄 DYNAMIC REBALANCING")
-            print(f"   Rebalancing frequency:   {rebalance_frequency:.1f}% of trading days")
-            print(f"   Total rebalance days:    {rebalance_days} out of {len(positions)}")
-            print(f"   Avg changes per rebal:   {position_changes[position_changes > 0].mean():.1f} contracts")
+            print(
+                f"   Rebalancing frequency:   {rebalance_frequency:.1f}% of trading days"
+            )
+            print(
+                f"   Total rebalance days:    {rebalance_days} out of {len(positions)}"
+            )
+            print(
+                f"   Avg changes per rebal:   {position_changes[position_changes > 0].mean():.1f} contracts"
+            )
 
         except Exception as e:
             print(f"⚠ Risk analysis calculation error: {e}")
@@ -1034,13 +1199,13 @@ class DynamicSystemBacktester:
         turnover_results = analyzer.extract_all_turnover_metrics()
 
         # Generate comprehensive report
-        report_file = analyzer.generate_turnover_report('project_dynamic/results')
+        report_file = analyzer.generate_turnover_report("project_dynamic/results")
 
         # Create visualization plots
-        plot_file = analyzer.plot_turnover_analysis('project_dynamic/results')
+        plot_file = analyzer.plot_turnover_analysis("project_dynamic/results")
 
         # Store results for later use
-        self.results['turnover_analysis'] = turnover_results
+        self.results["turnover_analysis"] = turnover_results
 
         return turnover_results
 
@@ -1069,15 +1234,15 @@ class DynamicSystemBacktester:
 
         # Pick most active instrument for detailed check
         if activity:
-            most_active = max(activity.items(), key=lambda x: x[1]['total_changes'])
+            most_active = max(activity.items(), key=lambda x: x[1]["total_changes"])
             instrument = most_active[0]
             print(f"\n" + "🔍" * 35)
             crosscheck = analyzer.cross_check_turnover_calculation(instrument)
 
         return {
-            'activity': activity,
-            'positions': positions,
-            'crosscheck': crosscheck if activity else {}
+            "activity": activity,
+            "positions": positions,
+            "crosscheck": crosscheck if activity else {},
         }
 
 
@@ -1136,18 +1301,18 @@ def main():
 
     # 4. Save results to CSV files
     print("\n4️⃣ Saving Results...")
-    backtester.save_results(output_dir='project_dynamic/results')
+    backtester.save_results(output_dir="project_dynamic/results")
 
     # 5. Create performance plots (equity curve + drawdown)
     print("\n5️⃣ Creating Performance Plots...")
     performance_plots = backtester.create_performance_plots(
-        output_dir='project_dynamic/results'
+        output_dir="project_dynamic/results"
     )
 
     # 6. Create position and risk analysis plots
     print("\n6️⃣ Creating Position & Risk Analysis Plots...")
     position_plots = backtester.create_position_and_risk_plots(
-        output_dir='project_dynamic/results'
+        output_dir="project_dynamic/results"
     )
 
     # 7. Turnover analysis (if turnover_analysis module is available)
@@ -1162,7 +1327,7 @@ def main():
     print("=" * 70)
     print("3️⃣ Running Turnover Diagnostics...")
     diagnostic_results = backtester.run_turnover_diagnostics()
-    backtester.results['diagnostic_results'] = diagnostic_results
+    backtester.results["diagnostic_results"] = diagnostic_results
 
     # ============================================================
     # FINAL SUMMARY
@@ -1177,7 +1342,7 @@ def main():
     print(f"📁 Results saved to: project_dynamic/results/")
 
     # Print key metrics summary
-    portfolio_returns = results['portfolio_returns']
+    portfolio_returns = results["portfolio_returns"]
     print(f"\n📊 KEY PERFORMANCE METRICS:")
     print(f"   Sharpe Ratio: {portfolio_returns.sharpe():.3f}")
     print(f"   Annual Return: {portfolio_returns.percent.mean() * 256:.1f}%")

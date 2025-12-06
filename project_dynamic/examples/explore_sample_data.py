@@ -21,7 +21,7 @@ def explore_sample_data():
     print(f"📊 Total instruments available: {len(instruments)}")
 
     # Test some popular instruments
-    test_instruments = ['SP500_micro', 'AUD', 'CORN', 'GOLD', 'CRUDE_W']
+    test_instruments = ["SP500_micro", "AUD", "CORN", "GOLD", "CRUDE_W"]
     available_test = [inst for inst in test_instruments if inst in instruments]
 
     print(f"\n🔍 Testing sample instruments: {available_test}")
@@ -64,9 +64,11 @@ def test_dynamic_optimization_with_data():
     system = futures_system(sim_data=data)
 
     # Test with a few liquid instruments
-    test_instruments = ['AUD', 'SP500_micro', 'GOLD']
+    test_instruments = ["AUD", "SP500_micro", "GOLD"]
     available_instruments = system.get_instrument_list()
-    test_instruments = [inst for inst in test_instruments if inst in available_instruments]
+    test_instruments = [
+        inst for inst in test_instruments if inst in available_instruments
+    ]
 
     print(f"🧪 Testing optimization with: {test_instruments}")
 

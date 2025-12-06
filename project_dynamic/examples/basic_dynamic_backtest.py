@@ -33,7 +33,9 @@ from systems.forecast_scale_cap import ForecastScaleCap
 from systems.positionsizing import PositionSizing
 from systems.portfolio import Portfolios
 from systems.accounts.accounts_stage import Account
-from systems.provided.dynamic_small_system_optimise.optimised_positions_stage import optimisedPositions
+from systems.provided.dynamic_small_system_optimise.optimised_positions_stage import (
+    optimisedPositions,
+)
 from sysdata.config.configdata import Config
 
 
@@ -47,7 +49,7 @@ def get_project_root():
 
     # Go up directories until we find project_dynamic
     for parent in current_file.parents:
-        if parent.name == 'project_dynamic':
+        if parent.name == "project_dynamic":
             return parent
 
     # If not found, assume current directory's parent
@@ -96,7 +98,7 @@ def load_config(config_filename="dynamic_config.yaml"):
         raise FileNotFoundError(f"Config file not found: {config_path}")
 
     # Load the YAML file into a Python dictionary
-    with open(config_path, 'r') as file:
+    with open(config_path, "r") as file:
         config = yaml.safe_load(file)
 
     print(f"✅ Configuration loaded successfully!")
@@ -128,7 +130,6 @@ def setup_data_source(data_dirname="data"):
     csv_data_paths = {
         # Minimum needed to read prices
         "csvFuturesAdjustedPricesData": str(adjusted_prices_path),
-
         # You can wire these later when you add costs / FX / rolls:
         # "csvFuturesMultiplePricesData": str(repo_root / "data" / "futures" / "multiple_prices_csv"),
         # "csvFuturesInstrumentData": str(repo_root / "data" / "instruments"),
@@ -141,7 +142,6 @@ def setup_data_source(data_dirname="data"):
     data = csvFuturesSimData(csv_data_paths=csv_data_paths)
     print("✅ Data source configured to use pysystemtrade bundled sample data")
     return data
-
 
 
 def create_dynamic_system(data, config):
@@ -165,7 +165,9 @@ def create_dynamic_system(data, config):
     # STAGE 2: Trading Rules
     # Generates buy/sell signals (forecasts) from price patterns
     rules_stage = Rules()
-    print(f"   ⚙️  Stage 2: Trading rules ({len(config.get('trading_rules', {}))} rules)")
+    print(
+        f"   ⚙️  Stage 2: Trading rules ({len(config.get('trading_rules', {}))} rules)"
+    )
 
     # STAGE 3: Forecast Scaling & Capping
     # Makes sure all forecasts are on the same scale (-20 to +20)
@@ -213,7 +215,7 @@ def create_dynamic_system(data, config):
         position_stage,  # Position sizing
         portfolio_stage,  # Dynamic optimization
         optimized_stage,  # Advanced optimization
-        account_stage  # Performance tracking
+        account_stage,  # Performance tracking
     ]
 
     # Create the complete system object
@@ -221,7 +223,7 @@ def create_dynamic_system(data, config):
     system = System(
         system_stages,  # ✅ ONLY system stages (no data object)
         data,  # ✅ Data source as separate parameter
-        config_object  # ✅ Config object as separate parameter
+        config_object,  # ✅ Config object as separate parameter
     )
 
     print(f"✅ Dynamic system built successfully!")
@@ -251,7 +253,9 @@ def run_backtest(system, start_date="2010-01-01", end_date="2025-12-31"):
 
     # Get the list of instruments from your configuration
     instruments = system.get_instrument_list()
-    print(f"   - Trading {len(instruments)} instruments: {', '.join(instruments[:5])}...")
+    print(
+        f"   - Trading {len(instruments)} instruments: {', '.join(instruments[:5])}..."
+    )
 
     # CALCULATE KEY SYSTEM OUTPUTS
     results = {}
@@ -262,11 +266,11 @@ def run_backtest(system, start_date="2010-01-01", end_date="2025-12-31"):
     # This shows how your account value changes over time
     try:
         account_curve = system.accounts.portfolio()
-        results['account_curve'] = account_curve
+        results["account_curve"] = account_curve
         print(f"   ✅ Account curve calculated ({len(account_curve)} data points)")
     except Exception as e:
         print(f"   ❌ Error calculating account curve: {e}")
-        results['account_curve'] = None
+        results["account_curve"] = None
 
     # 2. INDIVIDUAL INSTRUMENT PERFORMANCE
     # Shows how each market contributed to your returns
@@ -282,7 +286,7 @@ def run_backtest(system, start_date="2010-01-01", end_date="2025-12-31"):
         except Exception as e:
             print(f"   ⚠️  {instrument}: Error - {e}")
 
-    results['instrument_returns'] = instrument_returns
+    results["instrument_returns"] = instrument_returns
 
     # 3. POSITION HISTORY
     # Shows how your positions changed over time (the dynamic part!)
@@ -298,14 +302,14 @@ def run_backtest(system, start_date="2010-01-01", end_date="2025-12-31"):
         except Exception as e:
             print(f"   ⚠️  {instrument}: Error - {e}")
 
-    results['positions'] = position_history
+    results["positions"] = position_history
 
     # 4. RISK METRICS
     # Calculate key risk and return statistics
     print("   🎯 Calculating performance metrics...")
 
-    if results['account_curve'] is not None:
-        account_curve = results['account_curve']
+    if results["account_curve"] is not None:
+        account_curve = results["account_curve"]
 
         # Calculate daily returns
         daily_returns = account_curve.pct_change().dropna()
@@ -313,7 +317,7 @@ def run_backtest(system, start_date="2010-01-01", end_date="2025-12-31"):
         # Key performance metrics
         total_return = (account_curve.iloc[-1] / account_curve.iloc[0]) - 1
         annual_return = ((1 + total_return) ** (252 / len(daily_returns))) - 1
-        annual_volatility = daily_returns.std() * (252 ** 0.5)
+        annual_volatility = daily_returns.std() * (252**0.5)
         sharpe_ratio = annual_return / annual_volatility if annual_volatility > 0 else 0
 
         # Maximum drawdown calculation
@@ -322,13 +326,13 @@ def run_backtest(system, start_date="2010-01-01", end_date="2025-12-31"):
         drawdown = (cumulative - running_max) / running_max
         max_drawdown = drawdown.min()
 
-        results['performance_metrics'] = {
-            'total_return': total_return,
-            'annual_return': annual_return,
-            'annual_volatility': annual_volatility,
-            'sharpe_ratio': sharpe_ratio,
-            'max_drawdown': max_drawdown,
-            'num_trades': len(daily_returns)
+        results["performance_metrics"] = {
+            "total_return": total_return,
+            "annual_return": annual_return,
+            "annual_volatility": annual_volatility,
+            "sharpe_ratio": sharpe_ratio,
+            "max_drawdown": max_drawdown,
+            "num_trades": len(daily_returns),
         }
 
         print(f"   ✅ Performance calculated!")
@@ -354,76 +358,101 @@ def display_results(results):
     print(f"📊 Generating performance charts...")
 
     # Set up the plotting environment
-    plt.style.use('seaborn-v0_8' if 'seaborn-v0_8' in plt.style.available else 'default')
+    plt.style.use(
+        "seaborn-v0_8" if "seaborn-v0_8" in plt.style.available else "default"
+    )
     fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-    fig.suptitle('Dynamic Optimization System - Backtest Results', fontsize=16, fontweight='bold')
+    fig.suptitle(
+        "Dynamic Optimization System - Backtest Results", fontsize=16, fontweight="bold"
+    )
 
     # CHART 1: Account Curve (Main Performance)
-    if results.get('account_curve') is not None:
-        account_curve = results['account_curve']
+    if results.get("account_curve") is not None:
+        account_curve = results["account_curve"]
 
-        axes[0, 0].plot(account_curve.index, account_curve.values, 'b-', linewidth=2)
-        axes[0, 0].set_title('Portfolio Value Over Time')
-        axes[0, 0].set_ylabel('Portfolio Value')
+        axes[0, 0].plot(account_curve.index, account_curve.values, "b-", linewidth=2)
+        axes[0, 0].set_title("Portfolio Value Over Time")
+        axes[0, 0].set_ylabel("Portfolio Value")
         axes[0, 0].grid(True, alpha=0.3)
 
         # Add performance annotation
-        if 'performance_metrics' in results:
-            metrics = results['performance_metrics']
+        if "performance_metrics" in results:
+            metrics = results["performance_metrics"]
             textstr = f"Annual Return: {metrics['annual_return']:.1%}\n"
             textstr += f"Volatility: {metrics['annual_volatility']:.1%}\n"
             textstr += f"Sharpe: {metrics['sharpe_ratio']:.2f}\n"
             textstr += f"Max DD: {metrics['max_drawdown']:.1%}"
 
-            axes[0, 0].text(0.02, 0.98, textstr, transform=axes[0, 0].transAxes,
-                            fontsize=9, verticalalignment='top',
-                            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+            axes[0, 0].text(
+                0.02,
+                0.98,
+                textstr,
+                transform=axes[0, 0].transAxes,
+                fontsize=9,
+                verticalalignment="top",
+                bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
+            )
 
     # CHART 2: Individual Instrument Performance
-    if results.get('instrument_returns'):
-        instrument_returns = results['instrument_returns']
+    if results.get("instrument_returns"):
+        instrument_returns = results["instrument_returns"]
 
         for i, (instrument, returns) in enumerate(list(instrument_returns.items())[:5]):
             if returns is not None and len(returns) > 0:
                 # Normalize to start at 1.0 for comparison
                 normalized = returns / returns.iloc[0]
-                axes[0, 1].plot(normalized.index, normalized.values,
-                                label=instrument, linewidth=1, alpha=0.7)
+                axes[0, 1].plot(
+                    normalized.index,
+                    normalized.values,
+                    label=instrument,
+                    linewidth=1,
+                    alpha=0.7,
+                )
 
-        axes[0, 1].set_title('Individual Instrument Performance (Normalized)')
-        axes[0, 1].set_ylabel('Normalized Value')
+        axes[0, 1].set_title("Individual Instrument Performance (Normalized)")
+        axes[0, 1].set_ylabel("Normalized Value")
         axes[0, 1].legend(fontsize=8)
         axes[0, 1].grid(True, alpha=0.3)
 
     # CHART 3: Position History (The Dynamic Part!)
-    if results.get('positions'):
-        position_history = results['positions']
+    if results.get("positions"):
+        position_history = results["positions"]
 
         for instrument, positions in list(position_history.items())[:3]:
             if positions is not None and len(positions) > 0:
-                axes[1, 0].plot(positions.index, positions.values,
-                                label=instrument, linewidth=1, alpha=0.7)
+                axes[1, 0].plot(
+                    positions.index,
+                    positions.values,
+                    label=instrument,
+                    linewidth=1,
+                    alpha=0.7,
+                )
 
-        axes[1, 0].set_title('Position Sizes Over Time (Dynamic Optimization)')
-        axes[1, 0].set_ylabel('Position Size')
+        axes[1, 0].set_title("Position Sizes Over Time (Dynamic Optimization)")
+        axes[1, 0].set_ylabel("Position Size")
         axes[1, 0].legend(fontsize=8)
         axes[1, 0].grid(True, alpha=0.3)
-        axes[1, 0].axhline(y=0, color='black', linestyle='-', alpha=0.3)
+        axes[1, 0].axhline(y=0, color="black", linestyle="-", alpha=0.3)
 
     # CHART 4: Rolling Performance
-    if results.get('account_curve') is not None:
-        account_curve = results['account_curve']
+    if results.get("account_curve") is not None:
+        account_curve = results["account_curve"]
         daily_returns = account_curve.pct_change().dropna()
 
         # Calculate rolling 252-day (1-year) returns
         rolling_returns = daily_returns.rolling(252).apply(lambda x: (1 + x).prod() - 1)
 
-        axes[1, 1].plot(rolling_returns.index, rolling_returns.values * 100,
-                        'g-', linewidth=1.5, alpha=0.7)
-        axes[1, 1].set_title('Rolling 12-Month Returns')
-        axes[1, 1].set_ylabel('Rolling Return (%)')
+        axes[1, 1].plot(
+            rolling_returns.index,
+            rolling_returns.values * 100,
+            "g-",
+            linewidth=1.5,
+            alpha=0.7,
+        )
+        axes[1, 1].set_title("Rolling 12-Month Returns")
+        axes[1, 1].set_ylabel("Rolling Return (%)")
         axes[1, 1].grid(True, alpha=0.3)
-        axes[1, 1].axhline(y=0, color='red', linestyle='--', alpha=0.5)
+        axes[1, 1].axhline(y=0, color="red", linestyle="--", alpha=0.5)
 
     # Adjust layout and save
     plt.tight_layout()
@@ -431,7 +460,7 @@ def display_results(results):
     # Save the chart to the project root
     project_root = get_project_root()
     chart_path = project_root / "dynamic_optimization_results.png"
-    plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+    plt.savefig(chart_path, dpi=300, bbox_inches="tight")
     print(f"   💾 Charts saved as: {chart_path}")
 
     # Show the chart
@@ -449,8 +478,8 @@ def print_summary(results):
     print("🎯 DYNAMIC OPTIMIZATION BACKTEST SUMMARY")
     print("=" * 60)
 
-    if 'performance_metrics' in results:
-        metrics = results['performance_metrics']
+    if "performance_metrics" in results:
+        metrics = results["performance_metrics"]
 
         print(f"\n📈 PERFORMANCE METRICS:")
         print(f"   Total Return:        {metrics['total_return']:>8.1%}")
@@ -462,20 +491,20 @@ def print_summary(results):
 
         # Performance interpretation
         print(f"\n💡 INTERPRETATION:")
-        if metrics['sharpe_ratio'] > 1.0:
+        if metrics["sharpe_ratio"] > 1.0:
             print(f"   ✅ Excellent risk-adjusted returns (Sharpe > 1.0)")
-        elif metrics['sharpe_ratio'] > 0.5:
+        elif metrics["sharpe_ratio"] > 0.5:
             print(f"   ✅ Good risk-adjusted returns (Sharpe > 0.5)")
         else:
             print(f"   ⚠️  Below-average risk-adjusted returns")
 
-        if abs(metrics['max_drawdown']) < 0.20:
+        if abs(metrics["max_drawdown"]) < 0.20:
             print(f"   ✅ Reasonable drawdown control (< 20%)")
         else:
             print(f"   ⚠️  High drawdown - consider risk management")
 
-    if results.get('instrument_returns'):
-        instruments_count = len(results['instrument_returns'])
+    if results.get("instrument_returns"):
+        instruments_count = len(results["instrument_returns"])
         print(f"\n🌍 DIVERSIFICATION:")
         print(f"   Instruments Traded:  {instruments_count:>8,}")
         print(f"   Dynamic Optimization: {'✅ ENABLED':>15}")

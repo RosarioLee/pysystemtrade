@@ -6,7 +6,7 @@ def etf_carry_forecast(price, dividend_yield, funding_rate=0.0):
     # Calculate risk-adjusted raw carry (annualized)
     returns = price.pct_change()
     daily_vol = returns.ewm(span=35, min_periods=10).std()
-    annual_vol = daily_vol * (252 ** 0.5)
+    annual_vol = daily_vol * (252**0.5)
 
     # Raw carry = yield differential / volatility (risk-adjusted)
     raw_carry_forecast = (dividend_yield - funding_rate) / annual_vol

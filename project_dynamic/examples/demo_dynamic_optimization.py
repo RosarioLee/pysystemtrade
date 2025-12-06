@@ -3,6 +3,7 @@ FINAL WORKING Dynamic Optimization Demo for Beginners
 This version fixes the stage names issue and works perfectly in PyCharm
 """
 
+
 def main():
     """
     Main function to run the dynamic optimization demo
@@ -36,18 +37,24 @@ def main():
         print(f"\n🔧 Active system stages:")
 
         # The system has a 'stage_names' attribute that lists all stages
-        if hasattr(system, 'stage_names'):
+        if hasattr(system, "stage_names"):
             for stage_name in system.stage_names:
                 print(f"   ✓ {stage_name}")
         else:
             # Alternative way: check what stages we know are there
-            key_stages = ['rules', 'rawdata', 'combForecast', 'positionSize', 'portfolio']
+            key_stages = [
+                "rules",
+                "rawdata",
+                "combForecast",
+                "positionSize",
+                "portfolio",
+            ]
             for stage in key_stages:
                 if hasattr(system, stage):
                     print(f"   ✓ {stage}")
 
         # Check for dynamic optimization - THIS IS THE KEY TEST
-        has_dynamic_opt = hasattr(system, 'optimisedPositions')
+        has_dynamic_opt = hasattr(system, "optimisedPositions")
         print(f"\n🎯 Dynamic optimization available: {has_dynamic_opt}")
 
         if has_dynamic_opt:
@@ -57,11 +64,11 @@ def main():
             # Show key stages that matter for dynamic optimization
             print(f"\n🔍 Key stages check:")
             important_stages = {
-                'optimisedPositions': 'Dynamic portfolio optimization',
-                'portfolio': 'Standard portfolio construction',
-                'positionSize': 'Position sizing',
-                'combForecast': 'Forecast combination',
-                'rules': 'Trading rules'
+                "optimisedPositions": "Dynamic portfolio optimization",
+                "portfolio": "Standard portfolio construction",
+                "positionSize": "Position sizing",
+                "combForecast": "Forecast combination",
+                "rules": "Trading rules",
             }
 
             for stage_name, description in important_stages.items():
@@ -70,7 +77,7 @@ def main():
                 print(f"   {status} {stage_name}: {description}")
 
             # Try a simple test with one instrument
-            test_instrument = 'AUD'  # FX is usually reliable
+            test_instrument = "AUD"  # FX is usually reliable
             available_instruments = system.get_instrument_list()
 
             if test_instrument in available_instruments:
@@ -83,7 +90,9 @@ def main():
 
                     # Try to get a basic portfolio position (this should work)
                     position = system.portfolio.get_notional_position(test_instrument)
-                    print(f"   ✅ Got portfolio position data ({len(position)} data points)")
+                    print(
+                        f"   ✅ Got portfolio position data ({len(position)} data points)"
+                    )
 
                     if len(position) > 0:
                         print(f"   📈 Latest position value: {position.iloc[-1]:.3f}")
@@ -92,10 +101,14 @@ def main():
 
                 except Exception as e:
                     print(f"   ⚠️  Position calculation: {str(e)[:80]}...")
-                    print("   (This is normal with sample data - the framework is still correct)")
+                    print(
+                        "   (This is normal with sample data - the framework is still correct)"
+                    )
 
             else:
-                print(f"   ⚠️  {test_instrument} not available, but optimization stage is loaded!")
+                print(
+                    f"   ⚠️  {test_instrument} not available, but optimization stage is loaded!"
+                )
 
         else:
             print("   ❌ Dynamic optimization stage not found")
@@ -129,6 +142,7 @@ def main():
         print("Check that pysystemtrade is properly installed")
         return None
 
+
 def demonstrate_dynamic_vs_static():
     """
     Explain the difference between dynamic and static systems
@@ -137,7 +151,8 @@ def demonstrate_dynamic_vs_static():
     print("DYNAMIC vs STATIC PORTFOLIO OPTIMIZATION")
     print("=" * 60)
 
-    print("""
+    print(
+        """
 📊 STATIC SYSTEM (Traditional):
    • Fixed instrument weights (e.g., equal weight each market)
    • Weights never change regardless of market conditions
@@ -164,7 +179,9 @@ def demonstrate_dynamic_vs_static():
    • Automatic adaptation to market regimes
    • Built-in transaction cost management
    • Prevents over-concentration in any single market
-    """)
+    """
+    )
+
 
 if __name__ == "__main__":
     # Run the main demo
@@ -186,4 +203,3 @@ if __name__ == "__main__":
 
     else:
         print("\n❌ Setup incomplete. Please check the error messages above.")
-

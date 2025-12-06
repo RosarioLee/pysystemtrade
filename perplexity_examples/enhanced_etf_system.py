@@ -12,7 +12,7 @@ import warnings
 import time
 
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 from systems.provided.futures_chapter15.basesystem import futures_system
 from sysdata.config.configdata import Config
@@ -34,9 +34,9 @@ class ETFSimData(csvFuturesSimData):
         else:
             # Return zero yield series with same index as price data
             price_data = self.get_daily_prices(instrument)
-            return pd.Series(0.0, index=price_data.index, name=f"{instrument}_dividend_yield")
-
-
+            return pd.Series(
+                0.0, index=price_data.index, name=f"{instrument}_dividend_yield"
+            )
 
 
 class EnhancedETFSystem:
@@ -50,28 +50,30 @@ class EnhancedETFSystem:
     - Cost-aware optimization
     """
 
-    def __init__(self, config_path=None, test_mode=False, max_instruments=5, warm_up_days=365, data_source="yfinance"):
+    def __init__(
+        self,
+        config_path=None,
+        test_mode=False,
+        max_instruments=5,
+        warm_up_days=365,
+        data_source="yfinance",
+    ):
         """Initialize the enhanced ETF system"""
 
         # Add data source configuration
         self.data_source = data_source  # "yfinance" or "ib"
 
         # IB-specific configuration
-        self.ib_config = {
-            'host': '127.0.0.1',
-            'port': 7497,
-            'client_id': 100
-        }
+        self.ib_config = {"host": "127.0.0.1", "port": 7497, "client_id": 100}
 
         # Load configuration
         if config_path is None:
             config_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "config_v1.1.yaml"
+                os.path.dirname(os.path.abspath(__file__)), "config_v1.1.yaml"
             )  # Fixed: Added closing parenthesis
 
         try:
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 self.config_data = yaml.safe_load(file)
         except FileNotFoundError:
             print(f"⚠️ Config file not found at: {config_path}")
@@ -79,11 +81,11 @@ class EnhancedETFSystem:
 
         # Extract configuration
         self.warm_up_days = warm_up_days
-        self.instruments = self.config_data['instruments']
-        self.instrument_weights = self.config_data['instrument_weights']
-        self.vol_target = self.config_data['percentage_vol_target']
-        self.trading_rules = self.config_data['trading_rules']
-        self.monitoring_config = self.config_data.get('monitoring', {})
+        self.instruments = self.config_data["instruments"]
+        self.instrument_weights = self.config_data["instrument_weights"]
+        self.vol_target = self.config_data["percentage_vol_target"]
+        self.trading_rules = self.config_data["trading_rules"]
+        self.monitoring_config = self.config_data.get("monitoring", {})
 
         # Initialize data storage
         self.etf_data = {}
@@ -101,7 +103,9 @@ class EnhancedETFSystem:
         print(f"🎯 Trading Rules: {len(self.trading_rules)}")
         print(f"🎯 Volatility Target: {self.vol_target}%")
         print(f"📈 EWMAC Rules: {len([r for r in self.trading_rules if 'ewmac' in r])}")
-        print(f"📈 Breakout Rules: {len([r for r in self.trading_rules if 'breakout' in r])}")
+        print(
+            f"📈 Breakout Rules: {len([r for r in self.trading_rules if 'breakout' in r])}"
+        )
 
     def setup_directories(self):
         """Setup PySystemTrade directory structure"""
@@ -121,10 +125,10 @@ class EnhancedETFSystem:
         """Find the pysystemtrade root directory"""
         current_dir = os.path.dirname(os.path.abspath(__file__))
         while current_dir != os.path.dirname(current_dir):
-            if 'pysystemtrade' in os.path.basename(current_dir):
+            if "pysystemtrade" in os.path.basename(current_dir):
                 return current_dir
-            if os.path.exists(os.path.join(current_dir, 'pysystemtrade')):
-                return os.path.join(current_dir, 'pysystemtrade')
+            if os.path.exists(os.path.join(current_dir, "pysystemtrade")):
+                return os.path.join(current_dir, "pysystemtrade")
             current_dir = os.path.dirname(current_dir)
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -141,8 +145,8 @@ class EnhancedETFSystem:
             end_date = datetime.now().strftime("%Y-%m-%d")
 
         # Apply instrument limiting
-        if hasattr(self, 'max_instruments') and self.max_instruments > 0:
-            tickers = self.instruments[:self.max_instruments]
+        if hasattr(self, "max_instruments") and self.max_instruments > 0:
+            tickers = self.instruments[: self.max_instruments]
             print(f"⚠️ LIMITED MODE: Using {self.max_instruments} instruments")
         else:
             tickers = self.instruments
@@ -168,9 +172,9 @@ class EnhancedETFSystem:
 
             # Initialize IB downloader
             ib_downloader = ETFIBDataDownloader(
-                host=self.ib_config['host'],
-                port=self.ib_config['port'],
-                client_id=self.ib_config['client_id']
+                host=self.ib_config["host"],
+                port=self.ib_config["port"],
+                client_id=self.ib_config["client_id"],
             )
 
             # Download data
@@ -178,7 +182,7 @@ class EnhancedETFSystem:
                 etf_list=tickers,
                 duration_str="5 Y",
                 start_date=start_date,
-                end_date=end_date
+                end_date=end_date,
             )
 
             # Convert IB data to our internal format
@@ -186,7 +190,7 @@ class EnhancedETFSystem:
             for ticker, df in ib_data.items():
                 if not df.empty:
                     # Extract close prices (matching yfinance format)
-                    price_data = df['close'].copy()
+                    price_data = df["close"].copy()
                     price_data.name = ticker
 
                     # Apply same quality filters as yfinance
@@ -221,14 +225,14 @@ class EnhancedETFSystem:
                 # Get ETF distribution yield
                 etf = yf.Ticker(instrument)
                 info = etf.info
-                dividend_yield = info.get('dividendYield', info.get('yield', 0.0))
+                dividend_yield = info.get("dividendYield", info.get("yield", 0.0))
 
                 # Convert to pandas Series with same index as price data
                 price_data = self.etf_data[instrument]
                 yield_series = pd.Series(
                     dividend_yield,
                     index=price_data.index,
-                    name=f"{instrument}_dividend_yield"
+                    name=f"{instrument}_dividend_yield",
                 )
                 dividend_data[instrument] = yield_series
 
@@ -237,9 +241,7 @@ class EnhancedETFSystem:
                 # Default to 0% yield
                 price_data = self.etf_data[instrument]
                 dividend_data[instrument] = pd.Series(
-                    0.0,
-                    index=price_data.index,
-                    name=f"{instrument}_dividend_yield"
+                    0.0, index=price_data.index, name=f"{instrument}_dividend_yield"
                 )
 
         return dividend_data
@@ -257,15 +259,15 @@ class EnhancedETFSystem:
         for instrument, data in self.etf_data.items():
             try:
                 # PySystemTrade expects PRICE column with DATETIME index
-                df = pd.DataFrame({'PRICE': data})
-                df.index.name = 'DATETIME'
+                df = pd.DataFrame({"PRICE": data})
+                df.index.name = "DATETIME"
 
                 # Ensure datetime index
                 if not isinstance(df.index, pd.DatetimeIndex):
                     df.index = pd.to_datetime(df.index)
 
                 # Remove duplicates and sort
-                df = df[~df.index.duplicated(keep='first')]
+                df = df[~df.index.duplicated(keep="first")]
                 df = df.sort_index()
 
                 # Save to CSV
@@ -295,7 +297,7 @@ class EnhancedETFSystem:
 
         try:
             config_df = pd.read_csv(cfg_path)
-            available_instruments = set(config_df['Instrument'].tolist())
+            available_instruments = set(config_df["Instrument"].tolist())
 
             # Check which ETFs are available
             found_instruments = []
@@ -309,7 +311,9 @@ class EnhancedETFSystem:
 
             print(f"✅ Found {len(found_instruments)} ETFs in instrumentconfig.csv")
             if missing_instruments:
-                print(f"⚠️ Missing {len(missing_instruments)} ETFs: {missing_instruments}")
+                print(
+                    f"⚠️ Missing {len(missing_instruments)} ETFs: {missing_instruments}"
+                )
                 print("💡 These ETFs need to be added to instrumentconfig.csv")
 
             # Update valid instruments list
@@ -317,21 +321,36 @@ class EnhancedETFSystem:
 
             # New: Limit instruments in test mode for faster computation
             if self.test_mode:
-                print(f"⚠️ TEST MODE: Limiting to {self.max_instruments} instruments for faster execution")
-                self.valid_instruments = self.valid_instruments[:self.max_instruments]
+                print(
+                    f"⚠️ TEST MODE: Limiting to {self.max_instruments} instruments for faster execution"
+                )
+                self.valid_instruments = self.valid_instruments[: self.max_instruments]
                 # Recalculate normalized weights for limited set
-                valid_weights = {k: v for k, v in self.instrument_weights.items() if k in self.valid_instruments}
+                valid_weights = {
+                    k: v
+                    for k, v in self.instrument_weights.items()
+                    if k in self.valid_instruments
+                }
                 total_weight = sum(valid_weights.values())
-                self.normalized_weights = {k: v / total_weight for k, v in valid_weights.items()}
+                self.normalized_weights = {
+                    k: v / total_weight for k, v in valid_weights.items()
+                }
 
             # Prepare normalized weights for valid instruments only
-            valid_weights = {k: v for k, v in self.instrument_weights.items()
-                             if k in self.valid_instruments}
+            valid_weights = {
+                k: v
+                for k, v in self.instrument_weights.items()
+                if k in self.valid_instruments
+            }
 
             if valid_weights:
                 total_weight = sum(valid_weights.values())
-                self.normalized_weights = {k: v / total_weight for k, v in valid_weights.items()}
-                print(f"🔄 Normalized weights for {len(self.valid_instruments)} working ETFs")
+                self.normalized_weights = {
+                    k: v / total_weight for k, v in valid_weights.items()
+                }
+                print(
+                    f"🔄 Normalized weights for {len(self.valid_instruments)} working ETFs"
+                )
 
             return len(found_instruments) > 0
 
@@ -357,20 +376,22 @@ class EnhancedETFSystem:
                 return None
 
             # Add system-specific metadata
-            performance_metrics.update({
-                'warm_up_days_applied': self.warm_up_days,
-                'vol_target_percent': self.vol_target,
-                'system_version': 'Enhanced ETF System v1.1'
-            })
+            performance_metrics.update(
+                {
+                    "warm_up_days_applied": self.warm_up_days,
+                    "vol_target_percent": self.vol_target,
+                    "system_version": "Enhanced ETF System v1.1",
+                }
+            )
 
             return performance_metrics
 
         except Exception as e:
             print(f"❌ Performance calculation failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
-
 
     def create_carver_compliant_system(self):
         """Create system following strict Carver methodology"""
@@ -388,25 +409,21 @@ class EnhancedETFSystem:
             "instrument_weights": self.normalized_weights,
             "percentage_vol_target": self.vol_target,
             "base_currency": "USD",
-
             # Dynamic IDM (preserved)
             "use_instrument_div_mult_estimates": True,
             "use_instrument_weight_estimates": False,
-
             # CARVER METHODOLOGY: Pooled estimation
             "use_forecast_scale_estimates": True,
             "use_forecast_weight_estimates": True,
             "use_forecast_div_mult_estimates": True,
-
             # SINGLE SCALAR PER RULE
             "forecast_scalar_estimate": {
                 "pool_instruments": True,
                 "func": "sysquant.estimators.forecast_scalar.forecast_scalar",
                 "window": 250000,
                 "min_periods": 500,
-                "backfill": True
+                "backfill": True,
             },
-
             # UNIFORM RULE WEIGHTS
             "forecast_weight_estimate": {
                 "func": "sysquant.optimisation.generic_optimiser.genericOptimiser",
@@ -420,11 +437,10 @@ class EnhancedETFSystem:
                 "equalise_SR": False,
                 "ann_target_SR": 0.5,
                 "equalise_vols": True,
-                "apply_cost_weight_filter": True
+                "apply_cost_weight_filter": True,
             },
-
             # Trading rules from config
-            "trading_rules": {}
+            "trading_rules": {},
         }
 
         # Add all trading rules
@@ -432,13 +448,13 @@ class EnhancedETFSystem:
             system_config["trading_rules"][rule_name] = {
                 "function": rule_config["function"],
                 "data": rule_config["data"],
-                "other_args": rule_config["other_args"]
+                "other_args": rule_config["other_args"],
             }
 
         try:
             data_paths = {
-                'csvFuturesAdjustedPricesData': self.csv_dir,
-                'csvFuturesInstrumentData': self.config_dir
+                "csvFuturesAdjustedPricesData": self.csv_dir,
+                "csvFuturesInstrumentData": self.config_dir,
             }
             # data = csvFuturesSimData(csv_data_paths=data_paths)
             dividend_data = self.get_dividend_yield_data()

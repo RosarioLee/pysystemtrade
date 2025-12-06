@@ -57,13 +57,13 @@ class RobertCarverTurnoverAnalyzer:
 
         for instrument in instruments:
             # Asset class-based cost estimation (conservative)
-            if any(x in instrument for x in ['US10', 'US2', 'BUND', 'SOFR', 'FED']):
+            if any(x in instrument for x in ["US10", "US2", "BUND", "SOFR", "FED"]):
                 default_costs[instrument] = 0.001  # Interest rate futures (cheapest)
-            elif any(x in instrument for x in ['SP500', 'NASDAQ', 'EUROSTX', 'DAX']):
+            elif any(x in instrument for x in ["SP500", "NASDAQ", "EUROSTX", "DAX"]):
                 default_costs[instrument] = 0.002  # Equity index futures
-            elif any(x in instrument for x in ['EUR', 'GBP', 'JPY', 'AUD']):
+            elif any(x in instrument for x in ["EUR", "GBP", "JPY", "AUD"]):
                 default_costs[instrument] = 0.002  # Major FX futures
-            elif any(x in instrument for x in ['CRUDE', 'GOLD', 'CORN', 'COPPER']):
+            elif any(x in instrument for x in ["CRUDE", "GOLD", "CORN", "COPPER"]):
                 default_costs[instrument] = 0.003  # Commodity futures
             else:
                 default_costs[instrument] = 0.005  # Conservative default
@@ -118,14 +118,16 @@ class RobertCarverTurnoverAnalyzer:
                 speed_limit = self._get_speed_limit(cost)
                 status = "✓" if turnover <= speed_limit else "⚠"
 
-                print(f"{status} {instrument:12} {turnover:6.1f} trips/yr "
-                      f"(limit: {speed_limit:3.0f}, cost: {cost:.3f})")
+                print(
+                    f"{status} {instrument:12} {turnover:6.1f} trips/yr "
+                    f"(limit: {speed_limit:3.0f}, cost: {cost:.3f})"
+                )
 
             except Exception as e:
                 print(f"❌ {instrument:12} Error: {str(e)[:40]}")
                 portfolio_turnovers[instrument] = 0.0
 
-        results['portfolio_turnovers'] = portfolio_turnovers
+        results["portfolio_turnovers"] = portfolio_turnovers
 
         # Rest of your code remains the same...
         # (System-wide aggregation, cost analysis, etc.)
@@ -147,12 +149,12 @@ class RobertCarverTurnoverAnalyzer:
         """Extract instrument weights from system"""
         try:
             # Try to get dynamic weights first
-            if hasattr(self.system, 'optimisedPositions'):
+            if hasattr(self.system, "optimisedPositions"):
                 weights = self.system.optimisedPositions.get_optimised_weights_df()
                 return weights.abs().mean().to_dict()
 
             # Fallback to config weights
-            config_weights = getattr(self.system.config, 'instrument_weights', {})
+            config_weights = getattr(self.system.config, "instrument_weights", {})
             if config_weights:
                 return config_weights
 
@@ -169,17 +171,19 @@ class RobertCarverTurnoverAnalyzer:
         """Analyze cost impact using Robert's Cost = Standardized_Cost × Turnover formula"""
 
         cost_analysis = {
-            'individual_costs': {},
-            'total_cost_sr': 0.0,
-            'cost_warnings': [],
-            'profitability_check': None
+            "individual_costs": {},
+            "total_cost_sr": 0.0,
+            "cost_warnings": [],
+            "profitability_check": None,
         }
 
         total_cost = 0.0
         instruments = self.system.get_instrument_list()
         instrument_weights = self._get_instrument_weights()
 
-        print(f"Using Robert's formula: Annual Cost (SR) = Standardized Cost × Turnover")
+        print(
+            f"Using Robert's formula: Annual Cost (SR) = Standardized Cost × Turnover"
+        )
         print(f"Individual instrument costs:")
 
         for instrument in instruments:
@@ -194,25 +198,27 @@ class RobertCarverTurnoverAnalyzer:
             weighted_cost = annual_cost_sr * weight
             total_cost += weighted_cost
 
-            cost_analysis['individual_costs'][instrument] = {
-                'turnover': turnover,
-                'standardized_cost': std_cost,
-                'annual_cost_sr': annual_cost_sr,
-                'weight': weight,
-                'weighted_cost': weighted_cost
+            cost_analysis["individual_costs"][instrument] = {
+                "turnover": turnover,
+                "standardized_cost": std_cost,
+                "annual_cost_sr": annual_cost_sr,
+                "weight": weight,
+                "weighted_cost": weighted_cost,
             }
 
             # Warnings for high-cost instruments
             if annual_cost_sr > 0.05:  # More than 5% of a typical SR
-                cost_analysis['cost_warnings'].append(
+                cost_analysis["cost_warnings"].append(
                     f"{instrument}: {annual_cost_sr:.3f} SR units/year (HIGH)"
                 )
 
             status = "✓" if annual_cost_sr < 0.05 else "⚠"
-            print(f"  {status} {instrument:12} {annual_cost_sr:.4f} SR units/yr "
-                  f"(turnover: {turnover:4.1f}, cost: {std_cost:.3f})")
+            print(
+                f"  {status} {instrument:12} {annual_cost_sr:.4f} SR units/yr "
+                f"(turnover: {turnover:4.1f}, cost: {std_cost:.3f})"
+            )
 
-        cost_analysis['total_cost_sr'] = total_cost
+        cost_analysis["total_cost_sr"] = total_cost
 
         # Robert's profitability check
         print(f"\n💡 PROFITABILITY ASSESSMENT:")
@@ -220,13 +226,13 @@ class RobertCarverTurnoverAnalyzer:
 
         if total_cost <= 0.13:
             print(f"✅ EXCELLENT: Within Robert's 0.13 SR limit (max 1/3 of profits)")
-            cost_analysis['profitability_check'] = 'excellent'
+            cost_analysis["profitability_check"] = "excellent"
         elif total_cost <= 0.20:
             print(f"⚠ ACCEPTABLE: Moderate cost impact, monitor closely")
-            cost_analysis['profitability_check'] = 'acceptable'
+            cost_analysis["profitability_check"] = "acceptable"
         else:
             print(f"❌ DANGER: Costs likely exceed profitability threshold!")
-            cost_analysis['profitability_check'] = 'dangerous'
+            cost_analysis["profitability_check"] = "dangerous"
 
         return cost_analysis
 
@@ -234,9 +240,9 @@ class RobertCarverTurnoverAnalyzer:
         """Decompose turnover into different sources (forecast vs volatility changes)"""
 
         decomposition = {
-            'forecast_driven': {},
-            'volatility_driven': {},
-            'other_sources': {}
+            "forecast_driven": {},
+            "volatility_driven": {},
+            "other_sources": {},
         }
 
         try:
@@ -252,8 +258,10 @@ class RobertCarverTurnoverAnalyzer:
                         position_changes = positions.diff().abs()
                         avg_change = position_changes.mean()
 
-                        decomposition['forecast_driven'][instrument] = avg_change
-                        print(f"  {instrument}: Avg daily position change: {avg_change:.2f}")
+                        decomposition["forecast_driven"][instrument] = avg_change
+                        print(
+                            f"  {instrument}: Avg daily position change: {avg_change:.2f}"
+                        )
 
                 except Exception as e:
                     print(f"  ⚠ {instrument}: Decomposition failed - {str(e)[:30]}")
@@ -286,14 +294,16 @@ class RobertCarverTurnoverAnalyzer:
 
                 print(f"  {instrument:12} {period_str:12} (turnover: {turnover:.1f})")
             else:
-                holding_periods[instrument] = float('inf')
+                holding_periods[instrument] = float("inf")
                 print(f"  {instrument:12} {'∞ (no trading)':12}")
 
         return holding_periods
 
-    def generate_turnover_report(self, output_dir: str = 'project_dynamic/results') -> str:
+    def generate_turnover_report(
+        self, output_dir: str = "project_dynamic/results"
+    ) -> str:
         """Generate comprehensive turnover report for backtest validation"""
-        if not self.results or 'cost_analysis' not in self.results:
+        if not self.results or "cost_analysis" not in self.results:
             self.extract_all_turnover_metrics()  # Ensure we have complete results
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -301,9 +311,10 @@ class RobertCarverTurnoverAnalyzer:
 
         try:
             import os
+
             os.makedirs(output_dir, exist_ok=True)
 
-            with open(report_file, 'w') as f:
+            with open(report_file, "w") as f:
                 f.write("ROBERT CARVER'S TURNOVER ANALYSIS REPORT\n")
                 f.write("=" * 60 + "\n")
                 f.write(f"Generated: {datetime.now()}\n")
@@ -312,28 +323,36 @@ class RobertCarverTurnoverAnalyzer:
                 # Executive Summary
                 f.write("EXECUTIVE SUMMARY\n")
                 f.write("-" * 20 + "\n")
-                cost = self.results['cost_analysis']['total_cost_sr']
-                avg_turnover = self.results['system_average_turnover']
-                status = self.results['cost_analysis']['profitability_check']
+                cost = self.results["cost_analysis"]["total_cost_sr"]
+                avg_turnover = self.results["system_average_turnover"]
+                status = self.results["cost_analysis"]["profitability_check"]
 
-                f.write(f"System Average Turnover: {avg_turnover:.1f} round trips/year\n")
+                f.write(
+                    f"System Average Turnover: {avg_turnover:.1f} round trips/year\n"
+                )
                 f.write(f"Total Annual Costs: {cost:.3f} SR units\n")
                 f.write(f"Profitability Status: {status.upper()}\n\n")
 
                 # Detailed Results
                 f.write("DETAILED TURNOVER BY INSTRUMENT\n")
                 f.write("-" * 35 + "\n")
-                f.write(f"{'Instrument':<15} {'Turnover':<10} {'Cost (SR)':<12} {'Status':<10}\n")
+                f.write(
+                    f"{'Instrument':<15} {'Turnover':<10} {'Cost (SR)':<12} {'Status':<10}\n"
+                )
                 f.write("-" * 50 + "\n")
 
-                for instrument, data in self.results['cost_analysis']['individual_costs'].items():
-                    turnover = data['turnover']
-                    cost_sr = data['annual_cost_sr']
+                for instrument, data in self.results["cost_analysis"][
+                    "individual_costs"
+                ].items():
+                    turnover = data["turnover"]
+                    cost_sr = data["annual_cost_sr"]
                     status = "OK" if cost_sr < 0.05 else "HIGH"
-                    f.write(f"{instrument:<15} {turnover:<10.1f} {cost_sr:<12.4f} {status:<10}\n")
+                    f.write(
+                        f"{instrument:<15} {turnover:<10.1f} {cost_sr:<12.4f} {status:<10}\n"
+                    )
 
                 # Warnings
-                warnings = self.results['cost_analysis']['cost_warnings']
+                warnings = self.results["cost_analysis"]["cost_warnings"]
                 if warnings:
                     f.write(f"\nWARNINGS\n")
                     f.write("-" * 10 + "\n")
@@ -344,13 +363,15 @@ class RobertCarverTurnoverAnalyzer:
                 f.write(f"\nROBERT CARVER'S RECOMMENDATIONS\n")
                 f.write("-" * 35 + "\n")
 
-                if status == 'excellent':
+                if status == "excellent":
                     f.write("✅ System passes turnover analysis\n")
                     f.write("✅ Costs are within acceptable limits\n")
                     f.write("✅ Proceed with confidence\n")
-                elif status == 'acceptable':
+                elif status == "acceptable":
                     f.write("⚠ Monitor turnover closely\n")
-                    f.write("⚠ Consider reducing forecast speed or increasing buffers\n")
+                    f.write(
+                        "⚠ Consider reducing forecast speed or increasing buffers\n"
+                    )
                 else:
                     f.write("❌ URGENT: Turnover too high for profitability\n")
                     f.write("❌ Reduce number of trading rules\n")
@@ -364,9 +385,9 @@ class RobertCarverTurnoverAnalyzer:
             print(f"❌ Failed to save turnover report: {e}")
             return ""
 
-    def plot_turnover_analysis(self, output_dir: str = 'project_dynamic/results'):
+    def plot_turnover_analysis(self, output_dir: str = "project_dynamic/results"):
         """Create visualizations of turnover analysis"""
-        if not self.results or 'portfolio_turnovers' not in self.results:
+        if not self.results or "portfolio_turnovers" not in self.results:
             self.extract_all_turnover_metrics()
 
         try:
@@ -382,36 +403,60 @@ class RobertCarverTurnoverAnalyzer:
             fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
 
             # Plot 1: Turnover by Instrument
-            instruments = list(self.results['portfolio_turnovers'].keys())
-            turnovers = list(self.results['portfolio_turnovers'].values())
+            instruments = list(self.results["portfolio_turnovers"].keys())
+            turnovers = list(self.results["portfolio_turnovers"].values())
 
-            ax1.bar(range(len(instruments)), turnovers, alpha=0.7, color='steelblue')
-            ax1.set_xlabel('Instruments')
-            ax1.set_ylabel('Annual Turnover (Round Trips)')
-            ax1.set_title('Portfolio Turnover by Instrument\n(Robert Carver Analysis)')
+            ax1.bar(range(len(instruments)), turnovers, alpha=0.7, color="steelblue")
+            ax1.set_xlabel("Instruments")
+            ax1.set_ylabel("Annual Turnover (Round Trips)")
+            ax1.set_title("Portfolio Turnover by Instrument\n(Robert Carver Analysis)")
             ax1.set_xticks(range(0, len(instruments), max(1, len(instruments) // 10)))
-            ax1.set_xticklabels([instruments[i] for i in range(0, len(instruments), max(1, len(instruments) // 10))],
-                                rotation=45, ha='right')
+            ax1.set_xticklabels(
+                [
+                    instruments[i]
+                    for i in range(0, len(instruments), max(1, len(instruments) // 10))
+                ],
+                rotation=45,
+                ha="right",
+            )
 
             # Add Robert's speed limit line
             avg_speed_limit = 65  # Conservative average
-            ax1.axhline(y=avg_speed_limit, color='red', linestyle='--',
-                        label=f'Conservative Speed Limit ({avg_speed_limit})')
+            ax1.axhline(
+                y=avg_speed_limit,
+                color="red",
+                linestyle="--",
+                label=f"Conservative Speed Limit ({avg_speed_limit})",
+            )
             ax1.legend()
             ax1.grid(True, alpha=0.3)
 
             # Plot 2: Cost Impact Analysis
-            costs = [self.results['cost_analysis']['individual_costs'][inst]['annual_cost_sr']
-                     for inst in instruments]
+            costs = [
+                self.results["cost_analysis"]["individual_costs"][inst][
+                    "annual_cost_sr"
+                ]
+                for inst in instruments
+            ]
 
-            ax2.scatter(turnovers, costs, alpha=0.7, s=50, color='darkred')
-            ax2.set_xlabel('Annual Turnover (Round Trips)')
-            ax2.set_ylabel('Annual Cost (SR Units)')
-            ax2.set_title('Cost vs Turnover Analysis\n(Following Robert\'s Formula)')
+            ax2.scatter(turnovers, costs, alpha=0.7, s=50, color="darkred")
+            ax2.set_xlabel("Annual Turnover (Round Trips)")
+            ax2.set_ylabel("Annual Cost (SR Units)")
+            ax2.set_title("Cost vs Turnover Analysis\n(Following Robert's Formula)")
 
             # Add Robert's cost limit line
-            ax2.axhline(y=0.05, color='orange', linestyle='--', label='High Cost Threshold (0.05 SR)')
-            ax2.axhline(y=0.13, color='red', linestyle='--', label='Robert\'s Max Limit (0.13 SR)')
+            ax2.axhline(
+                y=0.05,
+                color="orange",
+                linestyle="--",
+                label="High Cost Threshold (0.05 SR)",
+            )
+            ax2.axhline(
+                y=0.13,
+                color="red",
+                linestyle="--",
+                label="Robert's Max Limit (0.13 SR)",
+            )
             ax2.legend()
             ax2.grid(True, alpha=0.3)
 
@@ -419,7 +464,7 @@ class RobertCarverTurnoverAnalyzer:
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             plot_file = f"{output_dir}/turnover_analysis_{timestamp}.png"
-            plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+            plt.savefig(plot_file, dpi=300, bbox_inches="tight")
             print(f"✅ Turnover plots saved: {plot_file}")
 
             plt.show()
@@ -445,15 +490,19 @@ class RobertCarverTurnoverAnalyzer:
 
             # Overall statistics
             total_days = len(positions)
-            changes = (positions.diff() != 0)
+            changes = positions.diff() != 0
             days_with_changes = changes.any(axis=1).sum()
 
             print(f"📊 Dataset: {total_days:,} days")
-            print(f"📊 Days with ANY position change: {days_with_changes} ({days_with_changes / total_days * 100:.1f}%)")
+            print(
+                f"📊 Days with ANY position change: {days_with_changes} ({days_with_changes / total_days * 100:.1f}%)"
+            )
 
             # Per-instrument activity
             print(f"\n📈 Top 10 Most Active Instruments:")
-            print(f"{'Instrument':<15} {'Changes':>8} {'% of Days':>10} {'Avg Change':>12}")
+            print(
+                f"{'Instrument':<15} {'Changes':>8} {'% of Days':>10} {'Avg Change':>12}"
+            )
             print(f"{'─' * 50}")
 
             activity_results = {}
@@ -464,22 +513,28 @@ class RobertCarverTurnoverAnalyzer:
                 # Average size of changes when they happen
                 position_changes = positions[inst].diff()
                 non_zero_changes = position_changes[position_changes != 0]
-                avg_change_size = non_zero_changes.abs().mean() if len(non_zero_changes) > 0 else 0
+                avg_change_size = (
+                    non_zero_changes.abs().mean() if len(non_zero_changes) > 0 else 0
+                )
 
                 activity_results[inst] = {
-                    'total_changes': inst_changes,
-                    'pct_days': pct_days,
-                    'avg_change_size': avg_change_size
+                    "total_changes": inst_changes,
+                    "pct_days": pct_days,
+                    "avg_change_size": avg_change_size,
                 }
 
             # Sort and display top 10
-            sorted_activity = sorted(activity_results.items(),
-                                     key=lambda x: x[1]['total_changes'],
-                                     reverse=True)
+            sorted_activity = sorted(
+                activity_results.items(),
+                key=lambda x: x[1]["total_changes"],
+                reverse=True,
+            )
 
             for inst, data in sorted_activity[:10]:
-                print(f"{inst:<15} {data['total_changes']:>8} {data['pct_days']:>9.2f}% "
-                      f"{data['avg_change_size']:>11.2f}")
+                print(
+                    f"{inst:<15} {data['total_changes']:>8} {data['pct_days']:>9.2f}% "
+                    f"{data['avg_change_size']:>11.2f}"
+                )
 
             # Warning for frozen systems
             if days_with_changes < total_days * 0.01:  # Less than 1% of days
@@ -503,8 +558,10 @@ class RobertCarverTurnoverAnalyzer:
         try:
             positions = self.system.optimisedPositions.get_optimised_position_df()
 
-            print(f"{'Instrument':<15} {'Avg Active':<12} {'Avg Overall':<12} "
-                  f"{'Active %':<10} {'Max Pos':<10}")
+            print(
+                f"{'Instrument':<15} {'Avg Active':<12} {'Avg Overall':<12} "
+                f"{'Active %':<10} {'Max Pos':<10}"
+            )
             print(f"{'─' * 70}")
 
             verification_results = {}
@@ -521,14 +578,16 @@ class RobertCarverTurnoverAnalyzer:
                     pct_active = (len(active_positions) / len(pos_series)) * 100
                     max_pos = pos_series.abs().max()
 
-                    print(f"{inst:<15} {avg_active:<12.2f} {avg_overall:<12.2f} "
-                          f"{pct_active:<9.1f}% {max_pos:<10.2f}")
+                    print(
+                        f"{inst:<15} {avg_active:<12.2f} {avg_overall:<12.2f} "
+                        f"{pct_active:<9.1f}% {max_pos:<10.2f}"
+                    )
 
                     verification_results[inst] = {
-                        'avg_when_active': avg_active,
-                        'avg_overall': avg_overall,
-                        'pct_active_days': pct_active,
-                        'max_position': max_pos
+                        "avg_when_active": avg_active,
+                        "avg_overall": avg_overall,
+                        "pct_active_days": pct_active,
+                        "max_position": max_pos,
                     }
                 else:
                     print(f"{inst:<15} {'Never active':>12}")
@@ -537,7 +596,9 @@ class RobertCarverTurnoverAnalyzer:
             print(f"\n💡 Interpretation Guide:")
             print(f"   - 'Avg Overall' is used as denominator in turnover calculation")
             print(f"   - Very low 'Avg Overall' → high turnover (small denominator)")
-            print(f"   - Very sparse positions (low Active %) → turnover may be misleading")
+            print(
+                f"   - Very sparse positions (low Active %) → turnover may be misleading"
+            )
 
             return verification_results
 
@@ -555,7 +616,9 @@ class RobertCarverTurnoverAnalyzer:
 
         try:
             # Get positions (should be portfolio-weighted already)
-            positions = self.system.optimisedPositions.get_optimised_position_df()[instrument]
+            positions = self.system.optimisedPositions.get_optimised_position_df()[
+                instrument
+            ]
 
             # Manual calculation (YOUR CALCULATION - THIS IS CORRECT!)
             position_changes = positions.diff().abs()
@@ -585,7 +648,9 @@ class RobertCarverTurnoverAnalyzer:
             print(f"\n🔢 Turnover Results:")
             print(f"   Manual calculation:      {manual_turnover:.2f} round trips/year")
             print(f"   Sparse portfolio method: {native_turnover:.2f} round trips/year")
-            print(f"   Difference:              {abs(manual_turnover - native_turnover):.2f}")
+            print(
+                f"   Difference:              {abs(manual_turnover - native_turnover):.2f}"
+            )
 
             # Validation
             if abs(manual_turnover - native_turnover) > 0.01:
@@ -603,11 +668,11 @@ class RobertCarverTurnoverAnalyzer:
                 print(f"   Implied holding period:  {period_str}")
 
             return {
-                'manual_turnover': manual_turnover,
-                'native_turnover': native_turnover,
-                'difference': abs(manual_turnover - native_turnover),
-                'avg_position': avg_position,
-                'annual_changes': annual_changes
+                "manual_turnover": manual_turnover,
+                "native_turnover": native_turnover,
+                "difference": abs(manual_turnover - native_turnover),
+                "avg_position": avg_position,
+                "annual_changes": annual_changes,
             }
 
         except KeyError as e:
@@ -620,6 +685,7 @@ class RobertCarverTurnoverAnalyzer:
         except Exception as e:
             print(f"❌ Cross-check failed: {e}")
             import traceback
+
             traceback.print_exc()
             return {}
 

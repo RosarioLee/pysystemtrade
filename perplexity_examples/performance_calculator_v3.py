@@ -39,9 +39,11 @@ class SimplePerformanceCalculator:
                 return None
 
             # Use the proper returns from capital analysis if available
-            if capital_debug and 'proper_returns' in capital_debug:
-                daily_returns = capital_debug['proper_returns']
-                self.debug_print(f"Using capital-adjusted returns: {len(daily_returns)} returns")
+            if capital_debug and "proper_returns" in capital_debug:
+                daily_returns = capital_debug["proper_returns"]
+                self.debug_print(
+                    f"Using capital-adjusted returns: {len(daily_returns)} returns"
+                )
             else:
                 # Fallback to your existing method
                 daily_returns = self._get_returns(portfolio, system)
@@ -52,24 +54,27 @@ class SimplePerformanceCalculator:
 
             # Apply warm up period if specified
             if self.warm_up_days > 0 and len(daily_returns) > self.warm_up_days:
-                daily_returns = daily_returns.iloc[self.warm_up_days:]
+                daily_returns = daily_returns.iloc[self.warm_up_days :]
 
             # Calculate performance metrics
             performance_result = self._calculate_metrics(daily_returns)
 
             # Add capital information if available
             if capital_debug and performance_result:
-                performance_result.update({
-                    'starting_capital': capital_debug['starting_capital'],
-                    'total_pnl': capital_debug['total_pnl'],
-                    'final_portfolio_value': capital_debug['final_portfolio_value']
-                })
+                performance_result.update(
+                    {
+                        "starting_capital": capital_debug["starting_capital"],
+                        "total_pnl": capital_debug["total_pnl"],
+                        "final_portfolio_value": capital_debug["final_portfolio_value"],
+                    }
+                )
 
             return performance_result
 
         except Exception as e:
             self.debug_print(f"Performance calculation failed: {e}")
             import traceback
+
             self.debug_print(f"Traceback: {traceback.format_exc()}")
             return None
 
@@ -80,15 +85,17 @@ class SimplePerformanceCalculator:
 
             # Method 1: Try portfolio percentage returns
             try:
-                if hasattr(portfolio, 'percent'):
+                if hasattr(portfolio, "percent"):
                     percent_curve = portfolio.percent
-                    if hasattr(percent_curve, 'curve'):
+                    if hasattr(percent_curve, "curve"):
                         curve = percent_curve.curve()
                         if curve is not None and len(curve) > 1:
                             # FIXED: Handle zero starting values
                             returns = self._safe_pct_change(curve)
                             if returns is not None and len(returns) > 0:
-                                self.debug_print(f"Method 1 SUCCESS: Using percent.curve() - {len(returns)} returns")
+                                self.debug_print(
+                                    f"Method 1 SUCCESS: Using percent.curve() - {len(returns)} returns"
+                                )
                                 return returns
             except Exception as e:
                 self.debug_print(f"Method 1 failed: {e}")
@@ -100,7 +107,9 @@ class SimplePerformanceCalculator:
                     # FIXED: Handle zero starting values
                     returns = self._safe_pct_change(portfolio_curve)
                     if returns is not None and len(returns) > 0:
-                        self.debug_print(f"Method 2 SUCCESS: Using portfolio.curve() - {len(returns)} returns")
+                        self.debug_print(
+                            f"Method 2 SUCCESS: Using portfolio.curve() - {len(returns)} returns"
+                        )
                         return returns
             except Exception as e:
                 self.debug_print(f"Method 2 failed: {e}")
@@ -127,7 +136,9 @@ class SimplePerformanceCalculator:
             # Remove any infinite values
             returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
 
-            self.debug_print(f"Converted P&L to portfolio values starting from ${starting_capital:,.2f}")
+            self.debug_print(
+                f"Converted P&L to portfolio values starting from ${starting_capital:,.2f}"
+            )
             self.debug_print(f"Returns length: {len(returns)}")
             self.debug_print(f"First few returns: {returns.head().values}")
 
@@ -152,7 +163,7 @@ class SimplePerformanceCalculator:
 
             # Annual metrics
             annual_return = mean_daily_return * self.trading_days_per_year
-            annual_vol = daily_vol * (self.trading_days_per_year ** 0.5)
+            annual_vol = daily_vol * (self.trading_days_per_year**0.5)
             sharpe_ratio = annual_return / annual_vol if annual_vol != 0 else 0
 
             # Drawdown calculation
@@ -168,13 +179,13 @@ class SimplePerformanceCalculator:
             self.debug_print(f"Calculated annual return: {annual_return:.1%}")
 
             return {
-                'sharpe_ratio': float(sharpe_ratio),
-                'annual_return': float(annual_return),
-                'annual_volatility': float(annual_vol),
-                'max_drawdown': float(max_drawdown),
-                'win_rate': float(win_rate),
-                'days_of_data': len(daily_returns),
-                'years_analyzed': len(daily_returns) / self.trading_days_per_year
+                "sharpe_ratio": float(sharpe_ratio),
+                "annual_return": float(annual_return),
+                "annual_volatility": float(annual_vol),
+                "max_drawdown": float(max_drawdown),
+                "win_rate": float(win_rate),
+                "days_of_data": len(daily_returns),
+                "years_analyzed": len(daily_returns) / self.trading_days_per_year,
             }
 
         except Exception as e:
@@ -193,7 +204,9 @@ class SimplePerformanceCalculator:
             try:
                 curve = portfolio.curve()
                 self.debug_print(f"Portfolio curve type: {type(curve)}")
-                self.debug_print(f"Portfolio curve length: {len(curve) if curve is not None else 'None'}")
+                self.debug_print(
+                    f"Portfolio curve length: {len(curve) if curve is not None else 'None'}"
+                )
                 if curve is not None and len(curve) > 0:
                     self.debug_print(f"Curve start date: {curve.index[0]}")
                     self.debug_print(f"Curve end date: {curve.index[-1]}")
@@ -211,25 +224,26 @@ class SimplePerformanceCalculator:
         self.debug_print("=== TESTING PORTFOLIO ACCESS METHODS ===")
 
         methods_to_test = [
-            'portfolio().curve()',
-            'portfolio().percent.curve()',
-            'portfolio().net.curve()',
-            'portfolio().gross.curve()',
+            "portfolio().curve()",
+            "portfolio().percent.curve()",
+            "portfolio().net.curve()",
+            "portfolio().gross.curve()",
         ]
 
         for method_name in methods_to_test:
             try:
-                if method_name == 'portfolio().curve()':
+                if method_name == "portfolio().curve()":
                     result = system.accounts.portfolio().curve()
-                elif method_name == 'portfolio().percent.curve()':
+                elif method_name == "portfolio().percent.curve()":
                     result = system.accounts.portfolio().percent.curve()
-                elif method_name == 'portfolio().net.curve()':
+                elif method_name == "portfolio().net.curve()":
                     result = system.accounts.portfolio().net.curve()
-                elif method_name == 'portfolio().gross.curve()':
+                elif method_name == "portfolio().gross.curve()":
                     result = system.accounts.portfolio().gross.curve()
 
                 self.debug_print(
-                    f"{method_name}: SUCCESS - Type: {type(result)}, Length: {len(result) if result is not None else 'None'}")
+                    f"{method_name}: SUCCESS - Type: {type(result)}, Length: {len(result) if result is not None else 'None'}"
+                )
             except Exception as e:
                 self.debug_print(f"{method_name}: FAILED - {e}")
 
@@ -253,7 +267,7 @@ class SimplePerformanceCalculator:
                 # Test volatility calculation
                 if len(returns) > 0 and not returns.isna().all():
                     daily_vol = returns.std()
-                    annual_vol = daily_vol * (252 ** 0.5)
+                    annual_vol = daily_vol * (252**0.5)
                     self.debug_print(f"  Daily volatility: {daily_vol:.6f}")
                     self.debug_print(f"  Annual volatility: {annual_vol:.6f}")
 
@@ -273,13 +287,19 @@ class SimplePerformanceCalculator:
 
         try:
             # Get starting capital from system config
-            if hasattr(system, 'config') and hasattr(system.config, 'notional_trading_capital'):
+            if hasattr(system, "config") and hasattr(
+                system.config, "notional_trading_capital"
+            ):
                 starting_capital = system.config.notional_trading_capital
-                self.debug_print(f"Starting capital from config: ${starting_capital:,.2f}")
+                self.debug_print(
+                    f"Starting capital from config: ${starting_capital:,.2f}"
+                )
             else:
                 # Default assumption based on standard pysystemtrade config
                 starting_capital = 1000000
-                self.debug_print(f"Using default starting capital: ${starting_capital:,.2f}")
+                self.debug_print(
+                    f"Using default starting capital: ${starting_capital:,.2f}"
+                )
 
             # Get portfolio P&L curve (cumulative profits/losses)
             portfolio = system.accounts.portfolio()
@@ -292,34 +312,39 @@ class SimplePerformanceCalculator:
 
                 self.debug_print(f"Total P&L generated: ${total_pnl:,.2f}")
                 self.debug_print(f"Actual portfolio return: {actual_return_pct:.2f}%")
-                self.debug_print(f"Final portfolio value: ${final_portfolio_value:,.2f}")
+                self.debug_print(
+                    f"Final portfolio value: ${final_portfolio_value:,.2f}"
+                )
 
                 # This is the KEY fix - convert P&L to percentage returns
                 capital_curve = starting_capital + pnl_curve
                 proper_returns = capital_curve.pct_change().dropna()
 
                 if len(proper_returns) > 0 and not proper_returns.isna().all():
-                    self.debug_print(f"Proper daily returns mean: {proper_returns.mean():.6f}")
-                    self.debug_print(f"Proper daily returns std: {proper_returns.std():.6f}")
+                    self.debug_print(
+                        f"Proper daily returns mean: {proper_returns.mean():.6f}"
+                    )
+                    self.debug_print(
+                        f"Proper daily returns std: {proper_returns.std():.6f}"
+                    )
 
                     # Calculate proper Sharpe ratio
                     if proper_returns.std() > 0:
                         annual_return = proper_returns.mean() * 252
-                        annual_vol = proper_returns.std() * (252 ** 0.5)
+                        annual_vol = proper_returns.std() * (252**0.5)
                         sharpe_ratio = annual_return / annual_vol
                         self.debug_print(f"Proper Sharpe ratio: {sharpe_ratio:.3f}")
                         self.debug_print(f"Proper annual return: {annual_return:.1%}")
 
                     return {
-                        'starting_capital': starting_capital,
-                        'total_pnl': total_pnl,
-                        'actual_return_pct': actual_return_pct,
-                        'proper_returns': proper_returns,
-                        'final_portfolio_value': final_portfolio_value
+                        "starting_capital": starting_capital,
+                        "total_pnl": total_pnl,
+                        "actual_return_pct": actual_return_pct,
+                        "proper_returns": proper_returns,
+                        "final_portfolio_value": final_portfolio_value,
                     }
 
         except Exception as e:
             self.debug_print(f"Capital debug failed: {e}")
 
         return None
-

@@ -266,20 +266,26 @@ class objectiveFunctionForGreedy:
 
             # Get instrument names
             try:
-                if hasattr(self, 'keys_with_valid_data'):
+                if hasattr(self, "keys_with_valid_data"):
                     instrument_names = self.keys_with_valid_data
-                elif hasattr(self.costs, 'assets'):
+                elif hasattr(self.costs, "assets"):
                     instrument_names = list(self.costs.assets)
                 else:
-                    instrument_names = [f"Instrument_{i}" for i in range(len(costs_per_trade))]
+                    instrument_names = [
+                        f"Instrument_{i}" for i in range(len(costs_per_trade))
+                    ]
             except:
-                instrument_names = [f"Instrument_{i}" for i in range(len(costs_per_trade))]
+                instrument_names = [
+                    f"Instrument_{i}" for i in range(len(costs_per_trade))
+                ]
 
             # Find problem instruments
             problem_instruments = []
             problem_indices = []
 
-            for i, (inst, cost, gap) in enumerate(zip(instrument_names, costs_per_trade, trade_gap)):
+            for i, (inst, cost, gap) in enumerate(
+                zip(instrument_names, costs_per_trade, trade_gap)
+            ):
                 if np.isinf(cost):
                     problem_instruments.append(inst)
                     problem_indices.append(i)
@@ -323,7 +329,9 @@ class objectiveFunctionForGreedy:
 
                 print(f"Total variances: {len(variances)}")
                 print(f"NaN variances: {np.sum(np.isnan(variances))}")
-                print(f"Valid variances: {np.sum((variances > 0) & np.isfinite(variances))}")
+                print(
+                    f"Valid variances: {np.sum((variances > 0) & np.isfinite(variances))}"
+                )
 
                 # Problem instrument details
                 print(f"\nPROBLEM INSTRUMENT DETAILS:")
@@ -337,7 +345,8 @@ class objectiveFunctionForGreedy:
                         print(f"\n  {prob_inst}:")
                         print(f"    Variance: {variance}")
                         print(
-                            f"    Volatility: {np.sqrt(variance) if variance >= 0 and np.isfinite(variance) else 'N/A'}")
+                            f"    Volatility: {np.sqrt(variance) if variance >= 0 and np.isfinite(variance) else 'N/A'}"
+                        )
                         print(f"    Non-NaN in row: {non_nan_count}/{len(row)}")
                     else:
                         print(f"\n  {prob_inst}: NOT in covariance matrix")
@@ -351,14 +360,19 @@ class objectiveFunctionForGreedy:
                 for prob_inst in problem_instruments:
                     if prob_inst in self.keys_with_valid_data:
                         idx_filtered = self.keys_with_valid_data.index(prob_inst)
-                        variance_filtered = self.covariance_matrix_as_np[idx_filtered, idx_filtered]
-                        print(f"  ❌ {prob_inst} in filtered list (index {idx_filtered}), variance: {variance_filtered}")
+                        variance_filtered = self.covariance_matrix_as_np[
+                            idx_filtered, idx_filtered
+                        ]
+                        print(
+                            f"  ❌ {prob_inst} in filtered list (index {idx_filtered}), variance: {variance_filtered}"
+                        )
                     else:
                         print(f"  ✓ {prob_inst} correctly excluded")
 
             except Exception as e:
                 print(f"\n❌ Error in diagnostics: {str(e)}")
                 import traceback
+
                 traceback.print_exc()
 
             print("\n" + "=" * 80)

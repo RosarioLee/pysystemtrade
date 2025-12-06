@@ -34,7 +34,7 @@ class SampleDataManager:
     def __init__(self):
         """Initialize the data manager"""
         self.data_source = csvFuturesSimData()
-        self.results_dir = 'project_dynamic/data'
+        self.results_dir = "project_dynamic/data"
         self.validation_results = {}
 
         # Create results directory
@@ -57,9 +57,18 @@ class SampleDataManager:
         if instrument_list is None:
             # Use a representative subset for testing
             instrument_list = [
-                'US10', 'US2', 'SOFR', 'SP500micro', 'NASDAQ',
-                'EUROSTX', 'CORN', 'CRUDE_W', 'GOLD',
-                'EUR', 'GBP', 'JPY'
+                "US10",
+                "US2",
+                "SOFR",
+                "SP500micro",
+                "NASDAQ",
+                "EUROSTX",
+                "CORN",
+                "CRUDE_W",
+                "GOLD",
+                "EUR",
+                "GBP",
+                "JPY",
             ]
 
         print(f"📋 Validating {len(instrument_list)} test instruments...")
@@ -71,20 +80,24 @@ class SampleDataManager:
             validation_results.append(result)
 
             # Print validation status
-            status = "✓" if result['valid'] else "❌"
-            print(f"{status} {instrument:12} | "
-                  f"{result['start_date']} to {result['end_date']} | "
-                  f"{result['data_points']:5d} points | "
-                  f"{result['years']:.1f} years | "
-                  f"Missing: {result['missing_pct']:.1f}%")
+            status = "✓" if result["valid"] else "❌"
+            print(
+                f"{status} {instrument:12} | "
+                f"{result['start_date']} to {result['end_date']} | "
+                f"{result['data_points']:5d} points | "
+                f"{result['years']:.1f} years | "
+                f"Missing: {result['missing_pct']:.1f}%"
+            )
 
         # Summary statistics
-        valid_instruments = [r for r in validation_results if r['valid']]
-        invalid_instruments = [r for r in validation_results if not r['valid']]
+        valid_instruments = [r for r in validation_results if r["valid"]]
+        invalid_instruments = [r for r in validation_results if not r["valid"]]
 
         print(f"\n📊 VALIDATION SUMMARY")
         print(f"{'─' * 40}")
-        print(f"Valid instruments:      {len(valid_instruments)}/{len(instrument_list)}")
+        print(
+            f"Valid instruments:      {len(valid_instruments)}/{len(instrument_list)}"
+        )
         print(f"Invalid instruments:    {len(invalid_instruments)}")
 
         if invalid_instruments:
@@ -94,9 +107,9 @@ class SampleDataManager:
 
         # Store results
         self.validation_results = {
-            'all_results': validation_results,
-            'valid_instruments': [r['instrument'] for r in valid_instruments],
-            'invalid_instruments': [r['instrument'] for r in invalid_instruments]
+            "all_results": validation_results,
+            "valid_instruments": [r["instrument"] for r in valid_instruments],
+            "invalid_instruments": [r["instrument"] for r in invalid_instruments],
         }
 
         return self.validation_results
@@ -109,20 +122,20 @@ class SampleDataManager:
 
             if prices is None or len(prices) == 0:
                 return {
-                    'instrument': instrument,
-                    'valid': False,
-                    'issue': 'No price data available',
-                    'data_points': 0,
-                    'start_date': None,
-                    'end_date': None,
-                    'years': 0,
-                    'missing_pct': 100.0
+                    "instrument": instrument,
+                    "valid": False,
+                    "issue": "No price data available",
+                    "data_points": 0,
+                    "start_date": None,
+                    "end_date": None,
+                    "years": 0,
+                    "missing_pct": 100.0,
                 }
 
             # Calculate statistics
             data_points = len(prices)
-            start_date = prices.index[0].strftime('%Y-%m-%d')
-            end_date = prices.index[-1].strftime('%Y-%m-%d')
+            start_date = prices.index[0].strftime("%Y-%m-%d")
+            end_date = prices.index[-1].strftime("%Y-%m-%d")
             years = (prices.index[-1] - prices.index[0]).days / 365.25
             missing_pct = (prices.isna().sum() / len(prices)) * 100
 
@@ -130,9 +143,11 @@ class SampleDataManager:
             min_years = 3.0  # Minimum years for meaningful backtest
             max_missing_pct = 5.0  # Maximum missing data percentage
 
-            valid = (years >= min_years and
-                     missing_pct <= max_missing_pct and
-                     data_points >= 500)
+            valid = (
+                years >= min_years
+                and missing_pct <= max_missing_pct
+                and data_points >= 500
+            )
 
             issue = None
             if not valid:
@@ -144,29 +159,29 @@ class SampleDataManager:
                     issue = f"Too few data points ({data_points})"
 
             return {
-                'instrument': instrument,
-                'valid': valid,
-                'issue': issue,
-                'data_points': data_points,
-                'start_date': start_date,
-                'end_date': end_date,
-                'years': years,
-                'missing_pct': missing_pct
+                "instrument": instrument,
+                "valid": valid,
+                "issue": issue,
+                "data_points": data_points,
+                "start_date": start_date,
+                "end_date": end_date,
+                "years": years,
+                "missing_pct": missing_pct,
             }
 
         except Exception as e:
             return {
-                'instrument': instrument,
-                'valid': False,
-                'issue': f'Error loading data: {str(e)}',
-                'data_points': 0,
-                'start_date': None,
-                'end_date': None,
-                'years': 0,
-                'missing_pct': 100.0
+                "instrument": instrument,
+                "valid": False,
+                "issue": f"Error loading data: {str(e)}",
+                "data_points": 0,
+                "start_date": None,
+                "end_date": None,
+                "years": 0,
+                "missing_pct": 100.0,
             }
 
-    def export_sample_data(self, instrument_list=None, output_format='csv'):
+    def export_sample_data(self, instrument_list=None, output_format="csv"):
         """
         Export sample data for external analysis or backup
 
@@ -178,9 +193,11 @@ class SampleDataManager:
             print("❌ Run validation first")
             return
 
-        valid_instruments = self.validation_results['valid_instruments']
+        valid_instruments = self.validation_results["valid_instruments"]
         if instrument_list:
-            export_instruments = [inst for inst in instrument_list if inst in valid_instruments]
+            export_instruments = [
+                inst for inst in instrument_list if inst in valid_instruments
+            ]
         else:
             export_instruments = valid_instruments
 
@@ -202,7 +219,7 @@ class SampleDataManager:
         # Save to file
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        if output_format == 'csv':
+        if output_format == "csv":
             # Save as individual CSV files
             csv_dir = f"{self.results_dir}/csv_exports_{timestamp}"
             os.makedirs(csv_dir, exist_ok=True)
@@ -213,7 +230,7 @@ class SampleDataManager:
 
             print(f"✓ CSV files saved to: {csv_dir}")
 
-        elif output_format == 'pickle':
+        elif output_format == "pickle":
             # Save as single pickle file
             pickle_file = f"{self.results_dir}/sample_data_{timestamp}.pkl"
             pd.to_pickle(export_data, pickle_file)
@@ -229,30 +246,35 @@ class SampleDataManager:
         print(f"{'─' * 40}")
 
         report_lines = []
-        report_lines.append("ROBERT CARVER'S DYNAMIC OPTIMIZATION - DATA QUALITY REPORT")
+        report_lines.append(
+            "ROBERT CARVER'S DYNAMIC OPTIMIZATION - DATA QUALITY REPORT"
+        )
         report_lines.append(f"Generated: {datetime.now()}")
         report_lines.append("=" * 80)
 
         # Summary section
-        valid_count = len(self.validation_results['valid_instruments'])
-        total_count = len(self.validation_results['all_results'])
+        valid_count = len(self.validation_results["valid_instruments"])
+        total_count = len(self.validation_results["all_results"])
 
         report_lines.append(f"\nSUMMARY")
         report_lines.append(f"{'─' * 40}")
         report_lines.append(f"Total instruments validated: {total_count}")
         report_lines.append(f"Valid for backtesting:       {valid_count}")
-        report_lines.append(f"Success rate:                {valid_count / total_count * 100:.1f}%")
+        report_lines.append(
+            f"Success rate:                {valid_count / total_count * 100:.1f}%"
+        )
 
         # Detailed results
         report_lines.append(f"\nDETAILED VALIDATION RESULTS")
         report_lines.append(f"{'─' * 80}")
         report_lines.append(
-            f"{'Instrument':<12} {'Valid':<6} {'Start Date':<12} {'End Date':<12} {'Years':<6} {'Points':<7} {'Missing%':<8} {'Issue'}")
+            f"{'Instrument':<12} {'Valid':<6} {'Start Date':<12} {'End Date':<12} {'Years':<6} {'Points':<7} {'Missing%':<8} {'Issue'}"
+        )
         report_lines.append(f"{'─' * 80}")
 
-        for result in self.validation_results['all_results']:
-            status = "✓" if result['valid'] else "✗"
-            issue = result['issue'] or ""
+        for result in self.validation_results["all_results"]:
+            status = "✓" if result["valid"] else "✗"
+            issue = result["issue"] or ""
 
             report_lines.append(
                 f"{result['instrument']:<12} {status:<6} "
@@ -268,8 +290,8 @@ class SampleDataManager:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = f"{self.results_dir}/data_quality_report_{timestamp}.txt"
 
-        with open(report_file, 'w') as f:
-            f.write('\n'.join(report_lines))
+        with open(report_file, "w") as f:
+            f.write("\n".join(report_lines))
 
         print(f"✓ Report saved: {report_file}")
 
@@ -284,14 +306,22 @@ def main():
     print(f"Starting at: {datetime.now()}")
 
     # Initialize data manager
-    data_manager =  SampleDataManager()
+    data_manager = SampleDataManager()
 
     # Define test instruments (subset of Rob's portfolio)
     test_instruments = [
-        'US10', 'US2', 'SOFR',  # Interest rates
-        'SP500micro', 'NASDAQ', 'EUROSTX',  # Equities
-        'CORN', 'CRUDE_W', 'GOLD',  # Commodities
-        'EUR', 'GBP', 'JPY'  # FX
+        "US10",
+        "US2",
+        "SOFR",  # Interest rates
+        "SP500micro",
+        "NASDAQ",
+        "EUROSTX",  # Equities
+        "CORN",
+        "CRUDE_W",
+        "GOLD",  # Commodities
+        "EUR",
+        "GBP",
+        "JPY",  # FX
     ]
 
     # Validate data availability
@@ -301,9 +331,9 @@ def main():
     data_manager.generate_data_report()
 
     # Export valid data
-    valid_instruments = validation_results['valid_instruments']
+    valid_instruments = validation_results["valid_instruments"]
     if valid_instruments:
-        data_manager.export_sample_data(valid_instruments, output_format='csv')
+        data_manager.export_sample_data(valid_instruments, output_format="csv")
 
     print(f"\n✅ DATA SETUP COMPLETED")
     print(f"Valid instruments for backtesting: {valid_instruments}")

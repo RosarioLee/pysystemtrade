@@ -8,7 +8,7 @@ from datetime import datetime
 import traceback
 
 # Suppress warnings for cleaner output
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +30,13 @@ class ETFSystemRunner:
     - Comprehensive Excel reporting
     """
 
-    def __init__(self, config_path=None, max_instruments=32, test_mode=False, data_source="yfinance"):
+    def __init__(
+        self,
+        config_path=None,
+        max_instruments=32,
+        test_mode=False,
+        data_source="yfinance",
+    ):
         """Initialize the system runner"""
         self.config_path = config_path or self._get_default_config_path()
         self.max_instruments = max_instruments
@@ -52,7 +58,9 @@ class ETFSystemRunner:
         """Get default configuration path"""
         return os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "private", "etf_system", "config_v1.1.yaml"
+            "private",
+            "etf_system",
+            "config_v1.1.yaml",
         )
 
     def run_complete_analysis(self):
@@ -103,13 +111,15 @@ class ETFSystemRunner:
     def _initialize_etf_system(self):  # REMOVE data_source parameter
         """Initialize the Enhanced ETF System"""
         try:
-            print(f"\n📥 Step 1: Initializing ETF System with {self.data_source.upper()}...")
+            print(
+                f"\n📥 Step 1: Initializing ETF System with {self.data_source.upper()}..."
+            )
 
             self.etf_system = EnhancedETFSystem(
                 config_path=self.config_path,
                 test_mode=self.test_mode,
                 max_instruments=self.max_instruments,
-                data_source=self.data_source  # USE self.data_source
+                data_source=self.data_source,  # USE self.data_source
             )
 
             print("✅ ETF System initialized successfully")
@@ -129,7 +139,7 @@ class ETFSystemRunner:
                 return False
 
             print(f"✅ Successfully downloaded data for {download_count} instruments")
-            self.results['downloaded_instruments'] = download_count
+            self.results["downloaded_instruments"] = download_count
             return True
         except Exception as e:
             print(f"❌ Data download failed: {e}")
@@ -165,8 +175,12 @@ class ETFSystemRunner:
             # Force calculation of key components
             for instrument in instruments[:5]:  # Test with first 5
                 try:
-                    _ = self.trading_system.positionSize.get_volatility_scalar(instrument)
-                    _ = self.trading_system.positionSize.get_subsystem_position(instrument)
+                    _ = self.trading_system.positionSize.get_volatility_scalar(
+                        instrument
+                    )
+                    _ = self.trading_system.positionSize.get_subsystem_position(
+                        instrument
+                    )
                 except:
                     continue
 
@@ -195,17 +209,17 @@ class ETFSystemRunner:
 
             # NEW: Deep volatility chain analysis
             print("\n🔗 Deep Volatility Chain Analysis:")
-            self.debug_volatility_calculation_chain(['BBAX', 'HYD', 'IVV', 'VGK'])
+            self.debug_volatility_calculation_chain(["BBAX", "HYD", "IVV", "VGK"])
 
             # NEW: Add the 3 new debug functions
             print("\n🏢 Corporate Actions Analysis:")
-            self.debug_corporate_actions(['HYD', 'IVV', 'BBAX'])
+            self.debug_corporate_actions(["HYD", "IVV", "BBAX"])
 
             print("\n📅 Data Period Analysis:")
-            self.debug_data_periods(['HYD', 'IVV', 'BBAX'])
+            self.debug_data_periods(["HYD", "IVV", "BBAX"])
 
             print("\n📊 Yahoo Data Quality Analysis:")
-            self.debug_yahoo_data_quality(['HYD', 'IVV', 'BBAX'])
+            self.debug_yahoo_data_quality(["HYD", "IVV", "BBAX"])
 
             # Volatility diagnostics
             print("\n📈 Volatility Diagnostic Analysis:")
@@ -213,34 +227,44 @@ class ETFSystemRunner:
 
             # Weight conversion verification
             print("\n⚖️ Weight Conversion Verification:")
-            conversion_results = self.dashboard.verify_risk_to_cash_conversion(self.trading_system)
+            conversion_results = self.dashboard.verify_risk_to_cash_conversion(
+                self.trading_system
+            )
 
             # NEW: Add actual vs config weights comparison
             print("\n📊 Risk vs Cash Weights Analysis:")
-            weight_comparison = self.dashboard.compare_risk_vs_cash_weights(self.trading_system)
+            weight_comparison = self.dashboard.compare_risk_vs_cash_weights(
+                self.trading_system
+            )
 
             # Position sizing formula verification
             print("\n🧮 Position Sizing Formula Verification:")
-            formula_result = self.dashboard.verify_position_sizing_formula(self.trading_system)
+            formula_result = self.dashboard.verify_position_sizing_formula(
+                self.trading_system
+            )
 
             # NEW: Forecast scalar consistency check
             print("🔍 Forecast Scalar Consistency Verification...")
-            forecast_consistency = self.dashboard.verify_forecast_scalar_consistency(self.trading_system)
+            forecast_consistency = self.dashboard.verify_forecast_scalar_consistency(
+                self.trading_system
+            )
 
             # NEW: Export comprehensive diagnostic analysis
             print("📋 Exporting comprehensive diagnostic analysis...")
-            diagnostic_file = self.dashboard.export_diagnostic_analysis_excel("comprehensive_diagnostic_analysis.xlsx")
+            diagnostic_file = self.dashboard.export_diagnostic_analysis_excel(
+                "comprehensive_diagnostic_analysis.xlsx"
+            )
             if diagnostic_file:
                 print(f"✅ Diagnostic analysis exported: {diagnostic_file}")
 
             # Store results
-            self.results['diagnostics'] = {
-                'volatility_issues': vol_issues,
-                'weight_conversion': conversion_results,
-                'weight_comparison': weight_comparison,
-                'formula_verification': formula_result,
-                'forecast_consistency': forecast_consistency,  # NEW
-                'diagnostic_file': diagnostic_file  # NEW
+            self.results["diagnostics"] = {
+                "volatility_issues": vol_issues,
+                "weight_conversion": conversion_results,
+                "weight_comparison": weight_comparison,
+                "formula_verification": formula_result,
+                "forecast_consistency": forecast_consistency,  # NEW
+                "diagnostic_file": diagnostic_file,  # NEW
             }
 
             print("✅ System diagnostics completed")
@@ -261,7 +285,7 @@ class ETFSystemRunner:
                 if prices is not None:
                     returns = prices.pct_change().dropna()
                     manual_daily_vol = returns.std()
-                    manual_annual_vol = manual_daily_vol * (252 ** 0.5)
+                    manual_annual_vol = manual_daily_vol * (252**0.5)
                     print(f"📊 Manual calculation: {manual_annual_vol:.2%} annual vol")
                 else:
                     print("❌ No price data available")
@@ -269,16 +293,22 @@ class ETFSystemRunner:
 
                 # Check system volatility calculation
                 try:
-                    vol_scalar = self.trading_system.positionSize.get_volatility_scalar(instrument)
+                    vol_scalar = self.trading_system.positionSize.get_volatility_scalar(
+                        instrument
+                    )
                     if vol_scalar is not None:
                         latest_scalar = vol_scalar.iloc[-1]
                         if latest_scalar > 0:
                             implied_annual_vol = 0.12 / latest_scalar
-                            print(f"🔧 System calculation: {implied_annual_vol:.2%} annual vol")
+                            print(
+                                f"🔧 System calculation: {implied_annual_vol:.2%} annual vol"
+                            )
                             print(f"📏 Volatility scalar: {latest_scalar:.4f}")
                         else:
                             print("❌ Invalid volatility scalar")
-                            vol_issues.append(f"{instrument}: Invalid volatility scalar")
+                            vol_issues.append(
+                                f"{instrument}: Invalid volatility scalar"
+                            )
                     else:
                         print("❌ System volatility calculation returned None")
                         vol_issues.append(f"{instrument}: No system volatility")
@@ -288,31 +318,46 @@ class ETFSystemRunner:
 
                 # Enhanced: Check risk vs cash weights using actual cash weights
                 try:
-                    config_risk_weight = self.trading_system.config.instrument_weights.get(instrument, 0)
+                    config_risk_weight = (
+                        self.trading_system.config.instrument_weights.get(instrument, 0)
+                    )
 
                     # NEW: Use actual cash weights instead of system method
-                    cash_data = self.dashboard.get_actual_cash_weights(self.trading_system)
-                    if cash_data and instrument in cash_data['cash_weights']:
-                        actual_cash_weight = cash_data['cash_weights'][instrument]
+                    cash_data = self.dashboard.get_actual_cash_weights(
+                        self.trading_system
+                    )
+                    if cash_data and instrument in cash_data["cash_weights"]:
+                        actual_cash_weight = cash_data["cash_weights"][instrument]
                         cash_source = "ACTUAL"
                     else:
                         # Fallback to system method
-                        instrument_weights = self.trading_system.portfolio.get_instrument_weights()
-                        if instrument_weights is not None and instrument in instrument_weights.columns:
+                        instrument_weights = (
+                            self.trading_system.portfolio.get_instrument_weights()
+                        )
+                        if (
+                            instrument_weights is not None
+                            and instrument in instrument_weights.columns
+                        ):
                             actual_cash_weight = instrument_weights[instrument].iloc[-1]
                             cash_source = "SYSTEM"
                         else:
                             actual_cash_weight = 0
                             cash_source = "NONE"
 
-                    ratio = actual_cash_weight / config_risk_weight if config_risk_weight > 0 else 0
+                    ratio = (
+                        actual_cash_weight / config_risk_weight
+                        if config_risk_weight > 0
+                        else 0
+                    )
 
                     print(f"⚖️ Risk weight: {config_risk_weight:.4f}")
                     print(f"💰 Cash weight: {actual_cash_weight:.4f} ({cash_source})")
                     print(f"📊 Scaling ratio: {ratio:.2f}x")
 
                     if abs(ratio - 1.0) < 0.1:
-                        vol_issues.append(f"{instrument}: Weights not properly scaled (ratio: {ratio:.2f})")
+                        vol_issues.append(
+                            f"{instrument}: Weights not properly scaled (ratio: {ratio:.2f})"
+                        )
 
                 except Exception as e:
                     print(f"❌ Weight comparison failed: {e}")
@@ -332,7 +377,9 @@ class ETFSystemRunner:
             print("=" * 80)
 
             instruments = self.trading_system.get_instrument_list()
-            print(f"Analyzing {len(instruments)} instruments for value_of_block_price_move...\n")
+            print(
+                f"Analyzing {len(instruments)} instruments for value_of_block_price_move...\n"
+            )
 
             block_moves = {}
             anomalies = []
@@ -340,18 +387,26 @@ class ETFSystemRunner:
             for instrument in instruments:
                 try:
                     # Get value_of_block_price_move from the system
-                    block_move = self.trading_system.rawdata.get_value_of_block_price_move(instrument)
+                    block_move = (
+                        self.trading_system.rawdata.get_value_of_block_price_move(
+                            instrument
+                        )
+                    )
 
                     # Handle Series objects
-                    if hasattr(block_move, 'iloc'):
+                    if hasattr(block_move, "iloc"):
                         block_value = float(block_move.iloc[-1])  # Latest value
                     else:
-                        block_value = float(block_move) if block_move is not None else 1.0
+                        block_value = (
+                            float(block_move) if block_move is not None else 1.0
+                        )
 
                     block_moves[instrument] = block_value
 
                     # Check for non-standard values (not 1.0)
-                    if abs(block_value - 1.0) > 0.001:  # Allow for small floating point differences
+                    if (
+                        abs(block_value - 1.0) > 0.001
+                    ):  # Allow for small floating point differences
                         anomalies.append((instrument, block_value))
                         print(f"⚠️  {instrument}: {block_value:.6f} (NON-STANDARD)")
                     else:
@@ -371,7 +426,7 @@ class ETFSystemRunner:
                     print(f"  {instrument}: {value:.6f}")
 
                     # Special focus on HYD and IVV
-                    if instrument in ['HYD', 'IVV']:
+                    if instrument in ["HYD", "IVV"]:
                         print(f"    >>> THIS MATCHES YOUR MISSING FACTOR ISSUE! <<<")
 
                         # Calculate expected missing factor
@@ -379,11 +434,14 @@ class ETFSystemRunner:
                         print(f"    Expected Missing Factor: {expected_factor:.3f}")
 
             # Store results for further analysis
-            self.results['block_move_debug'] = {
-                'block_moves': block_moves,
-                'anomalies': anomalies,
-                'standard_instruments': [k for k, v in block_moves.items()
-                                         if isinstance(v, (int, float)) and abs(v - 1.0) <= 0.001]
+            self.results["block_move_debug"] = {
+                "block_moves": block_moves,
+                "anomalies": anomalies,
+                "standard_instruments": [
+                    k
+                    for k, v in block_moves.items()
+                    if isinstance(v, (int, float)) and abs(v - 1.0) <= 0.001
+                ],
             }
 
             return block_moves
@@ -391,6 +449,7 @@ class ETFSystemRunner:
         except Exception as e:
             print(f"❌ DEBUG function failed: {e}")
             import traceback
+
             traceback.print_exc()
             return {}
 
@@ -402,7 +461,11 @@ class ETFSystemRunner:
             print("=" * 80)
 
             if focus_instruments is None:
-                focus_instruments = ['BBAX', 'HYD', 'IVV']  # Include working example + problem cases
+                focus_instruments = [
+                    "BBAX",
+                    "HYD",
+                    "IVV",
+                ]  # Include working example + problem cases
 
             for instrument in focus_instruments:
                 if instrument not in self.trading_system.get_instrument_list():
@@ -416,17 +479,31 @@ class ETFSystemRunner:
                     # Step 1: Raw Price Data
                     prices = self.trading_system.rawdata.get_daily_prices(instrument)
                     latest_price = prices.iloc[-1] if prices is not None else None
-                    print(f"1️⃣ Latest Price: ${latest_price:.4f}" if latest_price else "1️⃣ Price: MISSING")
+                    print(
+                        f"1️⃣ Latest Price: ${latest_price:.4f}"
+                        if latest_price
+                        else "1️⃣ Price: MISSING"
+                    )
 
                     # Step 2: Value of Block Price Move (already confirmed = 1.0)
-                    block_move = self.trading_system.rawdata.get_value_of_block_price_move(instrument)
-                    block_value = float(block_move.iloc[-1]) if hasattr(block_move, 'iloc') else float(block_move)
+                    block_move = (
+                        self.trading_system.rawdata.get_value_of_block_price_move(
+                            instrument
+                        )
+                    )
+                    block_value = (
+                        float(block_move.iloc[-1])
+                        if hasattr(block_move, "iloc")
+                        else float(block_move)
+                    )
                     print(f"2️⃣ Block Price Move: {block_value:.6f}")
 
                     # Step 3: FX Rate (key suspect!)
                     try:
-                        fx_rate = self.trading_system.rawdata.get_fx_for_instrument(instrument, "USD")
-                        if hasattr(fx_rate, 'iloc'):
+                        fx_rate = self.trading_system.rawdata.get_fx_for_instrument(
+                            instrument, "USD"
+                        )
+                        if hasattr(fx_rate, "iloc"):
                             fx_value = float(fx_rate.iloc[-1])
                         else:
                             fx_value = float(fx_rate) if fx_rate is not None else 1.0
@@ -445,15 +522,23 @@ class ETFSystemRunner:
 
                     # Step 5: Daily Returns Volatility
                     try:
-                        daily_vol = self.trading_system.rawdata.daily_returns_volatility(instrument)
+                        daily_vol = (
+                            self.trading_system.rawdata.daily_returns_volatility(
+                                instrument
+                            )
+                        )
                         if daily_vol is not None:
                             latest_daily_vol = float(daily_vol.iloc[-1])
-                            print(f"5️⃣ Daily Returns Vol: {latest_daily_vol:.6f} ({latest_daily_vol * 100:.4f}%)")
+                            print(
+                                f"5️⃣ Daily Returns Vol: {latest_daily_vol:.6f} ({latest_daily_vol * 100:.4f}%)"
+                            )
 
                             # Manual verification
                             returns = prices.pct_change().dropna()
                             manual_daily_vol = returns.std()
-                            print(f"    Manual verification: {manual_daily_vol:.6f} ({manual_daily_vol * 100:.4f}%)")
+                            print(
+                                f"    Manual verification: {manual_daily_vol:.6f} ({manual_daily_vol * 100:.4f}%)"
+                            )
 
                             vol_diff = abs(latest_daily_vol - manual_daily_vol)
                             if vol_diff > 0.0001:
@@ -469,7 +554,8 @@ class ETFSystemRunner:
                     # Step 6: Instrument Value Volatility (Key Calculation!)
                     try:
                         instrument_value_vol = self.trading_system.positionSize.get_instrument_value_volatility(
-                            instrument)
+                            instrument
+                        )
                         if instrument_value_vol is not None:
                             latest_instr_vol = float(instrument_value_vol.iloc[-1])
                             print(f"6️⃣ Instrument Value Vol: ${latest_instr_vol:.4f}")
@@ -480,8 +566,12 @@ class ETFSystemRunner:
 
                             instr_vol_diff = abs(latest_instr_vol - manual_instr_vol)
                             if instr_vol_diff > 0.01:
-                                print(f"    ⚠️ INSTRUMENT VOL DISCREPANCY: ${instr_vol_diff:.4f}")
-                                print(f"    🔍 This could be the source of the missing factor!")
+                                print(
+                                    f"    ⚠️ INSTRUMENT VOL DISCREPANCY: ${instr_vol_diff:.4f}"
+                                )
+                                print(
+                                    f"    🔍 This could be the source of the missing factor!"
+                                )
                         else:
                             print(f"6️⃣ Instrument Value Vol: MISSING")
                             latest_instr_vol = 0
@@ -491,7 +581,9 @@ class ETFSystemRunner:
                         latest_instr_vol = 0
 
                     # Step 7: Daily Cash Vol Target
-                    daily_cash_vol_target = 1000000 * 0.12 / 16  # Your confirmed formula
+                    daily_cash_vol_target = (
+                        1000000 * 0.12 / 16
+                    )  # Your confirmed formula
                     print(f"7️⃣ Daily Cash Vol Target: ${daily_cash_vol_target:.2f}")
 
                     # Step 8: Final Volatility Scalar
@@ -500,27 +592,45 @@ class ETFSystemRunner:
                         print(f"8️⃣ Calculated Vol Scalar: {calculated_vol_scalar:.6f}")
 
                         # Compare with system value
-                        system_vol_scalar = self.trading_system.positionSize.get_volatility_scalar(instrument)
+                        system_vol_scalar = (
+                            self.trading_system.positionSize.get_volatility_scalar(
+                                instrument
+                            )
+                        )
                         if system_vol_scalar is not None:
                             system_scalar_value = float(system_vol_scalar.iloc[-1])
                             print(f"    System Vol Scalar: {system_scalar_value:.6f}")
 
-                            scalar_diff = abs(calculated_vol_scalar - system_scalar_value)
+                            scalar_diff = abs(
+                                calculated_vol_scalar - system_scalar_value
+                            )
                             if scalar_diff > 0.001:
                                 print(f"    ⚠️ SCALAR DISCREPANCY: {scalar_diff:.6f}")
 
                             # Calculate the missing factor based on your Excel data
-                            if instrument == 'HYD':
+                            if instrument == "HYD":
                                 expected_missing = 0.873
-                                actual_missing = system_scalar_value / calculated_vol_scalar
-                                print(f"    🎯 Expected Missing Factor: {expected_missing:.3f}")
-                                print(f"    🎯 Actual Missing Factor: {actual_missing:.3f}")
+                                actual_missing = (
+                                    system_scalar_value / calculated_vol_scalar
+                                )
+                                print(
+                                    f"    🎯 Expected Missing Factor: {expected_missing:.3f}"
+                                )
+                                print(
+                                    f"    🎯 Actual Missing Factor: {actual_missing:.3f}"
+                                )
 
-                            elif instrument == 'IVV':
+                            elif instrument == "IVV":
                                 expected_missing = 0.715
-                                actual_missing = system_scalar_value / calculated_vol_scalar
-                                print(f"    🎯 Expected Missing Factor: {expected_missing:.3f}")
-                                print(f"    🎯 Actual Missing Factor: {actual_missing:.3f}")
+                                actual_missing = (
+                                    system_scalar_value / calculated_vol_scalar
+                                )
+                                print(
+                                    f"    🎯 Expected Missing Factor: {expected_missing:.3f}"
+                                )
+                                print(
+                                    f"    🎯 Actual Missing Factor: {actual_missing:.3f}"
+                                )
 
                     print("-" * 60)
 
@@ -532,6 +642,7 @@ class ETFSystemRunner:
         except Exception as e:
             print(f"❌ Volatility chain debug failed: {e}")
             import traceback
+
             traceback.print_exc()
 
     def _calculate_system_performance(self):
@@ -550,17 +661,17 @@ class ETFSystemRunner:
                 print(f" 📉 Max Drawdown: {performance['max_drawdown']:.1%}")
                 print(f" 🎯 Win Rate: {performance['win_rate']:.1%}")
                 print(f" 📅 Years Analyzed: {performance['years_analyzed']:.1f}")
-                self.results['performance'] = performance
+                self.results["performance"] = performance
             else:
                 print("❌ Performance calculation failed")
-                self.results['performance'] = None
+                self.results["performance"] = None
 
             # Show portfolio summary
             self._show_portfolio_summary()
 
         except Exception as e:
             print(f"❌ Performance calculation failed: {e}")
-            self.results['performance'] = None
+            self.results["performance"] = None
 
     def _show_portfolio_summary(self):
         """Display comprehensive portfolio summary"""
@@ -587,7 +698,9 @@ class ETFSystemRunner:
                 print(f"💰 Starting P&L: ${start_value:,.2f}")
                 print(f"💰 Ending P&L: ${end_value:,.2f}")
                 print(f"📊 Total Return: {total_return:.2f}%")
-                print(f"📅 Period: {curve.index[0].strftime('%Y-%m-%d')} to {curve.index[-1].strftime('%Y-%m-%d')}")
+                print(
+                    f"📅 Period: {curve.index[0].strftime('%Y-%m-%d')} to {curve.index[-1].strftime('%Y-%m-%d')}"
+                )
                 print(f"📊 Data Points: {len(curve):,} days")
 
                 # Additional portfolio metrics
@@ -606,11 +719,11 @@ class ETFSystemRunner:
             monitor = SimpleProductionMonitor(self.trading_system)
             health = monitor.run_health_check()
             monitor.display_summary(health)
-            self.results['health'] = health
+            self.results["health"] = health
             print("✅ Health monitoring completed")
         except Exception as e:
             print(f"❌ Health monitoring failed: {e}")
-            self.results['health'] = None
+            self.results["health"] = None
 
     def _generate_comprehensive_reports(self):
         """Generate all comprehensive Excel reports"""
@@ -624,7 +737,7 @@ class ETFSystemRunner:
                 "etf_instrument_analysis.xlsx"
             )
             if instrument_file:
-                reports_generated['instrument_analysis'] = instrument_file
+                reports_generated["instrument_analysis"] = instrument_file
                 print(f"✅ Instrument analysis: {instrument_file}")
 
             # Report 2: Portfolio Summary
@@ -633,7 +746,7 @@ class ETFSystemRunner:
                 "portfolio_summary.xlsx"
             )
             if portfolio_file:
-                reports_generated['portfolio_summary'] = portfolio_file
+                reports_generated["portfolio_summary"] = portfolio_file
                 print(f"✅ Portfolio summary: {portfolio_file}")
 
             # Report 3: Cash Weights Time Series
@@ -642,24 +755,30 @@ class ETFSystemRunner:
                 "cash_weights_time_series.xlsx"
             )
             if time_series_file:
-                reports_generated['cash_weights_time_series'] = time_series_file
+                reports_generated["cash_weights_time_series"] = time_series_file
                 print(f"✅ Cash weights time series: {time_series_file}")
 
             # Report 4: Final Day Backtest Report with MULTIPLE timeseries
             print("📋 Exporting final day backtest report with multiple timeseries...")
             final_day_file = self.dashboard.export_final_day_backtest_report(
                 "final_day_backtest_report.xlsx",
-                timeseries_instruments=['BBAX', 'IVV', 'HYD']  # SPECIFY MULTIPLE INSTRUMENTS
+                timeseries_instruments=[
+                    "BBAX",
+                    "IVV",
+                    "HYD",
+                ],  # SPECIFY MULTIPLE INSTRUMENTS
             )
             if final_day_file:
-                reports_generated['final_day_report'] = final_day_file
+                reports_generated["final_day_report"] = final_day_file
                 print(f"✅ Final day backtest report: {final_day_file}")
 
             # Report 5: Volatility Analysis
             print("📊 Exporting volatility analysis...")
-            vol_file = self.dashboard.export_volatility_analysis_excel("enhanced_vol_analysis.xlsx")
+            vol_file = self.dashboard.export_volatility_analysis_excel(
+                "enhanced_vol_analysis.xlsx"
+            )
             if vol_file:
-                reports_generated['volatility_analysis'] = vol_file
+                reports_generated["volatility_analysis"] = vol_file
                 print(f"✅ Volatility analysis: {vol_file}")
 
             # Create equity curve plot (visual output)
@@ -675,20 +794,21 @@ class ETFSystemRunner:
             except Exception as plot_error:
                 print(f"Strategy comparison plot failed: {plot_error}")
 
-            '''print("Creating comprehensive capital multiplier analysis...")
+            """print("Creating comprehensive capital multiplier analysis...")
             try:
                 self.dashboard.createcomprehensiveequitycurveplot()
             except Exception as comp_error:
-                print(f"Comprehensive plot creation failed: {comp_error}")'''
+                print(f"Comprehensive plot creation failed: {comp_error}")"""
 
-            self.results['reports'] = reports_generated
+            self.results["reports"] = reports_generated
             print(f"✅ Generated {len(reports_generated)} comprehensive reports")
 
         except Exception as e:
             print(f"❌ Report generation failed: {e}")
             import traceback
+
             traceback.print_exc()
-            self.results['reports'] = {}
+            self.results["reports"] = {}
 
     def _display_final_summary(self):
         """Display comprehensive final summary"""
@@ -699,8 +819,10 @@ class ETFSystemRunner:
 
             # System Overview
             print("\n📊 SYSTEM OVERVIEW:")
-            if self.results.get('downloaded_instruments'):
-                print(f" 📈 Instruments Processed: {self.results['downloaded_instruments']}")
+            if self.results.get("downloaded_instruments"):
+                print(
+                    f" 📈 Instruments Processed: {self.results['downloaded_instruments']}"
+                )
 
             if self.trading_system:
                 instruments = self.trading_system.get_instrument_list()
@@ -709,7 +831,7 @@ class ETFSystemRunner:
                 print(f" 📏 Trading Rules: {len(rules)}")
 
             # Performance Summary
-            performance = self.results.get('performance')
+            performance = self.results.get("performance")
             if performance:
                 print(f"\n💰 PERFORMANCE SUMMARY:")
                 print(f" 📊 Sharpe Ratio: {performance['sharpe_ratio']:.3f}")
@@ -720,18 +842,22 @@ class ETFSystemRunner:
                 print(f" 📅 Analysis Period: {performance['years_analyzed']:.1f} years")
 
             # Health Status
-            health = self.results.get('health')
+            health = self.results.get("health")
             if health:
                 print(f"\n🏥 SYSTEM HEALTH: {health['overall_status']}")
 
             # Weight Analysis Summary (NEW)
-            diagnostics = self.results.get('diagnostics', {})
-            weight_comparison = diagnostics.get('weight_comparison')
+            diagnostics = self.results.get("diagnostics", {})
+            weight_comparison = diagnostics.get("weight_comparison")
             if weight_comparison:
                 print(f"\n⚖️ WEIGHT ANALYSIS SUMMARY:")
 
                 # Calculate summary statistics
-                scaling_factors = [d['scaling_factor'] for d in weight_comparison.values() if d['scaling_factor'] > 0]
+                scaling_factors = [
+                    d["scaling_factor"]
+                    for d in weight_comparison.values()
+                    if d["scaling_factor"] > 0
+                ]
                 if scaling_factors:
                     avg_scaling = np.mean(scaling_factors)
                     min_scaling = np.min(scaling_factors)
@@ -743,25 +869,31 @@ class ETFSystemRunner:
                     # Identify extreme cases
                     extreme_instruments = []
                     for instrument, data in weight_comparison.items():
-                        if data['scaling_factor'] > 2.0:
-                            extreme_instruments.append(f"{instrument} (HIGH: {data['scaling_factor']:.1f}x)")
-                        elif data['scaling_factor'] < 0.5:
-                            extreme_instruments.append(f"{instrument} (LOW: {data['scaling_factor']:.1f}x)")
+                        if data["scaling_factor"] > 2.0:
+                            extreme_instruments.append(
+                                f"{instrument} (HIGH: {data['scaling_factor']:.1f}x)"
+                            )
+                        elif data["scaling_factor"] < 0.5:
+                            extreme_instruments.append(
+                                f"{instrument} (LOW: {data['scaling_factor']:.1f}x)"
+                            )
 
                     if extreme_instruments:
-                        print(f" ⚠️ Extreme Scaling Cases: {', '.join(extreme_instruments[:3])}")
+                        print(
+                            f" ⚠️ Extreme Scaling Cases: {', '.join(extreme_instruments[:3])}"
+                        )
                         if len(extreme_instruments) > 3:
                             print(f"   ... and {len(extreme_instruments) - 3} more")
 
             # Reports Generated
-            reports = self.results.get('reports', {})
+            reports = self.results.get("reports", {})
             if reports:
                 print(f"\n📊 REPORTS GENERATED ({len(reports)}):")
                 for report_type, filename in reports.items():
                     print(f" 📁 {report_type}: {filename}")
 
             # Diagnostic Issues
-            vol_issues = diagnostics.get('volatility_issues', [])
+            vol_issues = diagnostics.get("volatility_issues", [])
             if vol_issues:
                 print(f"\n⚠️ DIAGNOSTIC ISSUES FOUND ({len(vol_issues)}):")
                 for issue in vol_issues[:5]:  # Show first 5
@@ -778,9 +910,10 @@ class ETFSystemRunner:
         except Exception as e:
             print(f"❌ Error displaying final summary: {e}")
 
-    def debug_corporate_actions(self, focus_instruments=['HYD', 'IVV', 'BBAX']):
+    def debug_corporate_actions(self, focus_instruments=["HYD", "IVV", "BBAX"]):
         """Check for corporate actions affecting price/volatility calculations"""
         import pandas as pd
+
         try:
             print(f"\n🔍 CORPORATE ACTIONS DEBUG")
             print("=" * 60)
@@ -803,7 +936,9 @@ class ETFSystemRunner:
                 if len(very_large_moves) > 0:
                     print(f"   ⚠️ SUSPICIOUS LARGE MOVES DETECTED:")
                     for date, move in very_large_moves.tail(5).items():
-                        print(f"      {date.strftime('%Y-%m-%d')}: {move:.4f} ({move * 100:.2f}%)")
+                        print(
+                            f"      {date.strftime('%Y-%m-%d')}: {move:.4f} ({move * 100:.2f}%)"
+                        )
 
                 # Check price level consistency
                 price_start = prices.iloc[0]
@@ -812,11 +947,15 @@ class ETFSystemRunner:
 
                 print(f"   💰 Start price: ${price_start:.4f}")
                 print(f"   💰 End price: ${price_end:.4f}")
-                print(f"   📈 Total return: {total_return:.4f} ({total_return * 100:.2f}%)")
+                print(
+                    f"   📈 Total return: {total_return:.4f} ({total_return * 100:.2f}%)"
+                )
 
                 # Check for price discontinuities
                 price_ratios = prices / prices.shift(1)
-                unusual_ratios = price_ratios[(price_ratios < 0.8) | (price_ratios > 1.2)]
+                unusual_ratios = price_ratios[
+                    (price_ratios < 0.8) | (price_ratios > 1.2)
+                ]
 
                 if len(unusual_ratios) > 0:
                     print(f"   ⚠️ PRICE DISCONTINUITIES DETECTED:")
@@ -824,14 +963,16 @@ class ETFSystemRunner:
                         prev_price = prices.shift(1).loc[date]
                         curr_price = prices.loc[date]
                         print(
-                            f"      {date.strftime('%Y-%m-%d')}: ${prev_price:.4f} → ${curr_price:.4f} (ratio: {ratio:.4f})")
+                            f"      {date.strftime('%Y-%m-%d')}: ${prev_price:.4f} → ${curr_price:.4f} (ratio: {ratio:.4f})"
+                        )
 
         except Exception as e:
             print(f"❌ Corporate actions debug failed: {e}")
 
-    def debug_data_periods(self, focus_instruments=['HYD', 'IVV', 'BBAX']):
+    def debug_data_periods(self, focus_instruments=["HYD", "IVV", "BBAX"]):
         """Check data period consistency across instruments"""
         import pandas as pd
+
         try:
             print(f"\n🔍 DATA PERIOD ANALYSIS")
             print("=" * 60)
@@ -849,8 +990,10 @@ class ETFSystemRunner:
 
                 # Check for gaps in data
                 price_dates = pd.DataFrame(index=prices.index)
-                price_dates['trading_day'] = 1
-                full_range = pd.date_range(start=prices.index[0], end=prices.index[-1], freq='D')
+                price_dates["trading_day"] = 1
+                full_range = pd.date_range(
+                    start=prices.index[0], end=prices.index[-1], freq="D"
+                )
                 missing_dates = []
 
                 for date in full_range:
@@ -860,12 +1003,14 @@ class ETFSystemRunner:
 
                 if len(missing_dates) > 5:  # Only show if significant gaps
                     print(f"   ⚠️ Missing trading days: {len(missing_dates)}")
-                    print(f"      Recent gaps: {[d.strftime('%Y-%m-%d') for d in missing_dates[-3:]]}")
+                    print(
+                        f"      Recent gaps: {[d.strftime('%Y-%m-%d') for d in missing_dates[-3:]]}"
+                    )
 
         except Exception as e:
             print(f"❌ Data periods debug failed: {e}")
 
-    def debug_yahoo_data_quality(self, focus_instruments=['HYD', 'IVV', 'BBAX']):
+    def debug_yahoo_data_quality(self, focus_instruments=["HYD", "IVV", "BBAX"]):
         """Check Yahoo Finance data quality for specific instruments"""
         try:
             print(f"\n🔍 YAHOO FINANCE DATA QUALITY CHECK")
@@ -880,7 +1025,9 @@ class ETFSystemRunner:
 
                 # Basic statistics
                 vol_simple = returns.std()
-                vol_pst = self.trading_system.rawdata.daily_returns_volatility(instrument).iloc[-1]
+                vol_pst = self.trading_system.rawdata.daily_returns_volatility(
+                    instrument
+                ).iloc[-1]
 
                 print(f"   📈 Simple volatility: {vol_simple:.6f}")
                 print(f"   📈 PST volatility: {vol_pst:.6f}")
@@ -913,9 +1060,6 @@ class ETFSystemRunner:
     def get_results(self):
         """Get complete analysis results"""
         return self.results
-
-
-
 
 
 # Utility functions for enhanced functionality
@@ -982,7 +1126,7 @@ def debug_volatility_chain_only():
             return None
 
         # Run the chain debug on problem instruments
-        runner.debug_volatility_calculation_chain(['HYD', 'IVV', 'BBAX'])
+        runner.debug_volatility_calculation_chain(["HYD", "IVV", "BBAX"])
 
     except Exception as e:
         print(f"❌ Chain debug failed: {e}")
@@ -997,7 +1141,7 @@ def main():
         runner = ETFSystemRunner(
             max_instruments=10,  # Adjust as needed
             test_mode=True,  # Set to True for faster testing
-            data_source="ib"
+            data_source="ib",
         )
 
         # Run complete analysis
@@ -1005,9 +1149,9 @@ def main():
 
         if results:
             # Store results globally for interactive access
-            globals()['system_results'] = results
-            globals()['trading_system'] = runner.get_trading_system()
-            globals()['system_runner'] = runner
+            globals()["system_results"] = results
+            globals()["trading_system"] = runner.get_trading_system()
+            globals()["system_runner"] = runner
 
             print(f"\n✅ Analysis completed successfully!")
             print(f"📊 Results stored in 'system_results' variable")
@@ -1026,8 +1170,8 @@ def main():
         traceback.print_exc()
         return None
 
+
 if __name__ == "__main__":
     # Run the complete analysis
-     main()
-    #debug_results = debug_volatility_chain_only()
-
+    main()
+# debug_results = debug_volatility_chain_only()
