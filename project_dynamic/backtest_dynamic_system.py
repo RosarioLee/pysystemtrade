@@ -1044,32 +1044,41 @@ class DynamicSystemBacktester:
 
         return turnover_results
 
-    def verify_cost_loading(self):
-        # Test that costs are being loaded from spreadcosts.csv
-        print("🔍 COST SYSTEM VERIFICATION")
-        print("─" * 40)
+    def run_turnover_diagnostics(self):
+        """
+        Run comprehensive turnover diagnostics
+        Call this AFTER backtest completes
+        """
+        print(f"\n" + "=" * 70)
+        print(f"🔬 RUNNING TURNOVER DIAGNOSTICS")
+        print(f"=" * 70)
 
-        test_instruments = ['US10', 'BUND', 'SP500_micro', 'CORN', 'EUR_micro']
+        if not self.system:
+            print("❌ No system available - run backtest first!")
+            return
 
-        for instrument in test_instruments:
-            try:
-                if instrument in self.data_source.get_instrument_list():
-                    cost_data = self.data_source.get_raw_cost_data(instrument)
-                    spread_cost = cost_data.price_slippage  # ✅ CORRECT API
-                    commission = cost_data.value_of_block_commission  # ✅ ADDITIONAL INFO
-                    print(f"✓ {instrument}: spread={spread_cost}, commission={commission}")
+        # Initialize analyzer
+        analyzer = RobertCarverTurnoverAnalyzer(self.system)
 
-                    if spread_cost == 0.0:
-                        print(f"  ❌ {instrument} has zero cost!")
-                        return False
-                    else:
-                        print(f"  ✅ {instrument} has valid cost")
-            except Exception as e:
-                print(f"❌ {instrument}: Error getting cost - {e}")
-                return False
+        # Run all three diagnostics
+        print(f"\n" + "🔍" * 35)
+        activity = analyzer.diagnostic_position_activity()
 
-        print("✓ Cost system working properly")
-        return True
+        print(f"\n" + "🔍" * 35)
+        positions = analyzer.verify_average_position_calculation()
+
+        # Pick most active instrument for detailed check
+        if activity:
+            most_active = max(activity.items(), key=lambda x: x[1]['total_changes'])
+            instrument = most_active[0]
+            print(f"\n" + "🔍" * 35)
+            crosscheck = analyzer.cross_check_turnover_calculation(instrument)
+
+        return {
+            'activity': activity,
+            'positions': positions,
+            'crosscheck': crosscheck if activity else {}
+        }
 
 
 def main():
@@ -1149,6 +1158,11 @@ def main():
     except (ImportError, AttributeError) as e:
         print(f"⚠ Turnover analysis not available: {e}")
         print("  (This is optional - basic turnover metrics already shown)")
+
+    print("=" * 70)
+    print("3️⃣ Running Turnover Diagnostics...")
+    diagnostic_results = backtester.run_turnover_diagnostics()
+    backtester.results['diagnostic_results'] = diagnostic_results
 
     # ============================================================
     # FINAL SUMMARY
