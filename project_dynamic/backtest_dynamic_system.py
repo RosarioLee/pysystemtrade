@@ -1121,6 +1121,300 @@ class DynamicSystemBacktester:
             print(f"❌ Error creating position/risk plots: {e}")
             return None, None
 
+    def plot_instrument_with_signals(self, instrument_code, rule_name=None,
+                                     start_date=None, end_date=None):
+        """
+        Plot instrument price with ACTUAL trading signals from optimized positions.
+
+        This plots:
+        - Price chart with actual buy/sell trades (from optimized integer positions)
+        - Combined forecast (the signal strength)
+        - Actual optimized positions (whole numbers after dynamic optimization)
+
+        Args:
+            instrument_code: The instrument to plot (e.g., 'GOLD', 'SP500micro')
+            rule_name: Specific rule to plot (e.g., 'momentum16'), or None for combined
+            start_date: Start date for plot (default: last 2 years)
+            end_date: End date for plot (default: latest)
+        """
+        import matplotlib.pyplot as plt
+        import pandas as pd
+        from matplotlib.dates import DateFormatter
+
+        if not self.system:
+            print("No system available. Run backtest first!")
+            return
+
+        print(f"\n{'=' * 60}")
+        print(f"Plotting {instrument_code} - ACTUAL OPTIMIZED POSITIONS")
+        print(f"{'=' * 60}")
+
+        try:
+            # 1. Get price data
+            price = self.system.rawdata.get_daily_prices(instrument_code)
+
+            # 2. Get combined forecast (trading signal - BEFORE optimization)
+            combined_forecast = self.system.combForecast.get_combined_forecast(instrument_code)
+
+            # 3. Get ACTUAL OPTIMIZED positions (integer, after dynamic optimization)
+            # This is the KEY FIX - use optimised positions, not portfolio positions
+            try:
+                optimized_positions_df = self.system.optimisedPositions.get_optimised_position_df()
+                if instrument_code in optimized_positions_df.columns:
+                    actual_positions = optimized_positions_df[instrument_code]
+                    print(f"✓ Using optimized integer positions for {instrument_code}")
+                else:
+                    print(f"✗ {instrument_code} not in optimized positions - not traded in this backtest")
+                    return
+            except AttributeError:
+                print("✗ Dynamic optimization not available - using standard positions")
+                actual_positions = self.system.portfolio.get_notional_position(instrument_code)
+
+            # 4. Filter by date range
+            if start_date is None:
+                start_date = price.index[-504]  # ~2 years of daily data
+            if end_date is None:
+                end_date = price.index[-1]
+
+            price = price[start_date:end_date]
+            combined_forecast = combined_forecast[start_date:end_date]
+            actual_positions = actual_positions[start_date:end_date]
+
+            # 5. Identify ACTUAL buy/sell trades (from optimized positions)
+            # Only mark as trade if position actually changed (not just signal change)
+            position_changes = actual_positions.diff()
+
+            # Buy = position increased (includes both new longs and covering shorts)
+            buys = position_changes[position_changes > 0]
+            # Sell = position decreased (includes both new shorts and selling longs)
+            sells = position_changes[position_changes < 0]
+
+            # 6. Verify these are integer positions
+            non_integer = actual_positions[actual_positions != actual_positions.round()]
+            if len(non_integer) > 0:
+                print(f"⚠ WARNING: Found {len(non_integer)} fractional positions!")
+                print(f"  This suggests positions are NOT from optimized output")
+                print(f"  First few fractional values: {non_integer.head()}")
+            else:
+                print(f"✓ All positions are integers (as expected)")
+
+            # 7. Create the plot
+            fig, axes = plt.subplots(3, 1, figsize=(15, 10), sharex=True)
+
+            # Plot 1: Price with ACTUAL buy/sell markers
+            ax1 = axes[0]
+            ax1.plot(price.index, price.values, 'k-', linewidth=1.5, label='Price')
+
+            # Mark actual trades with larger, more visible markers
+            if len(buys) > 0:
+                ax1.scatter(buys.index, price.loc[buys.index],
+                            color='green', marker='^', s=150, label='Buy/Cover',
+                            zorder=5, edgecolors='darkgreen', linewidths=2)
+            if len(sells) > 0:
+                ax1.scatter(sells.index, price.loc[sells.index],
+                            color='red', marker='v', s=150, label='Sell/Short',
+                            zorder=5, edgecolors='darkred', linewidths=2)
+
+            ax1.set_ylabel('Price', fontsize=12)
+            ax1.set_title(f'{instrument_code} - Price with ACTUAL TRADES (Optimized Positions)',
+                          fontsize=14, fontweight='bold')
+            ax1.legend(loc='upper left')
+            ax1.grid(True, alpha=0.3)
+
+            # Plot 2: Combined forecast (signal strength BEFORE optimization)
+            ax2 = axes[1]
+            ax2.plot(combined_forecast.index, combined_forecast.values,
+                     'b-', linewidth=1.5, label='Combined Forecast (Pre-Optimization)')
+            ax2.axhline(y=0, color='black', linestyle='--', alpha=0.5)
+            ax2.fill_between(combined_forecast.index, 0, combined_forecast.values,
+                             where=(combined_forecast.values > 0), alpha=0.3,
+                             color='green', label='Long Signal')
+            ax2.fill_between(combined_forecast.index, 0, combined_forecast.values,
+                             where=(combined_forecast.values < 0), alpha=0.3,
+                             color='red', label='Short Signal')
+            ax2.set_ylabel('Forecast', fontsize=12)
+            ax2.set_title('Signal Strength (Before Dynamic Optimization)', fontsize=12)
+            ax2.legend(loc='upper left')
+            ax2.grid(True, alpha=0.3)
+
+            # Plot 3: ACTUAL OPTIMIZED positions (integers)
+            ax3 = axes[2]
+            # Use step plot to emphasize integer nature
+            ax3.step(actual_positions.index, actual_positions.values, 'purple',
+                     linewidth=2.5, label='Optimized Position (Integers)', where='post')
+            ax3.axhline(y=0, color='black', linestyle='--', alpha=0.5)
+            ax3.fill_between(actual_positions.index, 0, actual_positions.values,
+                             where=(actual_positions.values > 0), alpha=0.3,
+                             color='green', step='post')
+            ax3.fill_between(actual_positions.index, 0, actual_positions.values,
+                             where=(actual_positions.values < 0), alpha=0.3,
+                             color='red', step='post')
+            ax3.set_ylabel('Position (contracts)', fontsize=12)
+            ax3.set_xlabel('Date', fontsize=12)
+            ax3.set_title('Actual Portfolio Position (After Dynamic Optimization)', fontsize=12)
+            ax3.legend(loc='upper left')
+            ax3.grid(True, alpha=0.3)
+
+            # Format x-axis
+            date_fmt = DateFormatter('%Y-%m-%d')
+            ax3.xaxis.set_major_formatter(date_fmt)
+            plt.xticks(rotation=45)
+
+            plt.tight_layout()
+            plt.show()
+
+            # Print detailed statistics
+            print(f"\n{'=' * 60}")
+            print(f"ACTUAL TRADING STATISTICS for {instrument_code}")
+            print(f"{'=' * 60}")
+            print(f"Position Statistics:")
+            print(f"  Average position: {actual_positions.mean():.2f} contracts")
+            print(f"  Max long position: {actual_positions.max():.0f} contracts")
+            print(f"  Max short position: {actual_positions.min():.0f} contracts")
+            print(f"  Position std dev: {actual_positions.std():.2f}")
+
+            print(f"\nTrading Activity:")
+            print(f"  Number of buy trades: {len(buys)}")
+            print(f"  Number of sell trades: {len(sells)}")
+            print(f"  Total trades: {len(buys) + len(sells)}")
+            print(f"  Average trade size: {position_changes.abs().mean():.2f} contracts")
+            print(f"  Largest trade: {position_changes.abs().max():.0f} contracts")
+
+            print(f"\nHolding Statistics:")
+            days_in_market = (actual_positions != 0).sum()
+            days_long = (actual_positions > 0).sum()
+            days_short = (actual_positions < 0).sum()
+            days_flat = (actual_positions == 0).sum()
+            total_days = len(actual_positions)
+
+            print(f"  Days in market: {days_in_market}/{total_days} ({days_in_market / total_days * 100:.1f}%)")
+            print(f"  Days long: {days_long} ({days_long / total_days * 100:.1f}%)")
+            print(f"  Days short: {days_short} ({days_short / total_days * 100:.1f}%)")
+            print(f"  Days flat: {days_flat} ({days_flat / total_days * 100:.1f}%)")
+
+            print(f"\nSignal vs Position Comparison:")
+            forecast_avg = combined_forecast.mean()
+            position_avg = actual_positions.mean()
+            print(f"  Avg forecast: {forecast_avg:.2f}")
+            print(f"  Avg position: {position_avg:.2f}")
+
+            # How often does optimizer reject signals?
+            strong_signals = combined_forecast.abs() > 10
+            no_position = actual_positions == 0
+            rejected_signals = (strong_signals & no_position).sum()
+            print(
+                f"  Strong signals rejected: {rejected_signals}/{strong_signals.sum()} ({rejected_signals / max(strong_signals.sum(), 1) * 100:.1f}%)")
+            print(f"    (Shows shadow cost/optimization filtering)")
+
+        except Exception as e:
+            print(f"Error plotting {instrument_code}: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def plot_top_traded_instruments(self, n=5, years=2):
+        """
+        Plot the top N most actively traded instruments using OPTIMIZED positions.
+        """
+        if not self.system:
+            print("No system available. Run backtest first!")
+            return
+
+        print(f"\nFinding top {n} most traded instruments from OPTIMIZED positions...")
+
+        try:
+            # Get optimized positions dataframe
+            optimized_positions_df = self.system.optimisedPositions.get_optimised_position_df()
+
+            # Calculate trade counts for each instrument
+            trade_counts = {}
+            for instrument in optimized_positions_df.columns:
+                positions = optimized_positions_df[instrument]
+                # Count actual position changes (trades)
+                trades = (positions.diff() != 0).sum()
+                # Only include if actually traded
+                if trades > 0:
+                    trade_counts[instrument] = trades
+
+            # Sort by trade count
+            top_instruments = sorted(trade_counts.items(),
+                                     key=lambda x: x[1], reverse=True)[:n]
+
+            print(f"\nTop {n} most traded instruments (from optimized positions):")
+            for i, (inst, count) in enumerate(top_instruments, 1):
+                print(f"  {i}. {inst}: {count} trades")
+
+            # Plot each one
+            for instrument, count in top_instruments:
+                self.plot_instrument_with_signals(instrument)
+                input("Press Enter for next instrument...")
+
+        except AttributeError:
+            print("✗ Optimized positions not available!")
+            print("  System may not have dynamic optimization enabled")
+
+    def plot_individual_rule_signals(self, instrument_code, start_date=None, end_date=None):
+        """
+        Plot each trading rule's forecast separately for an instrument.
+        Shows how different strategies contribute to final signal.
+        """
+        import matplotlib.pyplot as plt
+
+        if not self.system:
+            print("No system available. Run backtest first!")
+            return
+
+        # Get price
+        price = self.system.rawdata.get_daily_prices(instrument_code)
+
+        # Get all rule forecasts
+        rules = self.system.rules.trading_rules().keys()
+
+        # Set up subplots: 1 for price + 1 per rule + 1 for combined
+        n_plots = len(rules) + 2
+        fig, axes = plt.subplots(n_plots, 1, figsize=(15, 3 * n_plots), sharex=True)
+
+        # Date filtering
+        if start_date is None:
+            start_date = price.index[-504]
+        if end_date is None:
+            end_date = price.index[-1]
+
+        price = price[start_date:end_date]
+
+        # Plot 1: Price
+        axes[0].plot(price.index, price.values, 'k-', linewidth=1.5)
+        axes[0].set_title(f'{instrument_code} - Price', fontweight='bold')
+        axes[0].set_ylabel('Price')
+        axes[0].grid(True, alpha=0.3)
+
+        # Plot each rule
+        for i, rule_name in enumerate(rules, 1):
+            try:
+                forecast = self.system.rules.get_raw_forecast(instrument_code, rule_name)
+                forecast = forecast[start_date:end_date]
+
+                axes[i].plot(forecast.index, forecast.values, linewidth=1.5)
+                axes[i].axhline(y=0, color='black', linestyle='--', alpha=0.5)
+                axes[i].set_title(f'Rule: {rule_name}')
+                axes[i].set_ylabel('Forecast')
+                axes[i].grid(True, alpha=0.3)
+            except:
+                axes[i].text(0.5, 0.5, f'{rule_name}: No data',
+                             ha='center', va='center', transform=axes[i].transAxes)
+
+        # Plot combined forecast
+        combined = self.system.combForecast.get_combined_forecast(instrument_code)
+        combined = combined[start_date:end_date]
+        axes[-1].plot(combined.index, combined.values, 'purple', linewidth=2)
+        axes[-1].axhline(y=0, color='black', linestyle='--', alpha=0.5)
+        axes[-1].set_title('Combined Forecast', fontweight='bold')
+        axes[-1].set_ylabel('Forecast')
+        axes[-1].set_xlabel('Date')
+        axes[-1].grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plt.show()
+
     def print_advanced_risk_analysis(self):
         """
         Print detailed risk analysis following Robert Carver's risk-first approach
@@ -1245,7 +1539,6 @@ class DynamicSystemBacktester:
             "crosscheck": crosscheck if activity else {},
         }
 
-
 def main():
     """Main execution with full analysis pipeline"""
     print(f"\n🚀 ROBERT CARVER'S DYNAMIC OPTIMIZATION BACKTEST")
@@ -1311,6 +1604,14 @@ def main():
     except (ImportError, AttributeError) as e:
         print(f"⚠ Turnover analysis not available: {e}")
         print("  (This is optional - basic turnover metrics already shown)")
+
+    # PLOTTING ANALYSIS
+    print("\n" + "=" * 60)
+    print("SIGNAL ANALYSIS")
+    print("=" * 60)
+
+    # Automatically plot top traded instruments
+    backtester.plot_top_traded_instruments(n=10, years=2)
 
     # print("=" * 70)
     # print("3️⃣ Running Turnover Diagnostics...")

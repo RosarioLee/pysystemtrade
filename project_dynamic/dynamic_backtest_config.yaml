@@ -19,7 +19,7 @@ use_SR_costs: True
 use_forecast_weight_estimates: False
 use_forecast_div_mult_estimates: True
 use_instrument_weight_estimates: True
-use_instrument_div_mult_estimates: True
+use_instrument_div_mult_estimates: False
 use_forecast_scale_estimates: False
 
 forecast_scalar_estimate:
@@ -515,4 +515,4 @@ instrument_weight_estimate:
   shrinkage_SR: 0.9
   shrinkage_corr: 0.5
   apply_cost_weight: True
-  ceiling_cost_SR: 0.13
+  ceiling_cost_SR: 0.10
