@@ -1611,7 +1611,7 @@ def main():
     print("=" * 60)
 
     # Automatically plot top traded instruments
-    backtester.plot_top_traded_instruments(n=10, years=2)
+    # backtester.plot_top_traded_instruments(n=10, years=2)
 
     # print("=" * 70)
     # print("3️⃣ Running Turnover Diagnostics...")
