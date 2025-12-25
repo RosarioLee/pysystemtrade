@@ -16,7 +16,7 @@ use_SR_costs: True
 # ============================================================
 # SYSTEM IDENTIFICATION
 # ============================================================
-use_forecast_weight_estimates: False
+use_forecast_weight_estimates: True
 use_forecast_div_mult_estimates: True
 use_instrument_weight_estimates: True
 use_instrument_div_mult_estimates: False
@@ -57,7 +57,59 @@ forecast_correlation_estimate:
   floor_at_zero: True
   forward_fill_data: True
 
+forecast_cost_estimates:
+  use_pooled_costs: False           # Instrument-specific costs (important!)
+  use_pooled_turnover: True         # Pool turnover across instruments
 
+# Add this section with CORRECT settings
+forecast_weight_estimate:
+  func: sysquant.optimisation.generic_optimiser.genericOptimiser
+
+  # Core optimization method
+  method: handcraft                 # or 'shrinkage' or 'one_period'
+
+  # Cost handling (Robert's recommended approach)
+  cost_multiplier: 0.0              # Optimize on gross returns
+  apply_cost_weight: True           # Apply cost adjustment AFTER
+  ceiling_cost_SR: 9999             # Eliminate rules > 0.13 SR cost
+
+  # Pooling strategy
+  pool_gross_returns: True          # Pool returns across instruments
+  equalise_gross: False             # Don't equalize
+
+  # Time parameters
+  frequency: "W"                    # Weekly resampling
+  date_method: "expanding"          # Use all history
+  rollyears: 20                     # 20 years maximum
+
+  # Statistical parameters
+  cleaning: True
+  equalise_SR: False
+  equalise_vols: True
+  ann_target_SR: 0.5
+  shrinkage_SR: 0.9
+  shrinkage_corr: 0.5
+
+  # Sub-estimators (copy from defaults.yaml)
+  correlation_estimate:
+    func: sysquant.estimators.correlation_estimator.correlationEstimator
+    using_exponent: True
+    ew_lookback: 50000
+    min_periods: 10
+    cleaning: False
+    floor_at_zero: False
+
+  mean_estimate:
+    func: sysquant.estimators.mean_estimator.meanEstimator
+    using_exponent: True
+    ew_lookback: 50000
+    min_periods: 5
+
+  vol_estimate:
+    func: sysquant.estimators.stdev_estimator.stdevEstimator
+    using_exponent: True
+    ew_lookback: 50000
+    min_periods: 5
 
 
 # ============================================================
@@ -247,8 +299,8 @@ instruments:
   - SGD
   - INR
 
-  # === COMMODITIES (36 instruments) ===
-  # Energy (6)
+  # === COMMODITIES (33 instruments) ===
+  # Energy (5)
   - CRUDE_W
   - BRENT-LAST
   - GAS_US
@@ -290,7 +342,7 @@ instruments:
   - LUMBER-new
   - BBCOMM
 
-  # Other Commodities (8)
+  # Other Commodities (7)
   - SOYMEAL
   - SOYOIL
   - REDWHEAT
@@ -505,13 +557,35 @@ instrument_div_mult_estimate:
 
 # Advanced portfolio optimization (Robert's latest approach)
 instrument_weight_estimate:
-  func: sysquant.optimisation.generic_optimiser.genericOptimiser
-  frequency: "W"
-  date_method: "rolling"
-  rollyears: 3
-  method: "handcraft"
-  ann_target_SR: 0.5
-  shrinkage_SR: 0.9
-  shrinkage_corr: 0.5
-  apply_cost_weight: True
-  ceiling_cost_SR: 0.10
+   func: sysquant.optimisation.generic_optimiser.genericOptimiser
+   method: handcraft
+   frequency: "W"
+   equalise_gross: False
+   cost_multiplier: 1.0
+   apply_cost_weight: False
+   date_method: "expanding"
+   rollyears: 20
+   cleaning: True
+   equalise_SR: True
+   ann_target_SR: 0.5
+   equalise_vols: True
+   shrinkage_mean: 1.00
+   shrinkage_corr: 0.50
+   monte_runs: 100
+   correlation_estimate:
+     func: sysquant.estimators.correlation_estimator.correlationEstimator
+     using_exponent: True
+     ew_lookback: 500000
+     min_periods: 10
+     floor_at_zero: True
+     cleaning: False
+   mean_estimate:
+     func: sysquant.estimators.mean_estimator.meanEstimator
+     using_exponent: True
+     ew_lookback: 50000
+     min_periods: 5
+   vol_estimate:
+     func: sysquant.estimators.stdev_estimator.stdevEstimator
+     using_exponent: True
+     ew_lookback: 50000
+     min_periods: 5

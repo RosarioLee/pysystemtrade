@@ -43,6 +43,15 @@ from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 from sysdata.config.configdata import Config
 from turnover_analysis import RobertCarverTurnoverAnalyzer, quick_turnover_check
 
+# Import static weight extraction modules
+try:
+    from extract_static_weights import ForecastWeightExtractor
+    from create_static_config import StaticConfigGenerator
+    STATIC_WEIGHTS_AVAILABLE = True
+except ImportError:
+    print("⚠️  Static weight modules not found")
+    STATIC_WEIGHTS_AVAILABLE = False
+
 # Keep analysis imports
 from syscore.constants import arg_not_supplied
 import pandas as pd
@@ -457,7 +466,7 @@ class DynamicSystemBacktester:
 
         print("-" * 50 + "\n")
 
-    def run_backtest(self, start_date=None, end_date=None):
+    def run_backtest(self, start_date=None, end_date=None, extract_static=False):
         """Execute the backtest using modern approach"""
         print(f"\n{'=' * 60}")
         print(f"RUNNING DYNAMIC OPTIMIZATION BACKTEST")
@@ -511,6 +520,28 @@ class DynamicSystemBacktester:
             print(
                 f"📉 Annual Volatility: {portfolio_returns.percent.std() * (256 ** 0.5):.1f}%"
             )
+
+            # ============================================================
+            # ADD THESE LINES HERE (just before "return self.results")
+            # ============================================================
+
+            # Save system to pickle for future analysis
+            pickle_path = self.save_system_to_pickle()
+
+            # Store pickle path in results for reference
+            if pickle_path:
+                self.results['pickle_path'] = pickle_path
+
+            # Auto-extract static weights if requested
+            if extract_static:
+                print(f"\n{'=' * 70}")
+                print("AUTO-EXTRACTING STATIC WEIGHTS")
+                print(f"{'=' * 70}")
+                self.extract_and_generate_static_weights()
+
+            # ============================================================
+            # END OF NEW CODE
+            # ============================================================
 
             return self.results
 
@@ -657,6 +688,64 @@ class DynamicSystemBacktester:
             print(f"Std: {float(portfolio_returns.std()):.3f}%")
             print(f"Skew: {float(portfolio_returns.skew()):.3f}")
             print(f"Kurtosis: {float(portfolio_returns.kurtosis()):.3f}")
+
+    def extract_and_generate_static_weights(self):
+        """Auto-extract static weights after backtest completes."""
+
+        print("\n" + "=" * 70)
+        print("AUTO-EXTRACTING STATIC WEIGHTS")
+        print("=" * 70)
+
+        try:
+            from extract_static_weights import ForecastWeightExtractor
+            from create_static_config import StaticConfigGenerator
+
+            # Step 1: Extract forecast weights
+            print("\nStep 1: Extracting forecast weights...")
+            extractor = ForecastWeightExtractor(system=self.system)
+
+            # ✅ CORRECTED METHOD NAME
+            extraction_results = extractor.extract_all_forecast_weights()
+
+            # Step 2: Run full analysis
+            print("\nStep 2: Running comprehensive analysis...")
+            recommended_weights = extractor.run_full_analysis(
+                cost_threshold=0.13,
+                weight_method='average_last_2y',
+                save_plots=True
+            )
+
+            # Step 3: Generate static config
+            print("\nStep 3: Generating static configuration...")
+            generator = StaticConfigGenerator(
+                recommended_weights=recommended_weights,
+                base_config_path=self.config_file
+            )
+
+            config_file = generator.generate_static_config(
+                output_path="results/static_config.yaml"
+            )
+
+            print("\n" + "=" * 70)
+            print("✓ STATIC WEIGHT EXTRACTION COMPLETE")
+            print("=" * 70)
+            print(f"\nGenerated files:")
+            print(f"  - Forecast weights: results/forecast_weights_timeseries/")
+            print(f"  - Analysis: results/static_weight_analysis/")
+            print(f"  - Static config: {config_file}")
+            print("\nNext: Run backtest with the new static config!")
+
+            return {
+                'extractor': extractor,
+                'recommended_weights': recommended_weights,
+                'config_file': config_file
+            }
+
+        except Exception as e:
+            print(f"\n❌ Static weight extraction failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
 
     def save_results(self, output_dir="project_dynamic/results"):
         """Save backtest results to files"""
@@ -1539,6 +1628,150 @@ class DynamicSystemBacktester:
             "crosscheck": crosscheck if activity else {},
         }
 
+    def save_system_to_pickle(self, output_path=None):
+        """
+        Save the complete system object to pickle file.
+        This allows future analysis without re-running the backtest.
+
+        Args:
+            output_path: Where to save (default: auto-generated in results/)
+
+        Returns:
+            str: Path to saved pickle file
+        """
+        import pickle
+
+        # Generate filename with timestamp if not provided
+        if output_path is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = f"results/pickles/system_{timestamp}.pkl"
+
+        # Create directory
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+        print(f"\n{'=' * 70}")
+        print("💾 SAVING SYSTEM TO PICKLE")
+        print(f"{'=' * 70}")
+        print(f"📁 Output: {output_path}")
+        print(f"⏳ Saving (this takes ~30 seconds)...")
+
+        try:
+            with open(output_path, 'wb') as f:
+                pickle.dump(self.system, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+            # Check file size
+            file_size_mb = os.path.getsize(output_path) / (1024 * 1024)
+
+            print(f"✅ System saved successfully!")
+            print(f"📦 File size: {file_size_mb:.1f} MB")
+            print(f"📝 To use this pickle:")
+            print(f"   python extract_static_weights.py --pickle {output_path}")
+            print(f"{'=' * 70}\n")
+
+            return output_path
+
+        except Exception as e:
+            print(f"❌ Error saving pickle: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def debug_forecast_weight_calculation(self):
+        """
+        Diagnose which instruments have empty rule P&L data.
+        Call this BEFORE run_backtest() to identify problem instruments.
+        """
+        print(f"\n{'=' * 80}")
+        print("DIAGNOSTIC: FORECAST WEIGHT CALCULATION DATA AVAILABILITY")
+        print(f"{'=' * 80}\n")
+
+        instrument_list = self.system.get_instrument_list()
+        trading_rules = list(self.system.rules.trading_rules().keys())
+
+        print(f"Total instruments: {len(instrument_list)}")
+        print(f"Trading rules: {trading_rules}\n")
+        print(f"{'=' * 80}")
+
+        problem_instruments = []
+
+        for instrument in instrument_list:
+            print(f"\n{instrument}:")
+            print(f"{'-' * 40}")
+
+            valid_rules = []
+            empty_rules = []
+            error_rules = []
+
+            for rule_name in trading_rules:
+                try:
+                    # Try to get forecast for this rule
+                    forecast = self.system.rules.get_raw_forecast(instrument, rule_name)
+
+                    # Try to get price data
+                    price = self.system.rawdata.get_daily_prices(instrument)
+
+                    # Check if we have overlapping data
+                    if len(forecast) == 0:
+                        empty_rules.append(rule_name)
+                        print(f"  ❌ {rule_name:15s}: EMPTY forecast")
+                    elif forecast.isna().all():
+                        empty_rules.append(rule_name)
+                        print(f"  ❌ {rule_name:15s}: ALL NaN values")
+                    else:
+                        # Count valid observations
+                        valid_obs = (~forecast.isna()).sum()
+                        total_obs = len(forecast)
+                        pct_valid = (valid_obs / total_obs) * 100
+
+                        if pct_valid < 10:
+                            empty_rules.append(rule_name)
+                            print(f"  ⚠️  {rule_name:15s}: Only {pct_valid:.1f}% valid data")
+                        else:
+                            valid_rules.append(rule_name)
+                            print(f"  ✓  {rule_name:15s}: {valid_obs} valid obs ({pct_valid:.1f}%)")
+
+                except Exception as e:
+                    error_rules.append(rule_name)
+                    print(f"  💥 {rule_name:15s}: ERROR - {str(e)[:50]}")
+
+            # Summary for this instrument
+            print(f"\n  Summary:")
+            print(f"    Valid rules:  {len(valid_rules)} / {len(trading_rules)}")
+            print(f"    Empty rules:  {len(empty_rules)}")
+            print(f"    Error rules:  {len(error_rules)}")
+
+            # Check if this instrument will cause problems
+            if len(valid_rules) == 0:
+                print(f"  🚨 PROBLEM: NO VALID RULES - will cause 'No objects to concatenate' error!")
+                problem_instruments.append(instrument)
+            elif len(valid_rules) < 2:
+                print(f"  ⚠️  WARNING: Only {len(valid_rules)} valid rule(s) - may cause optimization issues")
+
+        # Final summary
+        print(f"\n{'=' * 80}")
+        print(f"DIAGNOSTIC SUMMARY")
+        print(f"{'=' * 80}")
+        print(f"Total instruments analyzed: {len(instrument_list)}")
+        print(f"Problem instruments (zero valid rules): {len(problem_instruments)}")
+
+        if problem_instruments:
+            print(f"\n🚨 INSTRUMENTS THAT WILL CAUSE ERRORS:")
+            for inst in problem_instruments:
+                print(f"   - {inst}")
+
+            print(f"\n💡 RECOMMENDED FIX:")
+            print(f"   Add to your config:")
+            print(f"   ignore_instruments:")
+            for inst in problem_instruments:
+                print(f"     - {inst}")
+        else:
+            print(f"\n✅ All instruments have at least one valid trading rule")
+
+        print(f"{'=' * 80}\n")
+
+        return problem_instruments
+
+
 def main():
     """Main execution with full analysis pipeline"""
     print(f"\n🚀 ROBERT CARVER'S DYNAMIC OPTIMIZATION BACKTEST")
@@ -1570,7 +1803,7 @@ def main():
     print("📈 RUNNING BACKTEST")
     print("=" * 70)
 
-    results = backtester.run_backtest()
+    results = backtester.run_backtest(extract_static=True)
 
     # ============================================================
     # COMPREHENSIVE ANALYSIS SUITE
