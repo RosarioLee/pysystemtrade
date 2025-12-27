@@ -3,35 +3,125 @@ import pandas as pd
 from collections import OrderedDict
 
 # Read your current config to get instrument list
-with open('dynamic_backtest_config.yaml', 'r') as f:
+with open("dynamic_backtest_config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-instruments = config['instruments']
+instruments = config["instruments"]
 
 # Define asset class groupings
 asset_classes = {
-    'BONDS': ['US10', 'US2', 'US20', 'US30', 'US5', 'SOFR', 'FED',
-              'BUND', 'BOBL', 'SHATZ', 'BUXL', 'BTP', 'BTP3', 'OAT',
-              'EURIBOR', 'JGB-SGX-mini'],
-    'EQUITIES': ['SP500_micro', 'NASDAQ_micro', 'RUSSELL', 'R1000', 'DOW',
-                 'EUROSTX', 'EUROSTX-LARGE', 'EURO600', 'CAC', 'DAX', 'AEX',
-                 'SMI', 'MIB', 'IBEX_mini', 'FTSE100', 'NIKKEI', 'TOPIX',
-                 'KOSPI_mini', 'HANG_mini', 'FTSECHINAA', 'FTSECHINAH',
-                 'MSCIASIA', 'MSCIWORLD', 'BOVESPA', 'SP400', 'RUSSELL_mini',
-                 'DOW_mini', 'NASDAQ', 'SP500'],
-    'FX': ['EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NOK', 'SEK',
-           'NZD', 'MXP', 'SGD', 'INR'],
-    'COMMODITIES': ['CRUDE_W', 'BRENT-LAST', 'GAS_US', 'HEATOIL', 'GASOILINE',
-                    'GOLD', 'SILVER', 'PLAT', 'PALLAD', 'COPPER', 'ALUMINIUM',
-                    'IRON', 'CORN', 'WHEAT', 'SOYBEAN', 'OATIES', 'RICE',
-                    'COTTON', 'SUGAR11', 'COFFEE', 'COCOA', 'OJ', 'LEANHOG',
-                    'LIVECOW', 'FEEDCOW', 'LUMBER-new', 'BBCOMM', 'SOYMEAL',
-                    'SOYOIL', 'REDWHEAT', 'MILLWHEAT', 'ROBUSTA', 'CANOLA'],
-    'VOLATILITY': ['VIX', 'V2X'],
-    'CRYPTO': ['BITCOIN', 'ETHEREUM'],
-    'US_SECTORS': ['US-TECH', 'US-HEALTH', 'US-FINANCE', 'US-ENERGY',
-                   'US-DISCRETE', 'US-STAPLES', 'US-INDUSTRY', 'US-MATERIAL',
-                   'US-UTILS', 'US-PROPERTY']
+    "BONDS": [
+        "US10",
+        "US2",
+        "US20",
+        "US30",
+        "US5",
+        "SOFR",
+        "FED",
+        "BUND",
+        "BOBL",
+        "SHATZ",
+        "BUXL",
+        "BTP",
+        "BTP3",
+        "OAT",
+        "EURIBOR",
+        "JGB-SGX-mini",
+    ],
+    "EQUITIES": [
+        "SP500_micro",
+        "NASDAQ_micro",
+        "RUSSELL",
+        "R1000",
+        "DOW",
+        "EUROSTX",
+        "EUROSTX-LARGE",
+        "EURO600",
+        "CAC",
+        "DAX",
+        "AEX",
+        "SMI",
+        "MIB",
+        "IBEX_mini",
+        "FTSE100",
+        "NIKKEI",
+        "TOPIX",
+        "KOSPI_mini",
+        "HANG_mini",
+        "FTSECHINAA",
+        "FTSECHINAH",
+        "MSCIASIA",
+        "MSCIWORLD",
+        "BOVESPA",
+        "SP400",
+        "RUSSELL_mini",
+        "DOW_mini",
+        "NASDAQ",
+        "SP500",
+    ],
+    "FX": [
+        "EUR",
+        "GBP",
+        "JPY",
+        "AUD",
+        "CAD",
+        "CHF",
+        "NOK",
+        "SEK",
+        "NZD",
+        "MXP",
+        "SGD",
+        "INR",
+    ],
+    "COMMODITIES": [
+        "CRUDE_W",
+        "BRENT-LAST",
+        "GAS_US",
+        "HEATOIL",
+        "GASOILINE",
+        "GOLD",
+        "SILVER",
+        "PLAT",
+        "PALLAD",
+        "COPPER",
+        "ALUMINIUM",
+        "IRON",
+        "CORN",
+        "WHEAT",
+        "SOYBEAN",
+        "OATIES",
+        "RICE",
+        "COTTON",
+        "SUGAR11",
+        "COFFEE",
+        "COCOA",
+        "OJ",
+        "LEANHOG",
+        "LIVECOW",
+        "FEEDCOW",
+        "LUMBER-new",
+        "BBCOMM",
+        "SOYMEAL",
+        "SOYOIL",
+        "REDWHEAT",
+        "MILLWHEAT",
+        "ROBUSTA",
+        "CANOLA",
+    ],
+    "VOLATILITY": ["VIX", "V2X"],
+    "CRYPTO": ["BITCOIN", "ETHEREUM"],
+    "US_SECTORS": [
+        "US-TECH",
+        "US-HEALTH",
+        "US-FINANCE",
+        "US-ENERGY",
+        "US-DISCRETE",
+        "US-STAPLES",
+        "US-INDUSTRY",
+        "US-MATERIAL",
+        "US-UTILS",
+        "US-PROPERTY",
+    ],
 }
 
 
@@ -66,8 +156,9 @@ def correlation_adjusted_weights(asset_allocations, correlation_adjustments):
 
         # Get adjustment factors (default to 1.0 if not specified)
         adjustments = correlation_adjustments.get(asset_class, {})
-        adjusted_weights = {inst: adjustments.get(inst, 1.0)
-                            for inst in instruments_in_class}
+        adjusted_weights = {
+            inst: adjustments.get(inst, 1.0) for inst in instruments_in_class
+        }
 
         # Normalize within asset class
         total_adjusted = sum(adjusted_weights.values())
@@ -109,78 +200,98 @@ def weights_to_yaml_string(weights, scenario_name):
 
     current_class = None
     for asset_class, instruments_list in asset_classes.items():
-        class_weights = {k: v for k, v in ordered_weights.items()
-                         if k in instruments_list}
+        class_weights = {
+            k: v for k, v in ordered_weights.items() if k in instruments_list
+        }
         if class_weights:
             yaml_lines.append(f"  # {asset_class} ({len(class_weights)} instruments)")
             for inst, weight in class_weights.items():
                 yaml_lines.append(f"  {inst}: {weight:.6f}")
 
-    return '\n'.join(yaml_lines)
+    return "\n".join(yaml_lines)
 
 
 # ========== DEFINE YOUR SCENARIOS ==========
 
 # Scenario 1: Equal weights with your preferred asset allocation
 scenario1_allocation = {
-    'BONDS': 0.15,
-    'EQUITIES': 0.25,
-    'FX': 0.15,
-    'COMMODITIES': 0.35,
-    'VOLATILITY': 0.045,
-    'CRYPTO': 0.045,
-    'US_SECTORS': 0.01
+    "BONDS": 0.15,
+    "EQUITIES": 0.25,
+    "FX": 0.15,
+    "COMMODITIES": 0.35,
+    "VOLATILITY": 0.045,
+    "CRYPTO": 0.045,
+    "US_SECTORS": 0.01,
 }
 
 weights_scenario1 = equal_weights_scenario(scenario1_allocation)
 
 # Scenario 2: Correlation-adjusted (reduce highly correlated instruments)
 scenario2_adjustments = {
-    'BONDS': {
+    "BONDS": {
         # Reduce correlated US rates
-        'US2': 0.7, 'US5': 0.7, 'US10': 0.7, 'US20': 0.7, 'US30': 0.7,
+        "US2": 0.7,
+        "US5": 0.7,
+        "US10": 0.7,
+        "US20": 0.7,
+        "US30": 0.7,
         # Increase independent rates
-        'SOFR': 1.3, 'FED': 1.3, 'JGB-SGX-mini': 1.5
+        "SOFR": 1.3,
+        "FED": 1.3,
+        "JGB-SGX-mini": 1.5,
     },
-    'EQUITIES': {
+    "EQUITIES": {
         # Reduce correlated US equity indices
-        'SP500_micro': 0.6, 'NASDAQ_micro': 0.6, 'RUSSELL': 0.6,
-        'DOW': 0.6, 'SP500': 0.6, 'NASDAQ': 0.6,
+        "SP500_micro": 0.6,
+        "NASDAQ_micro": 0.6,
+        "RUSSELL": 0.6,
+        "DOW": 0.6,
+        "SP500": 0.6,
+        "NASDAQ": 0.6,
         # Increase regional diversity
-        'NIKKEI': 1.2, 'HANG_mini': 1.2, 'BOVESPA': 1.2
+        "NIKKEI": 1.2,
+        "HANG_mini": 1.2,
+        "BOVESPA": 1.2,
     },
-    'COMMODITIES': {
+    "COMMODITIES": {
         # Reduce correlated energy
-        'CRUDE_W': 0.8, 'BRENT-LAST': 0.8,
+        "CRUDE_W": 0.8,
+        "BRENT-LAST": 0.8,
         # Reduce correlated grains
-        'WHEAT': 0.7, 'REDWHEAT': 0.7, 'MILLWHEAT': 0.7
-    }
+        "WHEAT": 0.7,
+        "REDWHEAT": 0.7,
+        "MILLWHEAT": 0.7,
+    },
 }
 
-weights_scenario2 = correlation_adjusted_weights(scenario1_allocation,
-                                                 scenario2_adjustments)
+weights_scenario2 = correlation_adjusted_weights(
+    scenario1_allocation, scenario2_adjustments
+)
 
 # ========== ANALYSIS AND OUTPUT ==========
 
 # Create comparison DataFrame
-df_comparison = pd.DataFrame({
-    'Scenario_1_Equal': pd.Series(weights_scenario1),
-    'Scenario_2_Corr_Adjusted': pd.Series(weights_scenario2)
-})
+df_comparison = pd.DataFrame(
+    {
+        "Scenario_1_Equal": pd.Series(weights_scenario1),
+        "Scenario_2_Corr_Adjusted": pd.Series(weights_scenario2),
+    }
+)
 
 # Add asset class column
-df_comparison['Asset_Class'] = ''
+df_comparison["Asset_Class"] = ""
 for asset_class, instruments_list in asset_classes.items():
     for inst in instruments_list:
         if inst in df_comparison.index:
-            df_comparison.loc[inst, 'Asset_Class'] = asset_class
+            df_comparison.loc[inst, "Asset_Class"] = asset_class
 
 # Reorder columns
-df_comparison = df_comparison[['Asset_Class', 'Scenario_1_Equal',
-                               'Scenario_2_Corr_Adjusted']]
+df_comparison = df_comparison[
+    ["Asset_Class", "Scenario_1_Equal", "Scenario_2_Corr_Adjusted"]
+]
 
 # Save to Excel for review
-df_comparison.to_excel('instrument_weights_comparison.xlsx')
+df_comparison.to_excel("instrument_weights_comparison.xlsx")
 
 print("Comparison saved to: instrument_weights_comparison.xlsx")
 print(f"\nScenario 1 sum: {sum(weights_scenario1.values()):.6f}")
@@ -191,10 +302,10 @@ yaml_s1 = weights_to_yaml_string(weights_scenario1, "Equal Weights")
 yaml_s2 = weights_to_yaml_string(weights_scenario2, "Correlation Adjusted")
 
 # Save to text files for easy copy-paste
-with open('weights_scenario1.txt', 'w') as f:
+with open("weights_scenario1.txt", "w") as f:
     f.write(yaml_s1)
 
-with open('weights_scenario2.txt', 'w') as f:
+with open("weights_scenario2.txt", "w") as f:
     f.write(yaml_s2)
 
 print("\nYAML snippets saved to:")
@@ -206,4 +317,4 @@ print("\nJust copy-paste the content into your config file!")
 print("\n" + "=" * 60)
 print("PREVIEW - Scenario 1 (first 10 instruments):")
 print("=" * 60)
-print('\n'.join(yaml_s1.split('\n')[:15]))
+print("\n".join(yaml_s1.split("\n")[:15]))

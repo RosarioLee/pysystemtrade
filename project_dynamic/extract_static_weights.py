@@ -43,20 +43,19 @@ from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 
 DEFAULT_CONFIG = {
     # Path to your pickled system (FAST - recommended)
-    'pickle_path': 'results/pickles/system_20251227_203003.pkl',
-
+    "pickle_path": "results/pickles/system_20251227_203003.pkl",
     # Alternative: rebuild from config (SLOW - only if pickle unavailable)
-    'config_path': None,  # 'dynamic_backtest_config.yaml'
-
+    "config_path": None,  # 'dynamic_backtest_config.yaml'
     # Analysis parameters
-    'cost_threshold': 0.13,  # Max acceptable SR cost
-    'weight_method': 'averagelast2y',  # How to aggregate weights
-    'lookback_years': 2,  # For stability analysis
-
+    "cost_threshold": 0.13,  # Max acceptable SR cost
+    "weight_method": "averagelast2y",  # How to aggregate weights
+    "lookback_years": 2,  # For stability analysis
     # Output settings
-    'generate_plots': True,  # Create visualization plots
-    'output_dir': 'results/static_weight_analysis'
+    "generate_plots": True,  # Create visualization plots
+    "output_dir": "results/static_weight_analysis",
 }
+
+
 class ForecastWeightExtractor:
     """
     Extract and analyze forecast weights from dynamic optimization backtest
@@ -82,7 +81,7 @@ class ForecastWeightExtractor:
         # Data storage
         self.forecast_weights = {}  # {instrument: DataFrame of weights over time}
         self.turnover_matrix = None  # DataFrame: instruments x rules
-        self.sr_cost_vector = None   # Series: instruments
+        self.sr_cost_vector = None  # Series: instruments
         self.annual_cost_matrix = None  # DataFrame: turnover × SR_cost
 
         # Analysis results
@@ -105,13 +104,15 @@ class ForecastWeightExtractor:
         if self.system:
             self.instruments = self.system.get_instrument_list()
             self.rules = list(self.system.rules.trading_rules().keys())
-            print(f"✓ System loaded: {len(self.instruments)} instruments, {len(self.rules)} rules")
+            print(
+                f"✓ System loaded: {len(self.instruments)} instruments, {len(self.rules)} rules"
+            )
 
     def load_system_from_pickle(self, pickle_path):
         """Load previously saved system from pickle file"""
         print(f"Loading system from pickle: {pickle_path}")
         try:
-            with open(pickle_path, 'rb') as f:
+            with open(pickle_path, "rb") as f:
                 self.system = pickle.load(f)
             print("✓ System loaded from pickle")
         except Exception as e:
@@ -123,10 +124,7 @@ class ForecastWeightExtractor:
         print(f"Rebuilding system from config: {config_path}")
         try:
             data = csvFuturesSimData()
-            self.system = futures_system(
-                sim_data=data,
-                config_filename=config_path
-            )
+            self.system = futures_system(sim_data=data, config_filename=config_path)
             print("✓ System rebuilt")
         except Exception as e:
             print(f"❌ Error rebuilding system: {e}")
@@ -137,7 +135,7 @@ class ForecastWeightExtractor:
         print(f"Saving system to pickle: {output_path}")
         try:
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            with open(output_path, 'wb') as f:
+            with open(output_path, "wb") as f:
                 pickle.dump(self.system, f, protocol=pickle.HIGHEST_PROTOCOL)
             print(f"✓ System saved to {output_path}")
         except Exception as e:
@@ -147,7 +145,9 @@ class ForecastWeightExtractor:
     # PART 1: EXTRACT FORECAST WEIGHTS TIME SERIES
     # ========================================================================
 
-    def extract_all_forecast_weights(self, save_dir="results/forecast_weights_timeseries"):
+    def extract_all_forecast_weights(
+        self, save_dir="results/forecast_weights_timeseries"
+    ):
         """
         Extract forecast weights time series for ALL instruments.
         This is the core data needed for static weight creation.
@@ -204,7 +204,7 @@ class ForecastWeightExtractor:
 
         for i, instrument in enumerate(self.instruments, 1):
             print(f"[{i}/{len(self.instruments)}] {instrument:20s}", end=" ")
-            row = {'instrument': instrument}
+            row = {"instrument": instrument}
 
             try:
                 # Get subsystem P&L for this instrument
@@ -240,7 +240,7 @@ class ForecastWeightExtractor:
                 turnover_data.append(row)
 
                 # Summary
-                avg_turn = np.mean([v for k, v in row.items() if k != 'instrument'])
+                avg_turn = np.mean([v for k, v in row.items() if k != "instrument"])
                 print(f"→ avg turnover: {avg_turn:.1f}x/year")
 
             except Exception as e:
@@ -251,7 +251,7 @@ class ForecastWeightExtractor:
                 turnover_data.append(row)
 
         self.turnover_matrix = pd.DataFrame(turnover_data)
-        self.turnover_matrix.set_index('instrument', inplace=True)
+        self.turnover_matrix.set_index("instrument", inplace=True)
 
         print(f"\n✓ Turnover matrix created: {self.turnover_matrix.shape}")
 
@@ -262,7 +262,9 @@ class ForecastWeightExtractor:
             if unique_count == 1:
                 print(f"  ⚠️  {rule:20s}: All instruments IDENTICAL (BUG!)")
             elif unique_count < 5:
-                print(f"  ⚠️  {rule:20s}: Only {unique_count} unique values (suspicious)")
+                print(
+                    f"  ⚠️  {rule:20s}: Only {unique_count} unique values (suspicious)"
+                )
             else:
                 print(f"  ✓  {rule:20s}: {unique_count} different values (good!)")
 
@@ -295,7 +297,7 @@ class ForecastWeightExtractor:
                 sr_costs[instrument] = np.nan
                 print(f"❌ Error: {e}")
 
-        self.sr_cost_vector = pd.Series(sr_costs, name='SR_cost')
+        self.sr_cost_vector = pd.Series(sr_costs, name="SR_cost")
 
         print(f"\n✓ SR cost vector created")
         print(f"  Mean SR cost: {self.sr_cost_vector.mean():.6f}")
@@ -374,19 +376,23 @@ class ForecastWeightExtractor:
 
                 # Metrics
                 stability[rule] = {
-                    'mean': rule_weights.mean(),
-                    'std': rule_weights.std(),
-                    'cv': rule_weights.std() / rule_weights.mean() if rule_weights.mean() != 0 else np.inf,
-                    'min': rule_weights.min(),
-                    'max': rule_weights.max(),
-                    'range': rule_weights.max() - rule_weights.min(),
-                    'latest': rule_weights.iloc[-1],
-                    'is_zero': (rule_weights == 0).all()  # Always zero?
+                    "mean": rule_weights.mean(),
+                    "std": rule_weights.std(),
+                    "cv": rule_weights.std() / rule_weights.mean()
+                    if rule_weights.mean() != 0
+                    else np.inf,
+                    "min": rule_weights.min(),
+                    "max": rule_weights.max(),
+                    "range": rule_weights.max() - rule_weights.min(),
+                    "latest": rule_weights.iloc[-1],
+                    "is_zero": (rule_weights == 0).all(),  # Always zero?
                 }
 
             self.weight_stability[instrument] = stability
 
-        print(f"✓ Weight stability analyzed for {len(self.weight_stability)} instruments")
+        print(
+            f"✓ Weight stability analyzed for {len(self.weight_stability)} instruments"
+        )
         return self.weight_stability
 
     # ========================================================================
@@ -424,14 +430,18 @@ class ForecastWeightExtractor:
             if violated_rules:
                 violations[instrument] = violated_rules
                 total_violations += len(violated_rules)
-                print(f"{instrument:20s}: {len(violated_rules)} rules eliminated - {violated_rules}")
+                print(
+                    f"{instrument:20s}: {len(violated_rules)} rules eliminated - {violated_rules}"
+                )
 
         self.cost_violations = violations
 
         print(f"\n✓ Cost analysis complete")
         print(f"  Total rule violations: {total_violations}")
         print(f"  Instruments with violations: {len(violations)}")
-        print(f"  Average violations per instrument: {total_violations / len(self.instruments):.1f}")
+        print(
+            f"  Average violations per instrument: {total_violations / len(self.instruments):.1f}"
+        )
 
         return violations
 
@@ -440,10 +450,7 @@ class ForecastWeightExtractor:
     # ========================================================================
 
     def calculate_recommended_weights(
-        self,
-        method='average_last_2y',
-        cost_threshold=0.13,
-        round_to=0.001
+        self, method="average_last_2y", cost_threshold=0.13, round_to=0.001
     ):
         """
         Calculate recommended static weights for each instrument.
@@ -473,15 +480,15 @@ class ForecastWeightExtractor:
 
         # Define lookback based on method
         lookback_days = {
-            'latest': 1,
-            'average_last_1y': 252,
-            'average_last_2y': 504,
-            'average_last_3y': 756,
-            'median_last_2y': 504
+            "latest": 1,
+            "average_last_1y": 252,
+            "average_last_2y": 504,
+            "average_last_3y": 756,
+            "median_last_2y": 504,
         }
 
         days = lookback_days.get(method, 504)
-        use_median = 'median' in method
+        use_median = "median" in method
 
         for i, instrument in enumerate(self.instruments, 1):
             print(f"[{i}/{len(self.instruments)}] {instrument:20s}", end=" ")
@@ -535,7 +542,9 @@ class ForecastWeightExtractor:
             n_active = (final > 0).sum()
             print(f"→ {n_active}/{len(final)} rules active, sum={final.sum():.3f}")
 
-        print(f"\n✓ Recommended static weights calculated for {len(self.recommended_weights)} instruments")
+        print(
+            f"\n✓ Recommended static weights calculated for {len(self.recommended_weights)} instruments"
+        )
         return self.recommended_weights
 
     # ========================================================================
@@ -575,7 +584,7 @@ class ForecastWeightExtractor:
         # 4. Cost violations
         if self.cost_violations:
             path = os.path.join(output_dir, f"cost_violations_{timestamp}.txt")
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write("COST VIOLATIONS (Rules to Eliminate)\n")
                 f.write("=" * 70 + "\n\n")
                 for inst, rules in self.cost_violations.items():
@@ -585,7 +594,7 @@ class ForecastWeightExtractor:
         # 5. Recommended weights
         if self.recommended_weights:
             path = os.path.join(output_dir, f"recommended_weights_{timestamp}.pkl")
-            with open(path, 'wb') as f:
+            with open(path, "wb") as f:
                 pickle.dump(self.recommended_weights, f)
             print(f"✓ Recommended weights (pickle): {path}")
 
@@ -597,7 +606,7 @@ class ForecastWeightExtractor:
 
         # 6. Summary report
         summary_path = os.path.join(output_dir, f"analysis_summary_{timestamp}.txt")
-        with open(summary_path, 'w') as f:
+        with open(summary_path, "w") as f:
             f.write("STATIC WEIGHT EXTRACTION ANALYSIS SUMMARY\n")
             f.write("=" * 70 + "\n\n")
             f.write(f"Analysis Date: {datetime.now()}\n")
@@ -608,8 +617,12 @@ class ForecastWeightExtractor:
                 f.write("SR COST STATISTICS:\n")
                 f.write(f"  Mean: {self.sr_cost_vector.mean():.6f}\n")
                 f.write(f"  Median: {self.sr_cost_vector.median():.6f}\n")
-                f.write(f"  Min: {self.sr_cost_vector.min():.6f} ({self.sr_cost_vector.idxmin()})\n")
-                f.write(f"  Max: {self.sr_cost_vector.max():.6f} ({self.sr_cost_vector.idxmax()})\n\n")
+                f.write(
+                    f"  Min: {self.sr_cost_vector.min():.6f} ({self.sr_cost_vector.idxmin()})\n"
+                )
+                f.write(
+                    f"  Max: {self.sr_cost_vector.max():.6f} ({self.sr_cost_vector.idxmax()})\n\n"
+                )
 
             if self.annual_cost_matrix is not None:
                 f.write("ANNUAL COST STATISTICS:\n")
@@ -618,7 +631,9 @@ class ForecastWeightExtractor:
 
             if self.cost_violations:
                 f.write("COST VIOLATIONS:\n")
-                f.write(f"  Total violations: {sum(len(v) for v in self.cost_violations.values())}\n")
+                f.write(
+                    f"  Total violations: {sum(len(v) for v in self.cost_violations.values())}\n"
+                )
                 f.write(f"  Instruments affected: {len(self.cost_violations)}\n")
 
         print(f"✓ Analysis summary: {summary_path}")
@@ -654,18 +669,24 @@ class ForecastWeightExtractor:
             fig, ax = plt.subplots(figsize=(14, 8))
 
             for rule in weights.columns:
-                ax.plot(weights.index, weights[rule], label=rule, linewidth=1.5, alpha=0.7)
+                ax.plot(
+                    weights.index, weights[rule], label=rule, linewidth=1.5, alpha=0.7
+                )
 
-            ax.set_title(f"Forecast Weight Evolution: {instrument}", fontsize=14, fontweight='bold')
+            ax.set_title(
+                f"Forecast Weight Evolution: {instrument}",
+                fontsize=14,
+                fontweight="bold",
+            )
             ax.set_xlabel("Date", fontsize=12)
             ax.set_ylabel("Weight", fontsize=12)
-            ax.legend(loc='upper left', bbox_to_anchor=(1.05, 1), frameon=True)
+            ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1), frameon=True)
             ax.grid(True, alpha=0.3)
 
             plt.tight_layout()
 
             filename = os.path.join(save_dir, f"weights_{instrument}.png")
-            plt.savefig(filename, dpi=150, bbox_inches='tight')
+            plt.savefig(filename, dpi=150, bbox_inches="tight")
             plt.close()
 
             print(f"✓ Saved plot: {filename}")
@@ -689,19 +710,21 @@ class ForecastWeightExtractor:
         sns.heatmap(
             self.annual_cost_matrix,
             annot=False,
-            cmap='RdYlGn_r',
+            cmap="RdYlGn_r",
             vmin=0,
             vmax=0.15,
-            cbar_kws={'label': 'Annual SR Cost'},
-            ax=ax
+            cbar_kws={"label": "Annual SR Cost"},
+            ax=ax,
         )
 
-        ax.set_title("Annual SR Cost Matrix (turnover × SR_cost)", fontsize=14, fontweight='bold')
+        ax.set_title(
+            "Annual SR Cost Matrix (turnover × SR_cost)", fontsize=14, fontweight="bold"
+        )
         ax.set_xlabel("Trading Rule", fontsize=12)
         ax.set_ylabel("Instrument", fontsize=12)
 
         plt.tight_layout()
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        plt.savefig(save_path, dpi=150, bbox_inches="tight")
         plt.close()
 
         print(f"✓ Cost heatmap saved: {save_path}")
@@ -711,10 +734,7 @@ class ForecastWeightExtractor:
     # ========================================================================
 
     def run_full_analysis(
-        self,
-        cost_threshold=0.13,
-        weight_method='average_last_2y',
-        save_plots=True
+        self, cost_threshold=0.13, weight_method="average_last_2y", save_plots=True
     ):
         """
         Run complete analysis pipeline.
@@ -747,8 +767,7 @@ class ForecastWeightExtractor:
 
         # Step 5: Calculate recommended weights
         self.calculate_recommended_weights(
-            method=weight_method,
-            cost_threshold=cost_threshold
+            method=weight_method, cost_threshold=cost_threshold
         )
 
         # Step 6: Save everything
@@ -773,49 +792,56 @@ class ForecastWeightExtractor:
 # COMMAND LINE INTERFACE
 # ============================================================================
 
+
 def main():
     """Command line interface with sensible defaults"""
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Extract static weights from dynamic optimization backtest'
+        description="Extract static weights from dynamic optimization backtest"
     )
 
     # Make all arguments optional with defaults from config
     parser.add_argument(
-        '--pickle',
+        "--pickle",
         type=str,
-        default=DEFAULT_CONFIG['pickle_path'],  # ← Use default
-        help=f"Path to pickled system (default: {DEFAULT_CONFIG['pickle_path']})"
+        default=DEFAULT_CONFIG["pickle_path"],  # ← Use default
+        help=f"Path to pickled system (default: {DEFAULT_CONFIG['pickle_path']})",
     )
 
     parser.add_argument(
-        '--config',
+        "--config",
         type=str,
-        default=DEFAULT_CONFIG['config_path'],
-        help='Path to config YAML (alternative to pickle - SLOW)'
+        default=DEFAULT_CONFIG["config_path"],
+        help="Path to config YAML (alternative to pickle - SLOW)",
     )
 
     parser.add_argument(
-        '--cost-threshold',
+        "--cost-threshold",
         type=float,
-        default=DEFAULT_CONFIG['cost_threshold'],
-        help=f"Max SR cost (default: {DEFAULT_CONFIG['cost_threshold']})"
+        default=DEFAULT_CONFIG["cost_threshold"],
+        help=f"Max SR cost (default: {DEFAULT_CONFIG['cost_threshold']})",
     )
 
     parser.add_argument(
-        '--weight-method',
+        "--weight-method",
         type=str,
-        default=DEFAULT_CONFIG['weight_method'],
-        choices=['latest', 'averagelast1y', 'averagelast2y', 'averagelast3y', 'medianlast2y'],
-        help=f"Aggregation method (default: {DEFAULT_CONFIG['weight_method']})"
+        default=DEFAULT_CONFIG["weight_method"],
+        choices=[
+            "latest",
+            "averagelast1y",
+            "averagelast2y",
+            "averagelast3y",
+            "medianlast2y",
+        ],
+        help=f"Aggregation method (default: {DEFAULT_CONFIG['weight_method']})",
     )
 
     parser.add_argument(
-        '--no-plots',
-        action='store_true',
-        default=not DEFAULT_CONFIG['generate_plots'],
-        help='Skip plot generation'
+        "--no-plots",
+        action="store_true",
+        default=not DEFAULT_CONFIG["generate_plots"],
+        help="Skip plot generation",
     )
 
     args = parser.parse_args()
@@ -841,7 +867,7 @@ def main():
     extractor.run_full_analysis(
         cost_threshold=args.cost_threshold,
         weight_method=args.weight_method,
-        save_plots=not args.no_plots
+        save_plots=not args.no_plots,
     )
 
     print(f"\n{'=' * 90}")
@@ -849,7 +875,9 @@ def main():
     print(f"{'=' * 90}\n")
     print("Next steps:")
     print("  1. Review analysis in results/static_weight_analysis/")
-    print("  2. Run: python create_static_config.py --base-config dynamic_backtest_config.yaml")
+    print(
+        "  2. Run: python create_static_config.py --base-config dynamic_backtest_config.yaml"
+    )
     print("  3. Copy generated YAML to your production config")
 
 

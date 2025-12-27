@@ -47,6 +47,7 @@ from turnover_analysis import RobertCarverTurnoverAnalyzer, quick_turnover_check
 try:
     from extract_static_weights import ForecastWeightExtractor
     from create_static_config import StaticConfigGenerator
+
     STATIC_WEIGHTS_AVAILABLE = True
 except ImportError:
     print("⚠️  Static weight modules not found")
@@ -530,7 +531,7 @@ class DynamicSystemBacktester:
 
             # Store pickle path in results for reference
             if pickle_path:
-                self.results['pickle_path'] = pickle_path
+                self.results["pickle_path"] = pickle_path
 
             # Auto-extract static weights if requested
             if extract_static:
@@ -710,16 +711,14 @@ class DynamicSystemBacktester:
             # Step 2: Run full analysis
             print("\nStep 2: Running comprehensive analysis...")
             recommended_weights = extractor.run_full_analysis(
-                cost_threshold=0.13,
-                weight_method='average_last_2y',
-                save_plots=True
+                cost_threshold=0.13, weight_method="average_last_2y", save_plots=True
             )
 
             # Step 3: Generate static config
             print("\nStep 3: Generating static configuration...")
             generator = StaticConfigGenerator(
                 recommended_weights=recommended_weights,
-                base_config_path=self.config_file
+                base_config_path=self.config_file,
             )
 
             config_file = generator.generate_static_config(
@@ -736,14 +735,15 @@ class DynamicSystemBacktester:
             print("\nNext: Run backtest with the new static config!")
 
             return {
-                'extractor': extractor,
-                'recommended_weights': recommended_weights,
-                'config_file': config_file
+                "extractor": extractor,
+                "recommended_weights": recommended_weights,
+                "config_file": config_file,
             }
 
         except Exception as e:
             print(f"\n❌ Static weight extraction failed: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -1210,8 +1210,9 @@ class DynamicSystemBacktester:
             print(f"❌ Error creating position/risk plots: {e}")
             return None, None
 
-    def plot_instrument_with_signals(self, instrument_code, rule_name=None,
-                                     start_date=None, end_date=None):
+    def plot_instrument_with_signals(
+        self, instrument_code, rule_name=None, start_date=None, end_date=None
+    ):
         """
         Plot instrument price with ACTUAL trading signals from optimized positions.
 
@@ -1243,21 +1244,29 @@ class DynamicSystemBacktester:
             price = self.system.rawdata.get_daily_prices(instrument_code)
 
             # 2. Get combined forecast (trading signal - BEFORE optimization)
-            combined_forecast = self.system.combForecast.get_combined_forecast(instrument_code)
+            combined_forecast = self.system.combForecast.get_combined_forecast(
+                instrument_code
+            )
 
             # 3. Get ACTUAL OPTIMIZED positions (integer, after dynamic optimization)
             # This is the KEY FIX - use optimised positions, not portfolio positions
             try:
-                optimized_positions_df = self.system.optimisedPositions.get_optimised_position_df()
+                optimized_positions_df = (
+                    self.system.optimisedPositions.get_optimised_position_df()
+                )
                 if instrument_code in optimized_positions_df.columns:
                     actual_positions = optimized_positions_df[instrument_code]
                     print(f"✓ Using optimized integer positions for {instrument_code}")
                 else:
-                    print(f"✗ {instrument_code} not in optimized positions - not traded in this backtest")
+                    print(
+                        f"✗ {instrument_code} not in optimized positions - not traded in this backtest"
+                    )
                     return
             except AttributeError:
                 print("✗ Dynamic optimization not available - using standard positions")
-                actual_positions = self.system.portfolio.get_notional_position(instrument_code)
+                actual_positions = self.system.portfolio.get_notional_position(
+                    instrument_code
+                )
 
             # 4. Filter by date range
             if start_date is None:
@@ -1292,60 +1301,116 @@ class DynamicSystemBacktester:
 
             # Plot 1: Price with ACTUAL buy/sell markers
             ax1 = axes[0]
-            ax1.plot(price.index, price.values, 'k-', linewidth=1.5, label='Price')
+            ax1.plot(price.index, price.values, "k-", linewidth=1.5, label="Price")
 
             # Mark actual trades with larger, more visible markers
             if len(buys) > 0:
-                ax1.scatter(buys.index, price.loc[buys.index],
-                            color='green', marker='^', s=150, label='Buy/Cover',
-                            zorder=5, edgecolors='darkgreen', linewidths=2)
+                ax1.scatter(
+                    buys.index,
+                    price.loc[buys.index],
+                    color="green",
+                    marker="^",
+                    s=150,
+                    label="Buy/Cover",
+                    zorder=5,
+                    edgecolors="darkgreen",
+                    linewidths=2,
+                )
             if len(sells) > 0:
-                ax1.scatter(sells.index, price.loc[sells.index],
-                            color='red', marker='v', s=150, label='Sell/Short',
-                            zorder=5, edgecolors='darkred', linewidths=2)
+                ax1.scatter(
+                    sells.index,
+                    price.loc[sells.index],
+                    color="red",
+                    marker="v",
+                    s=150,
+                    label="Sell/Short",
+                    zorder=5,
+                    edgecolors="darkred",
+                    linewidths=2,
+                )
 
-            ax1.set_ylabel('Price', fontsize=12)
-            ax1.set_title(f'{instrument_code} - Price with ACTUAL TRADES (Optimized Positions)',
-                          fontsize=14, fontweight='bold')
-            ax1.legend(loc='upper left')
+            ax1.set_ylabel("Price", fontsize=12)
+            ax1.set_title(
+                f"{instrument_code} - Price with ACTUAL TRADES (Optimized Positions)",
+                fontsize=14,
+                fontweight="bold",
+            )
+            ax1.legend(loc="upper left")
             ax1.grid(True, alpha=0.3)
 
             # Plot 2: Combined forecast (signal strength BEFORE optimization)
             ax2 = axes[1]
-            ax2.plot(combined_forecast.index, combined_forecast.values,
-                     'b-', linewidth=1.5, label='Combined Forecast (Pre-Optimization)')
-            ax2.axhline(y=0, color='black', linestyle='--', alpha=0.5)
-            ax2.fill_between(combined_forecast.index, 0, combined_forecast.values,
-                             where=(combined_forecast.values > 0), alpha=0.3,
-                             color='green', label='Long Signal')
-            ax2.fill_between(combined_forecast.index, 0, combined_forecast.values,
-                             where=(combined_forecast.values < 0), alpha=0.3,
-                             color='red', label='Short Signal')
-            ax2.set_ylabel('Forecast', fontsize=12)
-            ax2.set_title('Signal Strength (Before Dynamic Optimization)', fontsize=12)
-            ax2.legend(loc='upper left')
+            ax2.plot(
+                combined_forecast.index,
+                combined_forecast.values,
+                "b-",
+                linewidth=1.5,
+                label="Combined Forecast (Pre-Optimization)",
+            )
+            ax2.axhline(y=0, color="black", linestyle="--", alpha=0.5)
+            ax2.fill_between(
+                combined_forecast.index,
+                0,
+                combined_forecast.values,
+                where=(combined_forecast.values > 0),
+                alpha=0.3,
+                color="green",
+                label="Long Signal",
+            )
+            ax2.fill_between(
+                combined_forecast.index,
+                0,
+                combined_forecast.values,
+                where=(combined_forecast.values < 0),
+                alpha=0.3,
+                color="red",
+                label="Short Signal",
+            )
+            ax2.set_ylabel("Forecast", fontsize=12)
+            ax2.set_title("Signal Strength (Before Dynamic Optimization)", fontsize=12)
+            ax2.legend(loc="upper left")
             ax2.grid(True, alpha=0.3)
 
             # Plot 3: ACTUAL OPTIMIZED positions (integers)
             ax3 = axes[2]
             # Use step plot to emphasize integer nature
-            ax3.step(actual_positions.index, actual_positions.values, 'purple',
-                     linewidth=2.5, label='Optimized Position (Integers)', where='post')
-            ax3.axhline(y=0, color='black', linestyle='--', alpha=0.5)
-            ax3.fill_between(actual_positions.index, 0, actual_positions.values,
-                             where=(actual_positions.values > 0), alpha=0.3,
-                             color='green', step='post')
-            ax3.fill_between(actual_positions.index, 0, actual_positions.values,
-                             where=(actual_positions.values < 0), alpha=0.3,
-                             color='red', step='post')
-            ax3.set_ylabel('Position (contracts)', fontsize=12)
-            ax3.set_xlabel('Date', fontsize=12)
-            ax3.set_title('Actual Portfolio Position (After Dynamic Optimization)', fontsize=12)
-            ax3.legend(loc='upper left')
+            ax3.step(
+                actual_positions.index,
+                actual_positions.values,
+                "purple",
+                linewidth=2.5,
+                label="Optimized Position (Integers)",
+                where="post",
+            )
+            ax3.axhline(y=0, color="black", linestyle="--", alpha=0.5)
+            ax3.fill_between(
+                actual_positions.index,
+                0,
+                actual_positions.values,
+                where=(actual_positions.values > 0),
+                alpha=0.3,
+                color="green",
+                step="post",
+            )
+            ax3.fill_between(
+                actual_positions.index,
+                0,
+                actual_positions.values,
+                where=(actual_positions.values < 0),
+                alpha=0.3,
+                color="red",
+                step="post",
+            )
+            ax3.set_ylabel("Position (contracts)", fontsize=12)
+            ax3.set_xlabel("Date", fontsize=12)
+            ax3.set_title(
+                "Actual Portfolio Position (After Dynamic Optimization)", fontsize=12
+            )
+            ax3.legend(loc="upper left")
             ax3.grid(True, alpha=0.3)
 
             # Format x-axis
-            date_fmt = DateFormatter('%Y-%m-%d')
+            date_fmt = DateFormatter("%Y-%m-%d")
             ax3.xaxis.set_major_formatter(date_fmt)
             plt.xticks(rotation=45)
 
@@ -1366,7 +1431,9 @@ class DynamicSystemBacktester:
             print(f"  Number of buy trades: {len(buys)}")
             print(f"  Number of sell trades: {len(sells)}")
             print(f"  Total trades: {len(buys) + len(sells)}")
-            print(f"  Average trade size: {position_changes.abs().mean():.2f} contracts")
+            print(
+                f"  Average trade size: {position_changes.abs().mean():.2f} contracts"
+            )
             print(f"  Largest trade: {position_changes.abs().max():.0f} contracts")
 
             print(f"\nHolding Statistics:")
@@ -1376,7 +1443,9 @@ class DynamicSystemBacktester:
             days_flat = (actual_positions == 0).sum()
             total_days = len(actual_positions)
 
-            print(f"  Days in market: {days_in_market}/{total_days} ({days_in_market / total_days * 100:.1f}%)")
+            print(
+                f"  Days in market: {days_in_market}/{total_days} ({days_in_market / total_days * 100:.1f}%)"
+            )
             print(f"  Days long: {days_long} ({days_long / total_days * 100:.1f}%)")
             print(f"  Days short: {days_short} ({days_short / total_days * 100:.1f}%)")
             print(f"  Days flat: {days_flat} ({days_flat / total_days * 100:.1f}%)")
@@ -1392,12 +1461,14 @@ class DynamicSystemBacktester:
             no_position = actual_positions == 0
             rejected_signals = (strong_signals & no_position).sum()
             print(
-                f"  Strong signals rejected: {rejected_signals}/{strong_signals.sum()} ({rejected_signals / max(strong_signals.sum(), 1) * 100:.1f}%)")
+                f"  Strong signals rejected: {rejected_signals}/{strong_signals.sum()} ({rejected_signals / max(strong_signals.sum(), 1) * 100:.1f}%)"
+            )
             print(f"    (Shows shadow cost/optimization filtering)")
 
         except Exception as e:
             print(f"Error plotting {instrument_code}: {e}")
             import traceback
+
             traceback.print_exc()
 
     def plot_top_traded_instruments(self, n=5, years=2):
@@ -1412,7 +1483,9 @@ class DynamicSystemBacktester:
 
         try:
             # Get optimized positions dataframe
-            optimized_positions_df = self.system.optimisedPositions.get_optimised_position_df()
+            optimized_positions_df = (
+                self.system.optimisedPositions.get_optimised_position_df()
+            )
 
             # Calculate trade counts for each instrument
             trade_counts = {}
@@ -1425,8 +1498,9 @@ class DynamicSystemBacktester:
                     trade_counts[instrument] = trades
 
             # Sort by trade count
-            top_instruments = sorted(trade_counts.items(),
-                                     key=lambda x: x[1], reverse=True)[:n]
+            top_instruments = sorted(
+                trade_counts.items(), key=lambda x: x[1], reverse=True
+            )[:n]
 
             print(f"\nTop {n} most traded instruments (from optimized positions):")
             for i, (inst, count) in enumerate(top_instruments, 1):
@@ -1441,7 +1515,9 @@ class DynamicSystemBacktester:
             print("✗ Optimized positions not available!")
             print("  System may not have dynamic optimization enabled")
 
-    def plot_individual_rule_signals(self, instrument_code, start_date=None, end_date=None):
+    def plot_individual_rule_signals(
+        self, instrument_code, start_date=None, end_date=None
+    ):
         """
         Plot each trading rule's forecast separately for an instrument.
         Shows how different strategies contribute to final signal.
@@ -1471,34 +1547,42 @@ class DynamicSystemBacktester:
         price = price[start_date:end_date]
 
         # Plot 1: Price
-        axes[0].plot(price.index, price.values, 'k-', linewidth=1.5)
-        axes[0].set_title(f'{instrument_code} - Price', fontweight='bold')
-        axes[0].set_ylabel('Price')
+        axes[0].plot(price.index, price.values, "k-", linewidth=1.5)
+        axes[0].set_title(f"{instrument_code} - Price", fontweight="bold")
+        axes[0].set_ylabel("Price")
         axes[0].grid(True, alpha=0.3)
 
         # Plot each rule
         for i, rule_name in enumerate(rules, 1):
             try:
-                forecast = self.system.rules.get_raw_forecast(instrument_code, rule_name)
+                forecast = self.system.rules.get_raw_forecast(
+                    instrument_code, rule_name
+                )
                 forecast = forecast[start_date:end_date]
 
                 axes[i].plot(forecast.index, forecast.values, linewidth=1.5)
-                axes[i].axhline(y=0, color='black', linestyle='--', alpha=0.5)
-                axes[i].set_title(f'Rule: {rule_name}')
-                axes[i].set_ylabel('Forecast')
+                axes[i].axhline(y=0, color="black", linestyle="--", alpha=0.5)
+                axes[i].set_title(f"Rule: {rule_name}")
+                axes[i].set_ylabel("Forecast")
                 axes[i].grid(True, alpha=0.3)
             except:
-                axes[i].text(0.5, 0.5, f'{rule_name}: No data',
-                             ha='center', va='center', transform=axes[i].transAxes)
+                axes[i].text(
+                    0.5,
+                    0.5,
+                    f"{rule_name}: No data",
+                    ha="center",
+                    va="center",
+                    transform=axes[i].transAxes,
+                )
 
         # Plot combined forecast
         combined = self.system.combForecast.get_combined_forecast(instrument_code)
         combined = combined[start_date:end_date]
-        axes[-1].plot(combined.index, combined.values, 'purple', linewidth=2)
-        axes[-1].axhline(y=0, color='black', linestyle='--', alpha=0.5)
-        axes[-1].set_title('Combined Forecast', fontweight='bold')
-        axes[-1].set_ylabel('Forecast')
-        axes[-1].set_xlabel('Date')
+        axes[-1].plot(combined.index, combined.values, "purple", linewidth=2)
+        axes[-1].axhline(y=0, color="black", linestyle="--", alpha=0.5)
+        axes[-1].set_title("Combined Forecast", fontweight="bold")
+        axes[-1].set_ylabel("Forecast")
+        axes[-1].set_xlabel("Date")
         axes[-1].grid(True, alpha=0.3)
 
         plt.tight_layout()
@@ -1656,7 +1740,7 @@ class DynamicSystemBacktester:
         print(f"⏳ Saving (this takes ~30 seconds)...")
 
         try:
-            with open(output_path, 'wb') as f:
+            with open(output_path, "wb") as f:
                 pickle.dump(self.system, f, protocol=pickle.HIGHEST_PROTOCOL)
 
             # Check file size
@@ -1673,6 +1757,7 @@ class DynamicSystemBacktester:
         except Exception as e:
             print(f"❌ Error saving pickle: {e}")
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -1725,10 +1810,14 @@ class DynamicSystemBacktester:
 
                         if pct_valid < 10:
                             empty_rules.append(rule_name)
-                            print(f"  ⚠️  {rule_name:15s}: Only {pct_valid:.1f}% valid data")
+                            print(
+                                f"  ⚠️  {rule_name:15s}: Only {pct_valid:.1f}% valid data"
+                            )
                         else:
                             valid_rules.append(rule_name)
-                            print(f"  ✓  {rule_name:15s}: {valid_obs} valid obs ({pct_valid:.1f}%)")
+                            print(
+                                f"  ✓  {rule_name:15s}: {valid_obs} valid obs ({pct_valid:.1f}%)"
+                            )
 
                 except Exception as e:
                     error_rules.append(rule_name)
@@ -1742,10 +1831,14 @@ class DynamicSystemBacktester:
 
             # Check if this instrument will cause problems
             if len(valid_rules) == 0:
-                print(f"  🚨 PROBLEM: NO VALID RULES - will cause 'No objects to concatenate' error!")
+                print(
+                    f"  🚨 PROBLEM: NO VALID RULES - will cause 'No objects to concatenate' error!"
+                )
                 problem_instruments.append(instrument)
             elif len(valid_rules) < 2:
-                print(f"  ⚠️  WARNING: Only {len(valid_rules)} valid rule(s) - may cause optimization issues")
+                print(
+                    f"  ⚠️  WARNING: Only {len(valid_rules)} valid rule(s) - may cause optimization issues"
+                )
 
         # Final summary
         print(f"\n{'=' * 80}")
