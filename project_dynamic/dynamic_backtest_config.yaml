@@ -20,7 +20,7 @@ use_forecast_weight_estimates: True
 use_forecast_div_mult_estimates: True
 use_instrument_weight_estimates: True
 use_instrument_div_mult_estimates: False
-use_forecast_scale_estimates: False
+use_forecast_scale_estimates: True
 
 forecast_scalar_estimate:
    pool_instruments: True
@@ -182,12 +182,12 @@ forecast_cap: 20.0
 
 # Forecast scalars (from Rob's config)
 forecast_scalars:
-  breakout10: 0.603
-  breakout40: 0.704
-  breakout160: 0.739
-  momentum16: 4.104
-  momentum64: 1.909
-  carry60: 28.401
+  breakout10: 0.693
+  breakout40: 0.829
+  breakout160: 0.864
+  momentum16: 5.120
+  momentum64: 2.380
+  carry60: 37.474
 
 # FIXED: Complete forecast weights for ALL instruments (not just 3)
 # ============================================================
