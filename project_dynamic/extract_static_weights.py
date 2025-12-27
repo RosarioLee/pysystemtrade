@@ -37,7 +37,26 @@ sys.path.append(project_dir)
 from systems.provided.rob_system.run_system import futures_system
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 
+# ========================================================================
+# CONFIGURATION - UPDATE THESE PATHS
+# ========================================================================
 
+DEFAULT_CONFIG = {
+    # Path to your pickled system (FAST - recommended)
+    'pickle_path': 'results/pickles/system_20251227_203003.pkl',
+
+    # Alternative: rebuild from config (SLOW - only if pickle unavailable)
+    'config_path': None,  # 'dynamic_backtest_config.yaml'
+
+    # Analysis parameters
+    'cost_threshold': 0.13,  # Max acceptable SR cost
+    'weight_method': 'averagelast2y',  # How to aggregate weights
+    'lookback_years': 2,  # For stability analysis
+
+    # Output settings
+    'generate_plots': True,  # Create visualization plots
+    'output_dir': 'results/static_weight_analysis'
+}
 class ForecastWeightExtractor:
     """
     Extract and analyze forecast weights from dynamic optimization backtest
@@ -755,74 +774,83 @@ class ForecastWeightExtractor:
 # ============================================================================
 
 def main():
-    """
-    Command line interface for weight extraction.
-
-    Usage examples:
-        python extract_static_weights.py --config dynamic_backtest_config.yaml
-        python extract_static_weights.py --pickle results/pickles/system_20241223_143052.pkl
-    """
+    """Command line interface with sensible defaults"""
     import argparse
 
     parser = argparse.ArgumentParser(
         description='Extract static weights from dynamic optimization backtest'
     )
 
-    parser.add_argument(
-        '--config',
-        type=str,
-        help='Path to backtest config YAML (will rebuild system - SLOW)'
-    )
-
+    # Make all arguments optional with defaults from config
     parser.add_argument(
         '--pickle',
         type=str,
-        help='Path to pickled system object (FAST - recommended)'
+        default=DEFAULT_CONFIG['pickle_path'],  # ← Use default
+        help=f"Path to pickled system (default: {DEFAULT_CONFIG['pickle_path']})"
+    )
+
+    parser.add_argument(
+        '--config',
+        type=str,
+        default=DEFAULT_CONFIG['config_path'],
+        help='Path to config YAML (alternative to pickle - SLOW)'
     )
 
     parser.add_argument(
         '--cost-threshold',
         type=float,
-        default=0.13,
-        help='Maximum acceptable annual SR cost (default: 0.13)'
+        default=DEFAULT_CONFIG['cost_threshold'],
+        help=f"Max SR cost (default: {DEFAULT_CONFIG['cost_threshold']})"
     )
 
     parser.add_argument(
         '--weight-method',
         type=str,
-        default='average_last_2y',
-        choices=['latest', 'average_last_1y', 'average_last_2y',
-                 'average_last_3y', 'median_last_2y'],
-        help='Method for aggregating weights (default: average_last_2y)'
+        default=DEFAULT_CONFIG['weight_method'],
+        choices=['latest', 'averagelast1y', 'averagelast2y', 'averagelast3y', 'medianlast2y'],
+        help=f"Aggregation method (default: {DEFAULT_CONFIG['weight_method']})"
     )
 
     parser.add_argument(
         '--no-plots',
         action='store_true',
+        default=not DEFAULT_CONFIG['generate_plots'],
         help='Skip plot generation'
     )
 
     args = parser.parse_args()
 
-    # Validate inputs
-    if not args.config and not args.pickle:
-        parser.error("Must provide either --config or --pickle")
+    # Validate: need either pickle or config
+    if not args.pickle and not args.config:
+        parser.error("Must provide either --pickle or --config (or set DEFAULT_CONFIG)")
 
     # Create extractor
+    print(f"\n{'=' * 90}")
+    print("FORECAST WEIGHT EXTRACTION - STATIC CONFIGURATION")
+    print(f"{'=' * 90}\n")
+
     if args.pickle:
-        print(f"📦 Loading system from pickle: {args.pickle}")
+        print(f"✓ Loading from pickle: {args.pickle}")
         extractor = ForecastWeightExtractor(system_pickle_path=args.pickle)
     else:
-        print(f"🔧 Rebuilding system from config: {args.config}")
-        print(f"⚠️  This will take as long as running the backtest!")
+        print(f"⚠️  Rebuilding from config: {args.config}")
+        print("   (This will take as long as running the backtest!)")
         extractor = ForecastWeightExtractor(config_path=args.config)
 
-    # Run analysis
+    # Run full analysis
     extractor.run_full_analysis(
         cost_threshold=args.cost_threshold,
         weight_method=args.weight_method,
         save_plots=not args.no_plots
     )
+
+    print(f"\n{'=' * 90}")
+    print("✅ EXTRACTION COMPLETE")
+    print(f"{'=' * 90}\n")
+    print("Next steps:")
+    print("  1. Review analysis in results/static_weight_analysis/")
+    print("  2. Run: python create_static_config.py --base-config dynamic_backtest_config.yaml")
+    print("  3. Copy generated YAML to your production config")
 
 
 if __name__ == "__main__":

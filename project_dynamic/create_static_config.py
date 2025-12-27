@@ -29,6 +29,26 @@ import yaml
 
 warnings.filterwarnings("ignore")
 
+# ========================================================================
+# CONFIGURATION - UPDATE THESE PATHS
+# ========================================================================
+
+DEFAULT_CONFIG = {
+    # Input paths
+    'base_config': 'dynamic_backtest_config.yaml',
+    'analysis_dir': 'results/static_weight_analysis',
+
+    # Output paths
+    'weights_yaml': 'results/static_forecast_weights.yaml',
+    'complete_config': 'results/static_system_config.yaml',
+    'documentation': 'results/static_weights_documentation.md',
+
+    # Generation options
+    'use_templates': True,  # Group similar instruments
+    'generate_docs': True,  # Create markdown docs
+    'include_comments': True  # Add comments to YAML
+}
+
 
 class StaticConfigGenerator:
     """
@@ -510,14 +530,15 @@ class StaticConfigGenerator:
         print("GENERATING DOCUMENTATION")
         print(f"{'=' * 70}")
 
-        with open(output_file, 'w') as f:
+        # FIX: Use UTF-8 encoding to handle special characters
+        with open(output_file, 'w', encoding='utf-8') as f:
             f.write("# Static Forecast Weights Documentation\n\n")
             f.write(f"**Generated:** {datetime.now()}\n\n")
 
             f.write("## Overview\n\n")
             f.write(f"This configuration contains static forecast weights for "
-                   f"{len(self.recommended_weights)} instruments, derived from "
-                   f"dynamic optimization analysis.\n\n")
+                    f"{len(self.recommended_weights)} instruments, derived from "
+                    f"dynamic optimization analysis.\n\n")
 
             f.write("## Cost Tier Distribution\n\n")
             f.write("Instruments are grouped by trading cost (SR_cost):\n\n")
@@ -526,13 +547,13 @@ class StaticConfigGenerator:
                 if instruments:
                     avg_cost = self.sr_costs[instruments].mean()
                     f.write(f"- **{tier_name}**: {len(instruments)} instruments "
-                           f"(avg SR_cost: {avg_cost:.6f})\n")
+                            f"(avg SR_cost: {avg_cost:.6f})\n")
 
             f.write("\n## Weight Patterns\n\n")
 
             if self.weight_templates:
                 f.write(f"Identified {len(self.weight_templates)} distinct weight patterns "
-                       f"to reduce configuration duplication:\n\n")
+                        f"to reduce configuration duplication:\n\n")
 
                 for pattern_id, info in sorted(self.weight_templates.items()):
                     f.write(f"### Pattern {pattern_id}\n\n")
@@ -553,7 +574,7 @@ class StaticConfigGenerator:
             f.write("- Cost threshold: 0.13 SR (rules exceeding this were eliminated)\n")
             f.write("- Time aggregation: Average of last 2 years of dynamic optimization\n")
             f.write("- Rounding: 0.001 precision\n")
-            f.write("- Normalization: Total weight per instrument ≈ 1.0\n")
+            f.write("- Normalization: Total weight per instrument approximately 1.0\n")  # ← Changed
 
         print(f"✓ Documentation saved: {output_file}")
 
@@ -625,43 +646,48 @@ class StaticConfigGenerator:
 # ============================================================================
 
 def main():
-    """
-    Command line interface for config generation.
-
-    Usage:
-        python create_static_config.py --base-config dynamic_backtest_config.yaml
-    """
+    """Command line interface with sensible defaults"""
     import argparse
 
     parser = argparse.ArgumentParser(
         description='Generate static forecast weights configuration'
     )
+
     parser.add_argument(
         '--base-config',
         type=str,
-        required=True,
-        help='Path to your dynamic backtest config YAML'
+        default=DEFAULT_CONFIG['base_config'],  # ← Use default
+        help=f"Path to dynamic config (default: {DEFAULT_CONFIG['base_config']})"
     )
+
     parser.add_argument(
         '--analysis-dir',
         type=str,
-        default='results/static_weight_analysis',
-        help='Directory with analysis results (default: results/static_weight_analysis)'
+        default=DEFAULT_CONFIG['analysis_dir'],
+        help=f"Analysis directory (default: {DEFAULT_CONFIG['analysis_dir']})"
     )
+
     parser.add_argument(
         '--no-templates',
         action='store_true',
-        help='Do not group instruments into patterns'
+        default=not DEFAULT_CONFIG['use_templates'],
+        help='Do not group similar instruments'
     )
+
     parser.add_argument(
         '--no-docs',
         action='store_true',
-        help='Skip documentation generation'
+        default=not DEFAULT_CONFIG['generate_docs'],
+        help='Skip documentation'
     )
 
     args = parser.parse_args()
 
     # Create generator
+    print(f"\n{'=' * 90}")
+    print("STATIC CONFIG GENERATION - FORECAST WEIGHTS")
+    print(f"{'=' * 90}\n")
+
     generator = StaticConfigGenerator(analysis_dir=args.analysis_dir)
 
     # Run generation

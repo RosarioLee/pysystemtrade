@@ -37,6 +37,18 @@ sys.path.append(project_dir)
 from systems.provided.rob_system.run_system import futures_system
 from sysdata.sim.csv_futures_sim_data import csvFuturesSimData
 
+# ============================================================================
+# DEFAULT CONFIGURATION
+# ============================================================================
+# Set these defaults so you can run directly from PyCharm without command line args
+DEFAULT_CONFIG = {
+    'pickle_path': 'results/pickles/system_20251227_180759.pkl',  # Path to your pickled system (FAST - recommended)
+    'config_path': None,  # 'dynamic_backtest_config.yaml',  # Alternative: rebuild from config (SLOW - only if pickle unavailable)
+    'lookback_days': 504,  # Lookback for scalar averaging (2 years = 504 business days)
+    'method': 'mean',  # Averaging method: 'mean', 'median', or 'last'
+    'pool_across_instruments': True,  # Robert Carver's recommendation: same scalar per rule across all instruments
+    'output_dir': 'results/static_scalar_analysis',  # Where to save analysis files
+}
 
 class StaticForecastScalarExtractor:
     """
@@ -228,7 +240,7 @@ class StaticForecastScalarExtractor:
             self,
             method: str = "mean",
             lookback_days: int = 504,
-            round_to: float = 0.001,
+            # round_to: float = 0.001,
             pool_across_instruments: bool = True,  # NEW PARAMETER
     ):
         """
@@ -254,7 +266,7 @@ class StaticForecastScalarExtractor:
         if not self.scalar_timeseries:
             self.extract_scalar_timeseries(lookback_days=lookback_days)
 
-        dec = int(-np.log10(round_to))
+        # dec = int(-np.log10(round_to))
 
         if pool_across_instruments:
             # CARVER'S RECOMMENDED APPROACH: One scalar per rule
@@ -295,7 +307,8 @@ class StaticForecastScalarExtractor:
                 else:
                     raise ValueError(f"Unknown method: {method}")
 
-                pooled_scalars_by_rule[rule] = round(float(pooled_value), dec)
+                # pooled_scalars_by_rule[rule] = round(float(pooled_value), dec)
+                pooled_scalars_by_rule[rule] = float(pooled_value)
 
             # Apply pooled scalar to all instruments
             for inst in self.instruments:
@@ -305,7 +318,8 @@ class StaticForecastScalarExtractor:
 
             print(f"\n✓ Pooled scalars by rule:")
             for rule, scalar in pooled_scalars_by_rule.items():
-                print(f"   {rule:20s}: {scalar:.3f}")
+                #print(f"   {rule:20s}: {scalar:.3f}")
+                print(f"  {rule:20s}: {scalar}")
 
         else:
             # INSTRUMENT-SPECIFIC (NOT Carver's recommendation)
@@ -331,7 +345,8 @@ class StaticForecastScalarExtractor:
                     else:
                         raise ValueError(f"Unknown method: {method}")
 
-                    self.static_scalars[inst][rule] = round(float(val), dec)
+                    # self.static_scalars[inst][rule] = round(float(val), dec)
+                    self.static_scalars[inst][rule] = float(val)
 
         all_vals = [v for d in self.static_scalars.values() for v in d.values()]
         print(f"\n✓ Static scalars computed for {len(self.instruments)} instruments")
@@ -406,7 +421,7 @@ class StaticForecastScalarExtractor:
             self,
             lookback_days: int = 504,
             method: str = "last",
-            round_to: float = 0.001,
+            # round_to: float = 0.001,
             pool_across_instruments: bool = True,  # NEW
     ):
         """
@@ -427,7 +442,7 @@ class StaticForecastScalarExtractor:
         self.compute_static_scalars(
             method=method,
             lookback_days=lookback_days,
-            round_to=round_to,
+            # round_to=round_to,
             pool_across_instruments=pool_across_instruments  # Pass through
         )
 
@@ -445,58 +460,105 @@ class StaticForecastScalarExtractor:
 
 def main():
     """
-    Command line interface.
+    Command line interface with DEFAULT_CONFIG fallback.
 
     Examples:
+        # Using defaults from DEFAULT_CONFIG (easiest - just run in PyCharm)
+        python extract_static_forecast_scalars.py
+
+        # Override with command line args
         python extract_static_forecast_scalars.py --pickle results/system.pkl
         python extract_static_forecast_scalars.py --config dynamic_backtest_config.yaml
+        python extract_static_forecast_scalars.py --pickle system.pkl --lookback 756
     """
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Extract static forecast scalars from dynamic backtest"
+        description='Extract static forecast scalars from dynamic backtest'
     )
 
+    # Make all arguments optional with defaults from DEFAULT_CONFIG
     parser.add_argument(
-        "--pickle",
+        '--pickle',
         type=str,
-        help="Path to pickled system (preferred, fast)",
+        default=DEFAULT_CONFIG['pickle_path'],
+        help=f"Path to pickled system (default: {DEFAULT_CONFIG['pickle_path']})"
     )
     parser.add_argument(
-        "--config",
+        '--config',
         type=str,
-        help="Path to dynamic config YAML (will rebuild system, slow)",
+        default=DEFAULT_CONFIG['config_path'],
+        help='Path to dynamic config YAML (alternative to pickle - SLOW)'
     )
     parser.add_argument(
-        "--lookback",
+        '--lookback',
         type=int,
-        default=504,
-        help="Lookback days for scalar averaging (default: 504 ≈ 2 years)",
+        default=DEFAULT_CONFIG['lookback_days'],
+        help=f"Lookback days for scalar averaging (default: {DEFAULT_CONFIG['lookback_days']} = 2 years)"
     )
     parser.add_argument(
-        "--output-dir",
+        '--method',
         type=str,
-        default="results/static_scalar_analysis",
-        help="Directory to save analysis outputs",
+        default=DEFAULT_CONFIG['method'],
+        choices=['mean', 'median', 'last'],
+        help=f"Averaging method (default: {DEFAULT_CONFIG['method']})"
+    )
+    parser.add_argument(
+        '--no-pool',
+        action='store_true',
+        default=not DEFAULT_CONFIG['pool_across_instruments'],
+        help="Use instrument-specific scalars instead of pooled (NOT Robert Carver's recommendation)"
+    )
+    parser.add_argument(
+        '--output-dir',
+        type=str,
+        default=DEFAULT_CONFIG['output_dir'],
+        help=f"Directory to save analysis outputs (default: {DEFAULT_CONFIG['output_dir']})"
     )
 
     args = parser.parse_args()
 
+    # Validate: need either pickle or config
+    if not args.pickle and not args.config:
+        parser.error('Must provide either --pickle or --config, or set DEFAULT_CONFIG')
+
+    # Create extractor
+    print("=" * 90)
+    print("FORECAST SCALAR EXTRACTION - STATIC CONFIGURATION")
+    print("=" * 90)
+
     if args.pickle:
+        print(f"Loading from pickle: {args.pickle}")
         extractor = StaticForecastScalarExtractor(
             system_pickle_path=args.pickle,
-            output_dir=args.output_dir,
-        )
-    elif args.config:
-        extractor = StaticForecastScalarExtractor(
-            config_path=args.config,
-            output_dir=args.output_dir,
+            output_dir=args.output_dir
         )
     else:
-        parser.error("You must specify either --pickle or --config")
-        return
+        print(f"Rebuilding from config: {args.config}")
+        print("⚠️  This will take as long as running the backtest!")
+        extractor = StaticForecastScalarExtractor(
+            config_path=args.config,
+            output_dir=args.output_dir
+        )
 
-    extractor.run_full_extraction(lookback_days=args.lookback)
+    # Run full extraction
+    pool_across_instruments = not args.no_pool
+
+    extractor.run_full_extraction(
+        lookback_days=args.lookback,
+        method=args.method,
+        pool_across_instruments=pool_across_instruments
+    )
+
+    print("=" * 90)
+    print("EXTRACTION COMPLETE")
+    print("=" * 90)
+    print("Next steps:")
+    print("  1. Review the generated YAML: results/static_forecast_scalars.yaml")
+    print("  2. Copy forecast_scalars section into your config")
+    print("  3. Set use_forecast_scale_estimates: False")
+    print("  4. Re-run your backtest with static scalars")
+    print("  5. THEN extract static forecast weights")
 
 
 if __name__ == "__main__":
