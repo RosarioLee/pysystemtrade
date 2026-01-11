@@ -828,7 +828,9 @@ class DynamicSystemBacktester:
 
             # Calculate drawdown series
             rolling_max = equity_curve.cummax()
-            drawdown = (equity_curve / rolling_max - 1) * 100  # Convert to percentage
+            # drawdown = (equity_curve / rolling_max - 1) * 100  # Convert to percentage
+            # Use the exact same source as your summary for perfect alignment
+            drawdown = portfolio_returns.percent.drawdown()
 
             # Create timestamp for file naming
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
